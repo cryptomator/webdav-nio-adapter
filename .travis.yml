@@ -11,7 +11,7 @@ install:
 before_script:
 - mvn --update-snapshots dependency-check:check -Pdependency-check
 script:
-- mvn clean test
+- mvn clean test jacoco:report verify -Pcoverage
 cache:
   directories:
   - $HOME/.m2

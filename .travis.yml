@@ -1,0 +1,17 @@
+language: java
+sudo: false
+jdk:
+- oraclejdk8
+env:
+  global:
+  - secure: bT1lpgLsR/HIXG4qgR+dnYS0dGhTzu1Y1atoRs/71pFhykTwXH4A9kPyIV3q2XWUH4IAl7nwbOAC5X22RgqfpXhZI5r1qPkw7nncoNKF+CU37DPmG9JWUNTnJmJNva8e6WZ6flneMOTzx/u8tcV+vhH1+MLPzrYdH/c4W60HBrQF1WlXkOGBSHRr+p4bNvzglSX4w2bIGLRW6XJrcovCt3BDqq1/K8pM4YsQ19+0ddl1vVgGlVosoonxSloOUUDKbFM7KYCFMT3KjdEu1dWdvg1Z9bc9Mc0WAGO8BrTIfuQxnKHWpTEj+jTJrzVv/jlRLCvoh0KEhc/Fowhkby6QsFlWWwGgK1zo7Sk6t9urfxNPwtVYZrL2ZSPtqjlCKeG4fvMf7NEYqWmCOv02Jmmhgc19agpxT1VcpByrZxPURPv1Frwek8ZI+2EH2hdccB7ZIUW3xxRKdw9siaYu/78BlJRlvsXCvrVj9ceVcj2qm+jy6ZxRNZ+X587OtQLZoLuIRFDIlJJzDQfvvbeiMNNyRCfBiKF0chnuGjt7lYGtonrCpuJ0rd+a4zLrosOX1OkecXetGF6ARdsTOovFwch9KXDCHklg8bSeUk696HsHbop3vf5sWnxkvqfu7SKI2J0rktY3LAYQlya7YyNGGCMVlAq5VXfMVR83qxfkuEPvp1M= #CODACY_PROJECT_TOKEN
+install:
+- mvn dependency:go-offline -Pdependency-check
+- mvn dependency:go-offline -Pcoverage
+before_script:
+- mvn --update-snapshots dependency-check:check -Pdependency-check
+script:
+- mvn clean test
+cache:
+  directories:
+  - $HOME/.m2

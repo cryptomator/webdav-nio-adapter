@@ -60,7 +60,6 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 	}
 
 	private DavResource createResourceInternal(DavLocatorImpl locator, DavServletRequest request, DavServletResponse response) throws DavException {
-		System.out.println(locator.getResourcePath());
 		Path p = rootPath.resolve(locator.getResourcePath());
 		try {
 			BasicFileAttributes attr = Files.readAttributes(p, BasicFileAttributes.class);

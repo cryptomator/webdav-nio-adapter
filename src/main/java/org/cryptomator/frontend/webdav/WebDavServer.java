@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -44,25 +45,17 @@ public class WebDavServer {
 	private final WebDavServletContextFactory servletContextFactory;
 
 	@Inject
-	WebDavServer(WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet) {
+	WebDavServer(@ServerPort int port, WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet) {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
 		this.server = new Server(tp);
 		this.localConnector = new ServerConnector(server);
 		this.servletCollection = new ContextHandlerCollection();
 		this.servletContextFactory = servletContextFactory;
-
+		this.localConnector.setPort(port);
 		servletCollection.addHandler(defaultServlet.createServletContextHandler());
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
-	}
-
-	public void setPort(int port) {
-		if (server.isStopped()) {
-			localConnector.setPort(port);
-		} else {
-			throw new IllegalStateException("Cannot change port of running server.");
-		}
 	}
 
 	public int getPort() {
@@ -90,8 +83,7 @@ public class WebDavServer {
 		}
 	}
 
-	// visible for testing
-	ServletContextHandler addServlet(URI contextRoot, Path rootPath) {
+	private ServletContextHandler prepareWebDavServlet(URI contextRoot, Path rootPath) {
 		ServletContextHandler handler = servletContextFactory.create(contextRoot, rootPath);
 		servletCollection.addHandler(handler);
 		servletCollection.mapContexts();
@@ -106,8 +98,13 @@ public class WebDavServer {
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
 		}
-		final ServletContextHandler handler = addServlet(uri, rootPath);
-		LOG.info("Servlet available under " + uri);
+		final ServletContextHandler handler = prepareWebDavServlet(uri, rootPath);
+		try {
+			handler.start();
+			LOG.info("Servlet available under " + uri);
+		} catch (Exception e) {
+			LOG.error("Servlet could not be started.", e);
+		}
 	}
 
 }

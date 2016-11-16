@@ -8,36 +8,33 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import static java.lang.String.format;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The WebDAV server, that WebDAV servlets can be added to using {@link #startWebDavServlet(Path, String)}.
+ * 
+ * An instance of this class can be obtained via {@link WebDavServer#create(int)}.
+ */
 @Singleton
 public class WebDavServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
-	private static final int MAX_PENDING_REQUESTS = 200;
-	private static final int MAX_THREADS = 200;
-	private static final int MIN_THREADS = 4;
-	private static final int THREAD_IDLE_SECONDS = 20;
 
 	private final Server server;
 	private final ServerConnector localConnector;
@@ -45,41 +42,94 @@ public class WebDavServer {
 	private final WebDavServletContextFactory servletContextFactory;
 
 	@Inject
-	WebDavServer(@ServerPort int port, WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet) {
-		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
-		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
-		this.server = new Server(tp);
+	WebDavServer(@ServerPort int port, WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet, ThreadPool threadPool) {
+		this.server = new Server(threadPool);
 		this.localConnector = new ServerConnector(server);
 		this.servletCollection = new ContextHandlerCollection();
 		this.servletContextFactory = servletContextFactory;
-		this.localConnector.setPort(port);
+		localConnector.setPort(port);
 		servletCollection.addHandler(defaultServlet.createServletContextHandler());
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}
 
+	/**
+	 * Creates a new WebDavServer listening on the given port. Ideally this method is invoked only once.
+	 * 
+	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
+	 * @return A fully initialized but not yet running WebDavServer.
+	 */
+	public static WebDavServer create(int port) {
+		WebDavServerModule module = new WebDavServerModule(port);
+		WebDavServerComponent comp = DaggerWebDavServerComponent.builder().webDavServerModule(module).build();
+		return comp.server();
+	}
+
+	/**
+	 * @return The TCP port this server is running on (if it's {@link #isRunning() running}. Otherwise {@link #start() start} it first).
+	 */
 	public int getPort() {
 		return localConnector.getLocalPort();
 	}
 
-	public synchronized void start() {
-		try {
-			server.start();
-			LOG.info("Cryptomator is running on port {}", getPort());
-		} catch (Exception ex) {
-			throw new RuntimeException("Server couldn't be started", ex);
-		}
-	}
-
+	/**
+	 * @return <code>true</code> if the server is currently running.
+	 */
 	public boolean isRunning() {
 		return server.isRunning();
 	}
 
-	public synchronized void stop() {
+	/**
+	 * Starts the WebDAV server.
+	 * 
+	 * @throws ServerLifecycleException If any exception occurs during server start (e.g. port not available).
+	 */
+	public synchronized void start() throws ServerLifecycleException {
+		try {
+			server.start();
+			LOG.info("WebDavServer started on port {}.", getPort());
+		} catch (Exception e) {
+			throw new ServerLifecycleException("Server couldn't be started", e);
+		}
+	}
+
+	/**
+	 * Stops the WebDAV server.
+	 * 
+	 * @throws ServerLifecycleException If the server could not be stopped for any unexpected reason.
+	 */
+	public synchronized void stop() throws ServerLifecycleException {
 		try {
 			server.stop();
-		} catch (Exception ex) {
-			LOG.error("Server couldn't be stopped", ex);
+			LOG.info("WebDavServer stopped.");
+		} catch (Exception e) {
+			throw new ServerLifecycleException("Server couldn't be stopped", e);
+		}
+	}
+
+	/**
+	 * Registers and starts a new WebDAV servlet.
+	 * 
+	 * @param rootPath The path to the directory which should be served as root resource.
+	 * @param contextPath The servlet context path, i.e. the path of the root resource.
+	 * @throws ServerLifecycleException If the servlet could not be started for any unexpected reason.
+	 */
+	public void startWebDavServlet(Path rootPath, String contextPath) throws ServerLifecycleException {
+		final URI uri = createUriForContextPath(contextPath);
+		final ServletContextHandler handler = prepareWebDavServlet(uri, rootPath);
+		try {
+			handler.start();
+			LOG.info("WebDavServlet available under " + uri);
+		} catch (Exception e) {
+			throw new ServerLifecycleException("Servlet couldn't be started", e);
+		}
+	}
+
+	private URI createUriForContextPath(String contextPath) {
+		try {
+			return new URI("http", null, "localhost", getPort(), StringUtils.prependIfMissing(contextPath, "/"), null, null);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
 		}
 	}
 
@@ -88,23 +138,6 @@ public class WebDavServer {
 		servletCollection.addHandler(handler);
 		servletCollection.mapContexts();
 		return handler;
-	}
-
-	public void create(Path rootPath, String name) {
-		String contextPath = format("/%s", name);
-		final URI uri;
-		try {
-			uri = new URI("http", null, "localhost", getPort(), contextPath, null, null);
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
-		}
-		final ServletContextHandler handler = prepareWebDavServlet(uri, rootPath);
-		try {
-			handler.start();
-			LOG.info("Servlet available under " + uri);
-		} catch (Exception e) {
-			LOG.error("Servlet could not be started.", e);
-		}
 	}
 
 }

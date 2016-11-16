@@ -14,12 +14,9 @@ import java.nio.file.Paths;
 public class MirroringTest {
 
 	public static void main(String[] args) throws IOException {
-		WebDavServerComponent comp = DaggerWebDavServerComponent.builder() //
-				.webDavServerModule(new WebDavServerModule(8080)) //
-				.build();
-		WebDavServer server = comp.server();
+		WebDavServer server = WebDavServer.create(8080);
 		server.start();
-		server.create(Paths.get("/Users/sebastian/Desktop/ant-javafx"), "test");
+		server.startWebDavServlet(Paths.get("/Users/sebastian/Desktop/ant-javafx"), "test");
 		System.out.println("Sytem.in.read() to shutdown ;-)");
 		System.in.read();
 		server.stop();

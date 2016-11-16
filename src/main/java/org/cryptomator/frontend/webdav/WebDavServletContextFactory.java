@@ -38,7 +38,7 @@ class WebDavServletContextFactory {
 	 * </pre>
 	 * 
 	 * @param contextRoot The URI of the context root. Its path will be used as the servlet's context path.
-	 * @param root The location within a filesystem that shall be served via WebDAV.
+	 * @param rootPath The location within a filesystem that shall be served via WebDAV.
 	 * @return A new Jetty servlet context handler.
 	 */
 	public ServletContextHandler create(URI contextRoot, Path rootPath) {

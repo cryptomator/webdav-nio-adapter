@@ -78,7 +78,6 @@ class DavFile extends DavNode {
 
 	@Override
 	public void move(DavResource destination) throws DavException {
-		failToPreventFileSystemChanges();
 		if (destination instanceof DavNode) {
 			DavFile dst = (DavFile) destination;
 			if (!Files.isDirectory(dst.path.getParent())) {
@@ -97,7 +96,6 @@ class DavFile extends DavNode {
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		failToPreventFileSystemChanges();
 		if (destination instanceof DavNode) {
 			DavFile dst = (DavFile) destination;
 			if (!Files.isDirectory(dst.path.getParent())) {

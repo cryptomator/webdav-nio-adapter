@@ -11,8 +11,15 @@ package org.cryptomator.frontend.webdav;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Qualifier;
+import javax.inject.Singleton;
+
+import org.eclipse.jetty.util.thread.ExecutorThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 
 import dagger.Module;
 import dagger.Provides;
@@ -20,10 +27,15 @@ import dagger.Provides;
 @Module
 class WebDavServerModule {
 
+	private static final int MAX_PENDING_REQUESTS = 400;
+	private static final int MAX_THREADS = 200;
+	private static final int MIN_THREADS = 4;
+	private static final int THREAD_IDLE_SECONDS = 10;
+
 	private final int port;
 
 	/**
-	 * @param port Fixed TCP server port or 0 to let the OS auto-assign a port.
+	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
 	 */
 	public WebDavServerModule(int port) {
 		this.port = port;
@@ -33,6 +45,13 @@ class WebDavServerModule {
 	@ServerPort
 	int providePort() {
 		return port;
+	}
+
+	@Provides
+	@Singleton
+	ThreadPool serverThreadPool() {
+		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
+		return new ExecutorThreadPool(MIN_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
 	}
 
 	@Qualifier

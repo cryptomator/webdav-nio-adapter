@@ -26,5 +26,5 @@ deploy:
   script: mvn clean versions:set -DnewVersion=${TRAVIS_TAG} deploy -DskipTests -Prelease --settings settings.xml
   skip_cleanup: true
   on:
-    repo: cryptomator/cryptofs
+    repo: cryptomator/webdav-nio-adapter
     tags: true

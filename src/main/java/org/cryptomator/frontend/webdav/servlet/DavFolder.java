@@ -67,7 +67,6 @@ class DavFolder extends DavNode {
 
 	@Override
 	public void addMember(DavResource resource, InputContext inputContext) throws DavException {
-		failToPreventFileSystemChanges();
 		if (resource instanceof DavFolder) {
 			addMemberFolder((DavFolder) resource);
 		} else if (resource instanceof DavFile) {
@@ -118,7 +117,6 @@ class DavFolder extends DavNode {
 
 	@Override
 	public void removeMember(DavResource member) throws DavException {
-		failToPreventFileSystemChanges();
 		for (ActiveLock lock : member.getLocks()) {
 			member.unlock(lock.getToken());
 		}
@@ -137,25 +135,8 @@ class DavFolder extends DavNode {
 		}
 	}
 
-	// /**
-	// * @throws DavException
-	// * Error 404 if no child with the given name exists
-	// */
-	// private Node getMemberNode(String name) throws DavException {
-	// Node file = node.file(name);
-	// Node folder = node.folder(name);
-	// if (file.exists()) {
-	// return file;
-	// } else if (folder.exists()) {
-	// return folder;
-	// } else {
-	// throw new DavException(DavServletResponse.SC_NOT_FOUND, "No such file or directory: " + node.getResourcePath() + name);
-	// }
-	// }
-
 	@Override
 	public void move(DavResource destination) throws DavException {
-		failToPreventFileSystemChanges();
 		if (!exists()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		} else if (destination instanceof DavNode) {
@@ -179,7 +160,6 @@ class DavFolder extends DavNode {
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		failToPreventFileSystemChanges();
 		if (!exists()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		} else if (destination instanceof DavNode) {

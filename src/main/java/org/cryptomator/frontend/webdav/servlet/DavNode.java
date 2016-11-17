@@ -69,11 +69,6 @@ abstract class DavNode implements DavResource {
 		this.properties = new DavPropertySet();
 	}
 
-	@Deprecated
-	protected void failToPreventFileSystemChanges() throws DavException {
-		throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Method blocked to prevent filesystem damages.");
-	}
-
 	@Override
 	public String getComplianceClass() {
 		return DAV_COMPLIANCE_CLASSES;

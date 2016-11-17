@@ -78,7 +78,6 @@ class DavFile extends DavNode {
 
 	@Override
 	public void move(DavResource destination) throws DavException {
-		failToPreventFileSystemChanges();
 		if (destination instanceof DavNode) {
 			DavFile dst = (DavFile) destination;
 			if (!Files.isDirectory(dst.path.getParent())) {
@@ -97,7 +96,6 @@ class DavFile extends DavNode {
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		failToPreventFileSystemChanges();
 		if (destination instanceof DavNode) {
 			DavFile dst = (DavFile) destination;
 			if (!Files.isDirectory(dst.path.getParent())) {
@@ -140,6 +138,8 @@ class DavFile extends DavNode {
 	public ActiveLock lock(LockInfo reqLockInfo) throws DavException {
 		ActiveLock lock = super.lock(reqLockInfo);
 		if (!exists()) {
+			// locking non-existing resources must create a non-collection resource:
+			// https://tools.ietf.org/html/rfc4918#section-9.10.4
 			DavFolder parentFolder = getCollection();
 			assert parentFolder != null : "File always has a folder.";
 			parentFolder.addMember(this, new NullInputContext());

@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,37 +53,51 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 
 	@Override
 	public DavResource createResource(DavResourceLocator locator, DavServletRequest request, DavServletResponse response) throws DavException {
-		if (locator instanceof DavLocatorImpl) {
-			return createResourceInternal((DavLocatorImpl) locator, request, response);
+		if (locator instanceof DavLocatorImpl && locator.equals(request.getRequestLocator())) {
+			return createRequestResource((DavLocatorImpl) locator, request, response);
+		} else if (locator instanceof DavLocatorImpl && locator.equals(request.getDestinationLocator())) {
+			return createDestinationResource((DavLocatorImpl) locator, request, response);
 		} else {
 			throw new IllegalArgumentException("Unsupported locator of type " + locator.getClass());
 		}
 	}
 
-	private DavResource createResourceInternal(DavLocatorImpl locator, DavServletRequest request, DavServletResponse response) throws DavException {
-		System.out.println(locator.getResourcePath());
+	private DavResource createRequestResource(DavLocatorImpl locator, DavServletRequest request, DavServletResponse response) throws DavException {
+		assert locator.equals(request.getRequestLocator());
 		Path p = rootPath.resolve(locator.getResourcePath());
-		try {
-			BasicFileAttributes attr = Files.readAttributes(p, BasicFileAttributes.class);
-			if (attr.isRegularFile() && DavMethods.METHOD_GET.equals(request.getMethod()) && request.getHeader(HttpHeader.RANGE.asString()) != null) {
-				return createFileRange(locator, p, attr, request.getDavSession(), request, response);
-			} else if (attr.isRegularFile()) {
-				return createFile(locator, p, Optional.of(attr), request.getDavSession());
-			} else if (attr.isDirectory()) {
-				return createFolder(locator, p, Optional.of(attr), request.getDavSession());
-			} else {
-				throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
-			}
-		} catch (NoSuchFileException e) {
-			if (DavMethods.METHOD_PUT.equals(request.getMethod())) {
-				return createFile(locator, p, Optional.empty(), request.getDavSession());
-			} else if (DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
-				return createFolder(locator, p, Optional.empty(), request.getDavSession());
-			} else {
-				throw new DavException(DavServletResponse.SC_NOT_FOUND);
-			}
-		} catch (IOException e) {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+		Optional<BasicFileAttributes> attr = readBasicFileAttributes(p);
+		if (!attr.isPresent() && DavMethods.METHOD_PUT.equals(request.getMethod())) {
+			return createFile(locator, p, Optional.empty(), request.getDavSession());
+		} else if (!attr.isPresent() && DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
+			return createFolder(locator, p, Optional.empty(), request.getDavSession());
+		} else if (!attr.isPresent()) {
+			throw new DavException(DavServletResponse.SC_NOT_FOUND);
+		} else if (attr.get().isRegularFile() && DavMethods.METHOD_GET.equals(request.getMethod()) && request.getHeader(HttpHeader.RANGE.asString()) != null) {
+			return createFileRange(locator, p, attr.get(), request.getDavSession(), request, response);
+		} else if (attr.get().isRegularFile()) {
+			return createFile(locator, p, attr, request.getDavSession());
+		} else if (attr.get().isDirectory()) {
+			return createFolder(locator, p, attr, request.getDavSession());
+		} else {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
+		}
+	}
+
+	private DavResource createDestinationResource(DavLocatorImpl locator, DavServletRequest request, DavServletResponse response) throws DavException {
+		assert locator.equals(request.getDestinationLocator());
+		assert ArrayUtils.contains(new String[] {DavMethods.METHOD_MOVE, DavMethods.METHOD_COPY}, request.getMethod());
+		Path srcP = rootPath.resolve(request.getRequestLocator().getResourcePath());
+		Path dstP = rootPath.resolve(locator.getResourcePath());
+		Optional<BasicFileAttributes> srcAttr = readBasicFileAttributes(srcP);
+		Optional<BasicFileAttributes> dstAttr = readBasicFileAttributes(dstP);
+		if (!srcAttr.isPresent()) {
+			throw new DavException(DavServletResponse.SC_NOT_FOUND);
+		} else if (srcAttr.get().isRegularFile()) {
+			return createFile(locator, dstP, dstAttr, request.getDavSession());
+		} else if (srcAttr.get().isDirectory()) {
+			return createFolder(locator, dstP, dstAttr, request.getDavSession());
+		} else {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
 		}
 	}
 
@@ -97,17 +112,27 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 
 	private DavResource createResourceInternal(DavLocatorImpl locator, DavSession session) throws DavException {
 		Path p = rootPath.resolve(locator.getResourcePath());
-		try {
-			BasicFileAttributes attr = Files.readAttributes(p, BasicFileAttributes.class);
-			if (attr.isRegularFile()) {
-				return createFile(locator, p, Optional.of(attr), session);
-			} else if (attr.isDirectory()) {
-				return createFolder(locator, p, Optional.of(attr), session);
-			} else {
-				throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
-			}
-		} catch (NoSuchFileException e) {
+		Optional<BasicFileAttributes> attr = readBasicFileAttributes(p);
+		if (!attr.isPresent()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
+		} else if (attr.get().isRegularFile()) {
+			return createFile(locator, p, attr, session);
+		} else if (attr.get().isDirectory()) {
+			return createFolder(locator, p, attr, session);
+		} else {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
+		}
+	}
+
+	/**
+	 * @return BasicFileAttributes or {@link Optional#empty()} if the file/folder for the given path does not exist.
+	 * @throws DavException If an {@link IOException} occured during {@link Files#readAttributes(Path, Class, java.nio.file.LinkOption...)}.
+	 */
+	private Optional<BasicFileAttributes> readBasicFileAttributes(Path path) throws DavException {
+		try {
+			return Optional.of(Files.readAttributes(path, BasicFileAttributes.class));
+		} catch (NoSuchFileException e) {
+			return Optional.empty();
 		} catch (IOException e) {
 			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
 		}

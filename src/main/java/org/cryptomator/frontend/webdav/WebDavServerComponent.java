@@ -16,7 +16,7 @@ import org.cryptomator.frontend.webdav.servlet.WebDavServletModule;
 import dagger.Component;
 
 @Singleton
-@Component
+@Component(modules = {WebDavServerModule.class})
 interface WebDavServerComponent {
 
 	WebDavServer server();

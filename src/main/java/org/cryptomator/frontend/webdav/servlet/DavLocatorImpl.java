@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
+import org.apache.jackrabbit.webdav.util.EncodeUtil;
 
 class DavLocatorImpl implements DavResourceLocator {
 
@@ -96,7 +97,15 @@ class DavLocatorImpl implements DavResourceLocator {
 
 	@Override
 	public String getHref(boolean isCollection) {
-		return prefix + resourcePath;
+		if (isCollection) {
+			return StringUtils.appendIfMissing(getHref(), "/");
+		} else {
+			return StringUtils.removeEnd(getHref(), "/");
+		}
+	}
+
+	private String getHref() {
+		return prefix + EncodeUtil.escapePath(resourcePath);
 	}
 
 	@Override

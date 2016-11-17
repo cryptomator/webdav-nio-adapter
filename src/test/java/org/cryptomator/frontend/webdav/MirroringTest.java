@@ -9,17 +9,29 @@
 package org.cryptomator.frontend.webdav;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class MirroringTest {
 
 	public static void main(String[] args) throws IOException {
-		WebDavServer server = WebDavServer.create(8080);
-		server.start();
-		server.startWebDavServlet(Paths.get("/Users/sebastian/Desktop/ant-javafx"), "test");
-		System.out.println("Sytem.in.read() to shutdown ;-)");
-		System.in.read();
-		server.stop();
+		try (Scanner scanner = new Scanner(System.in)) {
+			System.out.println("Enter path to the directory you want to be accessible via WebDAV:");
+			Path p = Paths.get(scanner.nextLine());
+			if (Files.isDirectory(p)) {
+				WebDavServer server = WebDavServer.create(8080);
+				server.start();
+				server.startWebDavServlet(p, "test");
+				System.out.println("Enter anything to stop the server...");
+				System.in.read();
+				server.stop();
+			} else {
+				System.out.println("Invalid directory.");
+				return;
+			}
+		}
 	}
 
 }

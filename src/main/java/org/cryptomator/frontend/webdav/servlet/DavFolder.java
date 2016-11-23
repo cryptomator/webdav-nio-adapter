@@ -173,24 +173,24 @@ class DavFolder extends DavNode {
 	private void copyInternal(DavNode destination, boolean shallow) throws DavException {
 		assert exists();
 		assert attr.isPresent();
-		if (Files.isDirectory(destination.path.getParent())) {
-			try {
-				if (shallow && destination instanceof DavFolder) {
-					// http://www.webdav.org/specs/rfc2518.html#copy.for.collections
-					Files.createDirectory(destination.path);
-					BasicFileAttributeView attrView = Files.getFileAttributeView(destination.path, BasicFileAttributeView.class);
-					if (attrView != null) {
-						BasicFileAttributes a = attr.get();
-						attrView.setTimes(a.lastModifiedTime(), a.lastAccessTime(), a.creationTime());
-					}
-				} else {
-					Files.copy(path, destination.path, StandardCopyOption.REPLACE_EXISTING);
-				}
-			} catch (IOException e) {
-				throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-			}
-		} else {
+		if (!Files.isDirectory(destination.path.getParent())) {
 			throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+		}
+
+		try {
+			if (shallow && destination instanceof DavFolder) {
+				// http://www.webdav.org/specs/rfc2518.html#copy.for.collections
+				Files.createDirectory(destination.path);
+				BasicFileAttributeView attrView = Files.getFileAttributeView(destination.path, BasicFileAttributeView.class);
+				if (attrView != null) {
+					BasicFileAttributes a = attr.get();
+					attrView.setTimes(a.lastModifiedTime(), a.lastAccessTime(), a.creationTime());
+				}
+			} else {
+				Files.walkFileTree(path, new CopyingFileVisitor(path, destination.path, StandardCopyOption.REPLACE_EXISTING));
+			}
+		} catch (IOException e) {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
 		}
 	}
 

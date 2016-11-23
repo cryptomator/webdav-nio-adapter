@@ -225,7 +225,7 @@ abstract class DavNode implements DavResource {
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-			return factory.createFolder(parentLocator, parentPath, Optional.of(parentAttr), session);
+			return factory.createFolder(parentLocator, parentPath, Optional.ofNullable(parentAttr), session);
 		}
 	}
 

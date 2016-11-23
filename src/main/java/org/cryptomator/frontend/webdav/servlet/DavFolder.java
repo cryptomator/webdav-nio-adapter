@@ -127,7 +127,8 @@ class DavFolder extends DavNode {
 
 	public void removeMemberInternal(DavNode member) throws DavException {
 		try {
-			Files.delete(member.path);
+			// The DELETE method on a collection must act as if a "Depth: infinity" header was used on it
+			Files.walkFileTree(member.path, new DeletingFileVisitor());
 		} catch (NoSuchFileException e) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		} catch (IOException e) {

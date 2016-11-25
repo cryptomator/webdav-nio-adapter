@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.frontend.webdav.WebDavServerModule.BindAddr;
 import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -42,11 +43,12 @@ public class WebDavServer {
 	private final WebDavServletContextFactory servletContextFactory;
 
 	@Inject
-	WebDavServer(@ServerPort int port, WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet, ThreadPool threadPool) {
+	WebDavServer(@ServerPort int port, @BindAddr String bindAddr, WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet, ThreadPool threadPool) {
 		this.server = new Server(threadPool);
 		this.localConnector = new ServerConnector(server);
 		this.servletCollection = new ContextHandlerCollection();
 		this.servletContextFactory = servletContextFactory;
+		localConnector.setHost(bindAddr);
 		localConnector.setPort(port);
 		servletCollection.addHandler(defaultServlet.createServletContextHandler());
 		server.setConnectors(new Connector[] {localConnector});
@@ -56,11 +58,12 @@ public class WebDavServer {
 	/**
 	 * Creates a new WebDavServer listening on the given port. Ideally this method is invoked only once.
 	 * 
+	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
 	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
 	 * @return A fully initialized but not yet running WebDavServer.
 	 */
-	public static WebDavServer create(int port) {
-		WebDavServerModule module = new WebDavServerModule(port);
+	public static WebDavServer create(String bindAddr, int port) {
+		WebDavServerModule module = new WebDavServerModule(bindAddr, port);
 		WebDavServerComponent comp = DaggerWebDavServerComponent.builder().webDavServerModule(module).build();
 		return comp.server();
 	}

@@ -11,6 +11,7 @@ package org.cryptomator.frontend.webdav;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -33,18 +34,27 @@ class WebDavServerModule {
 	private static final int THREAD_IDLE_SECONDS = 10;
 
 	private final int port;
+	private final String bindAddr;
 
 	/**
+	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
 	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
 	 */
-	public WebDavServerModule(int port) {
-		this.port = port;
+	public WebDavServerModule(String bindAddr, int port) {
+		this.bindAddr = Objects.requireNonNull(bindAddr);
+		this.port = Objects.requireNonNull(port);
 	}
 
 	@Provides
 	@ServerPort
 	int providePort() {
 		return port;
+	}
+
+	@Provides
+	@BindAddr
+	String provideBindAddr() {
+		return bindAddr;
 	}
 
 	@Provides
@@ -58,6 +68,12 @@ class WebDavServerModule {
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ServerPort {
+	}
+
+	@Qualifier
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface BindAddr {
 	}
 
 }

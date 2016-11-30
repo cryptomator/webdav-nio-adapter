@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>0.2.0</version>
 	<name>Cryptomator WebDAV-NIO Adapter</name>
 	<description>WebDAV servlets allowing access to NIO-based resources.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -54,8 +54,6 @@
 			<artifactId>jackrabbit-webdav</artifactId>
 			<version>${jackrabbit.version}</version>
 		</dependency>
-
-
 
 		<!-- Jetty -->
 		<dependency>

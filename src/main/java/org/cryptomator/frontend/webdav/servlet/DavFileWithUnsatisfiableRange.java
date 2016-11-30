@@ -21,7 +21,7 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 /**
  * Sends the full file in reaction to an unsatisfiable range.
  * 
- * @see {@link https://tools.ietf.org/html/rfc7233#section-4.2}
+ * @see <a href="https://tools.ietf.org/html/rfc7233#section-4.2"/>RFC 7233 Section 4.2</a>
  */
 class DavFileWithUnsatisfiableRange extends DavFile {
 

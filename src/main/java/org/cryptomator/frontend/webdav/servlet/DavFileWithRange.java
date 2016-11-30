@@ -34,7 +34,7 @@ import com.google.common.io.ByteStreams;
 /**
  * Delivers only the requested range of bytes from a file.
  * 
- * @see {@link https://tools.ietf.org/html/rfc7233#section-4}
+ * @see <a href="https://tools.ietf.org/html/rfc7233#section-4"/>RFC 7233 Section 4</a>
  */
 class DavFileWithRange extends DavFile {
 

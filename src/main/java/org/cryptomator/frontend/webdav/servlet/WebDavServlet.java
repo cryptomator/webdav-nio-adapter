@@ -23,6 +23,7 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
 import org.apache.jackrabbit.webdav.WebdavResponse;
+import org.apache.jackrabbit.webdav.header.IfHeader;
 import org.apache.jackrabbit.webdav.lock.ActiveLock;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
@@ -31,11 +32,13 @@ import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterators;
+
 @PerServlet
 public class WebDavServlet extends AbstractWebdavServlet {
 
-	private static final long serialVersionUID = -6632687979352625020L;
-
+	private static final String NO_LOCK = "DAV:no-lock";
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServlet.class);
 
 	private final DavSessionProvider davSessionProvider;
@@ -51,7 +54,17 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected boolean isPreconditionValid(WebdavRequest request, DavResource resource) {
-		return !resource.exists() || request.matchesIfHeader(resource);
+		IfHeader ifHeader = new IfHeader(request);
+		if (ifHeader.hasValue() && Iterators.all(ifHeader.getAllTokens(), Predicates.equalTo(NO_LOCK))) {
+			// https://tools.ietf.org/html/rfc4918#section-10.4.8:
+			// "DAV:no-lock" is known to never represent a current lock token.
+			return false;
+		} else if (ifHeader.hasValue() && Iterators.any(ifHeader.getAllNotTokens(), Predicates.equalTo(NO_LOCK))) {
+			// by applying "Not" to a state token that is known not to be current, the Condition always evaluates to true.
+			return true;
+		} else {
+			return request.matchesIfHeader(resource);
+		}
 	}
 
 	@Override

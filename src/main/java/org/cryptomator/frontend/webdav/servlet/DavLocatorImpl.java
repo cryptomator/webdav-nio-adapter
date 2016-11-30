@@ -36,7 +36,7 @@ class DavLocatorImpl implements DavResourceLocator {
 		}
 		this.factory = Objects.requireNonNull(factory);
 		this.prefix = prefix;
-		this.resourcePath = resourcePath;
+		this.resourcePath = StringUtils.removeEnd(resourcePath, "/");
 	}
 
 	public DavLocatorImpl resolveChild(String childName) {
@@ -141,6 +141,11 @@ class DavLocatorImpl implements DavResourceLocator {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return this.factory + ": " + this.prefix + this.resourcePath;
 	}
 
 }

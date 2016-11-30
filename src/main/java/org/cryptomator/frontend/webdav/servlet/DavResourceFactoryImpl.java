@@ -70,6 +70,11 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 			return createFile(locator, p, Optional.empty(), request.getDavSession());
 		} else if (!attr.isPresent() && DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
 			return createFolder(locator, p, Optional.empty(), request.getDavSession());
+		} else if (!attr.isPresent() && DavMethods.METHOD_LOCK.equals(request.getMethod())) {
+			// locking non-existing resources must create a non-collection resource:
+			// https://tools.ietf.org/html/rfc4918#section-9.10.4
+			// See also: DavFile#lock(...)
+			return createFile(locator, p, Optional.empty(), request.getDavSession());
 		} else if (!attr.isPresent()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		} else if (attr.get().isRegularFile() && DavMethods.METHOD_GET.equals(request.getMethod()) && request.getHeader(HttpHeader.RANGE.asString()) != null) {

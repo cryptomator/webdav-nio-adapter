@@ -14,6 +14,7 @@ import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 
 @PerServlet
 class DavSessionProviderImpl implements DavSessionProvider {

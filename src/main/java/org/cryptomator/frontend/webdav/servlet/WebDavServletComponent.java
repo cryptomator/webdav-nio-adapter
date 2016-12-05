@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav.servlet;
 
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import dagger.Subcomponent;

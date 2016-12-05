@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 
@@ -32,6 +34,7 @@ class WebDavServerModule {
 	private static final int MAX_THREADS = 200;
 	private static final int MIN_THREADS = 4;
 	private static final int THREAD_IDLE_SECONDS = 10;
+	private static final String ROOT_PATH = "/";
 
 	private final int port;
 	private final String bindAddr;
@@ -64,16 +67,31 @@ class WebDavServerModule {
 		return new ExecutorThreadPool(MIN_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
 	}
 
-	@Qualifier
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ServerPort {
+	@Provides
+	@CatchAll
+	ServletContextHandler createServletContextHandler(DefaultServlet servlet) {
+		final ServletContextHandler servletContext = new ServletContextHandler(null, ROOT_PATH, ServletContextHandler.NO_SESSIONS);
+		final ServletHolder servletHolder = new ServletHolder(ROOT_PATH, servlet);
+		servletContext.addServlet(servletHolder, ROOT_PATH);
+		return servletContext;
 	}
 
 	@Qualifier
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface BindAddr {
+	@interface ServerPort {
+	}
+
+	@Qualifier
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface BindAddr {
+	}
+
+	@Qualifier
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface CatchAll {
 	}
 
 }

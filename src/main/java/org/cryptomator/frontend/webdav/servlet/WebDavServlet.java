@@ -28,6 +28,7 @@ import org.apache.jackrabbit.webdav.lock.ActiveLock;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

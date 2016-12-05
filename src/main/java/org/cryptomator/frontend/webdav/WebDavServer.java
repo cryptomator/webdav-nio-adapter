@@ -17,6 +17,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.frontend.webdav.WebDavServerModule.BindAddr;
+import org.cryptomator.frontend.webdav.WebDavServerModule.CatchAll;
 import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -43,14 +44,14 @@ public class WebDavServer {
 	private final WebDavServletContextFactory servletContextFactory;
 
 	@Inject
-	WebDavServer(@ServerPort int port, @BindAddr String bindAddr, WebDavServletContextFactory servletContextFactory, DefaultServlet defaultServlet, ThreadPool threadPool) {
+	WebDavServer(@ServerPort int port, @BindAddr String bindAddr, WebDavServletContextFactory servletContextFactory, @CatchAll ServletContextHandler catchAllServletHandler, ThreadPool threadPool) {
 		this.server = new Server(threadPool);
 		this.localConnector = new ServerConnector(server);
 		this.servletCollection = new ContextHandlerCollection();
 		this.servletContextFactory = servletContextFactory;
 		localConnector.setHost(bindAddr);
 		localConnector.setPort(port);
-		servletCollection.addHandler(defaultServlet.createServletContextHandler());
+		servletCollection.addHandler(catchAllServletHandler);
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}

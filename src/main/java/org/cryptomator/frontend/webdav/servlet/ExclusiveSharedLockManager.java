@@ -30,6 +30,7 @@ import org.apache.jackrabbit.webdav.lock.LockInfo;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 
 @PerServlet
 class ExclusiveSharedLockManager implements LockManager {

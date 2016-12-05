@@ -33,6 +33,8 @@ import org.apache.jackrabbit.webdav.DavServletRequest;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.lock.LockManager;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.RootPath;
 import org.eclipse.jetty.http.HttpHeader;
 
 @PerServlet

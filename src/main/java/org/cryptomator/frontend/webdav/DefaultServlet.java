@@ -9,25 +9,16 @@
 package org.cryptomator.frontend.webdav;
 
 import java.io.IOException;
-import java.util.EnumSet;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.cryptomator.frontend.webdav.servlet.LoopbackFilter;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-
 @Singleton
 class DefaultServlet extends HttpServlet {
-
-	private static final String ROOT_PATH = "/";
-	private static final String WILDCARD = "/*";
 
 	@Inject
 	public DefaultServlet() {
@@ -44,14 +35,6 @@ class DefaultServlet extends HttpServlet {
 		resp.addHeader("MS-Author-Via", "DAV");
 		resp.addHeader("Allow", "OPTIONS, GET, HEAD");
 		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-	}
-
-	public ServletContextHandler createServletContextHandler() {
-		final ServletContextHandler servletContext = new ServletContextHandler(null, ROOT_PATH, ServletContextHandler.NO_SESSIONS);
-		final ServletHolder servletHolder = new ServletHolder(ROOT_PATH, this);
-		servletContext.addServlet(servletHolder, ROOT_PATH);
-		servletContext.addFilter(LoopbackFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
-		return servletContext;
 	}
 
 }

@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.util.EncodeUtil;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 
 @PerServlet
 class DavLocatorFactoryImpl implements DavLocatorFactory {

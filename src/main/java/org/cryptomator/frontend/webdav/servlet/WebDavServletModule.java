@@ -8,14 +8,18 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav.servlet;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.EnumSet;
 
+import javax.inject.Qualifier;
+import javax.inject.Scope;
 import javax.servlet.DispatcherType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -91,15 +95,29 @@ public class WebDavServletModule {
 		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, servlet);
 		servletContext.addServlet(servletHolder, WILDCARD);
-		servletContext.addFilter(LoopbackFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(PostRequestBlockingFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(MkcolComplianceFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(AcceptRangeFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
-
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			servletContext.addFilter(MacChunkedPutCompatibilityFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
-		}
+		servletContext.addFilter(MacChunkedPutCompatibilityFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		return servletContext;
+	}
+
+	@Qualifier
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ContextRoot {
+	}
+
+	@Qualifier
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface RootPath {
+	}
+
+	@Scope
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface PerServlet {
 	}
 
 }

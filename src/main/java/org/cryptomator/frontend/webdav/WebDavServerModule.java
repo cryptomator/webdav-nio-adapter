@@ -62,7 +62,7 @@ class WebDavServerModule {
 
 	@Provides
 	@Singleton
-	ThreadPool serverThreadPool() {
+	ThreadPool provideServerThreadPool() {
 		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		/*
 		 * set core pool size = MAX_THREADS and allow coreThreadTimeOut

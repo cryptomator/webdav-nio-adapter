@@ -14,6 +14,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Qualifier;
@@ -31,9 +32,8 @@ import dagger.Provides;
 class WebDavServerModule {
 
 	private static final int MAX_PENDING_REQUESTS = 400;
-	private static final int MAX_THREADS = 200;
-	private static final int MIN_THREADS = 4;
-	private static final int THREAD_IDLE_SECONDS = 10;
+	private static final int MAX_THREADS = 100;
+	private static final int THREAD_IDLE_SECONDS = 60;
 	private static final String ROOT_PATH = "/";
 
 	private final int port;
@@ -64,7 +64,14 @@ class WebDavServerModule {
 	@Singleton
 	ThreadPool serverThreadPool() {
 		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
-		return new ExecutorThreadPool(MIN_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
+		/*
+		 * set core pool size = MAX_THREADS and allow coreThreadTimeOut
+		 * to enforce spawning threads till the maximum even if the
+		 * queue is not full
+		 */
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
+		executor.allowCoreThreadTimeOut(true);
+		return new ExecutorThreadPool(executor);
 	}
 
 	@Provides

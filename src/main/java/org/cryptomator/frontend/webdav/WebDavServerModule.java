@@ -32,7 +32,7 @@ class WebDavServerModule {
 
 	private static final int MAX_PENDING_REQUESTS = 400;
 	private static final int MAX_THREADS = 200;
-	private static final int MIN_THREADS = 4;
+	private static final int MIN_THREADS = 8;
 	private static final int THREAD_IDLE_SECONDS = 10;
 	private static final String ROOT_PATH = "/";
 

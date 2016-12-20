@@ -19,8 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.frontend.webdav.WebDavServerModule.BindAddr;
 import org.cryptomator.frontend.webdav.WebDavServerModule.CatchAll;
 import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The WebDAV server, that WebDAV servlets can be added to using {@link #startWebDavServlet(Path, String)}.
+ * The WebDAV server, that WebDAV servlets can be added to using {@link #createWebDavServlet(Path, String)}.
  * 
  * An instance of this class can be obtained via {@link #create(String, int)}.
  */

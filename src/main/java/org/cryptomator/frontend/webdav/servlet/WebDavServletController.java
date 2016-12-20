@@ -70,7 +70,7 @@ public class WebDavServletController {
 	 * 
 	 * @param mountParams Optional mount parameters, that may be required for certain operating systems.
 	 * @return A {@link Mount} instance allowing unmounting and revealing the drive.
-	 * @throws CommandFailedException
+	 * @throws CommandFailedException If mounting failed.
 	 */
 	public Mount mount(Map<MountParam, String> mountParams) throws CommandFailedException {
 		if (!contextHandler.isStarted()) {

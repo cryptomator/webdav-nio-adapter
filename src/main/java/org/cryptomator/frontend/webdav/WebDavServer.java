@@ -19,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.frontend.webdav.WebDavServerModule.BindAddr;
 import org.cryptomator.frontend.webdav.WebDavServerModule.CatchAll;
 import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -40,15 +42,14 @@ public class WebDavServer {
 
 	private final Server server;
 	private final ServerConnector localConnector;
-	private final ContextHandlerCollection servletCollection;
-	private final WebDavServletContextFactory servletContextFactory;
+	private final WebDavServletFactory servletFactory;
 
 	@Inject
-	WebDavServer(@ServerPort int port, @BindAddr String bindAddr, WebDavServletContextFactory servletContextFactory, @CatchAll ServletContextHandler catchAllServletHandler, ThreadPool threadPool) {
+	WebDavServer(@ServerPort int port, @BindAddr String bindAddr, ContextHandlerCollection servletCollection, WebDavServletFactory servletContextFactory, @CatchAll ServletContextHandler catchAllServletHandler,
+			ThreadPool threadPool) {
 		this.server = new Server(threadPool);
 		this.localConnector = new ServerConnector(server);
-		this.servletCollection = new ContextHandlerCollection();
-		this.servletContextFactory = servletContextFactory;
+		this.servletFactory = servletContextFactory;
 		localConnector.setHost(bindAddr);
 		localConnector.setPort(port);
 		servletCollection.addHandler(catchAllServletHandler);
@@ -112,21 +113,16 @@ public class WebDavServer {
 	}
 
 	/**
-	 * Registers and starts a new WebDAV servlet.
+	 * Creates a new WebDAV servlet (without starting it yet).
 	 * 
 	 * @param rootPath The path to the directory which should be served as root resource.
 	 * @param contextPath The servlet context path, i.e. the path of the root resource.
-	 * @throws ServerLifecycleException If the servlet could not be started for any unexpected reason.
+	 * @return The controller object for this new servlet
 	 */
-	public void startWebDavServlet(Path rootPath, String contextPath) throws ServerLifecycleException {
+	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) throws ServerLifecycleException {
 		final URI uri = createUriForContextPath(contextPath);
-		final ServletContextHandler handler = prepareWebDavServlet(uri, rootPath);
-		try {
-			handler.start();
-			LOG.info("WebDavServlet available under " + uri);
-		} catch (Exception e) {
-			throw new ServerLifecycleException("Servlet couldn't be started", e);
-		}
+		WebDavServletComponent servletComp = servletFactory.create(uri, rootPath);
+		return servletComp.servlet();
 	}
 
 	private URI createUriForContextPath(String contextPath) {
@@ -135,13 +131,6 @@ public class WebDavServer {
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
 		}
-	}
-
-	private ServletContextHandler prepareWebDavServlet(URI contextRoot, Path rootPath) {
-		ServletContextHandler handler = servletContextFactory.create(contextRoot, rootPath);
-		servletCollection.addHandler(handler);
-		servletCollection.mapContexts();
-		return handler;
 	}
 
 }

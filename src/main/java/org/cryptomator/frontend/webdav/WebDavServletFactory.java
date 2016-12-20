@@ -16,15 +16,14 @@ import javax.inject.Singleton;
 
 import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 
 @Singleton
-class WebDavServletContextFactory {
+class WebDavServletFactory {
 
 	private final WebDavServerComponent component;
 
 	@Inject
-	public WebDavServletContextFactory(WebDavServerComponent component) {
+	public WebDavServletFactory(WebDavServerComponent component) {
 		this.component = component;
 	}
 
@@ -39,13 +38,11 @@ class WebDavServletContextFactory {
 	 * 
 	 * @param contextRoot The URI of the context root. Its path will be used as the servlet's context path.
 	 * @param rootPath The location within a filesystem that shall be served via WebDAV.
-	 * @return A new Jetty servlet context handler.
+	 * @return A new WebDAV servlet component.
 	 */
-	public ServletContextHandler create(URI contextRoot, Path rootPath) {
-		final WebDavServletModule webDavServletModule = new WebDavServletModule(contextRoot, rootPath);
-		final WebDavServletComponent webDavServletComponent = component.newWebDavServletComponent(webDavServletModule);
-		final ServletContextHandler servletContext = webDavServletComponent.servletContext();
-		return servletContext;
+	public WebDavServletComponent create(URI contextRoot, Path rootPath) {
+		WebDavServletModule webDavServletModule = new WebDavServletModule(contextRoot, rootPath);
+		return component.newWebDavServletComponent(webDavServletModule);
 	}
 
 }

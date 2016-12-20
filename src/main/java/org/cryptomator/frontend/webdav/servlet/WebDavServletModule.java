@@ -53,41 +53,6 @@ public class WebDavServletModule {
 		return rootPath;
 	}
 
-	// @PerServlet
-	// @Provides
-	// @Named("loopbackFilter")
-	// public FilterHolder provideLoopbackFilter() {
-	// return new FilterHolder(new LoopbackFilter());
-	// }
-	//
-	// @PerServlet
-	// @Provides
-	// @Named("postRequestBlockingFilter")
-	// public FilterHolder providePostRequestBlockingFilter() {
-	// return new FilterHolder(new PostRequestBlockingFilter());
-	// }
-	//
-	// @PerServlet
-	// @Provides
-	// @Named("mkcolComplianceFilter")
-	// public FilterHolder provideMkColComplianceFilter() {
-	// return new FilterHolder(new MkcolComplianceFilter());
-	// }
-	//
-	// @PerServlet
-	// @Provides
-	// @Named("acceptRangeFilter")
-	// public FilterHolder provideAcceptRangeFilter() {
-	// return new FilterHolder(new AcceptRangeFilter());
-	// }
-	//
-	// @PerServlet
-	// @Provides
-	// @Named("macChunkedPutCompatibilityFilter")
-	// public FilterHolder provideMacChunkedPutCompatibilityFilter() {
-	// return new FilterHolder(new MacChunkedPutCompatibilityFilter());
-	// }
-
 	@PerServlet
 	@Provides
 	public ServletContextHandler provideServletContext(WebDavServlet servlet) {

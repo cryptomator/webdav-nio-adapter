@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
+import org.cryptomator.frontend.webdav.mount.MounterModule;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
@@ -28,7 +30,7 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 import dagger.Module;
 import dagger.Provides;
 
-@Module
+@Module(includes = {MounterModule.class})
 class WebDavServerModule {
 
 	private static final int MAX_PENDING_REQUESTS = 400;
@@ -75,6 +77,13 @@ class WebDavServerModule {
 	}
 
 	@Provides
+	@Singleton
+	ContextHandlerCollection providesContextHandlerCollection() {
+		return new ContextHandlerCollection();
+	}
+
+	@Provides
+	@Singleton
 	@CatchAll
 	ServletContextHandler createServletContextHandler(DefaultServlet servlet) {
 		final ServletContextHandler servletContext = new ServletContextHandler(null, ROOT_PATH, ServletContextHandler.NO_SESSIONS);

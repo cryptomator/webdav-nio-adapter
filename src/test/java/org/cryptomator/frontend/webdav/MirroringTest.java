@@ -23,7 +23,7 @@ public class MirroringTest {
 			if (Files.isDirectory(p)) {
 				WebDavServer server = WebDavServer.create("localhost", 8080);
 				server.start();
-				server.startWebDavServlet(p, "test");
+				server.createWebDavServlet(p, "test").start();
 				System.out.println("Enter anything to stop the server...");
 				System.in.read();
 				server.stop();

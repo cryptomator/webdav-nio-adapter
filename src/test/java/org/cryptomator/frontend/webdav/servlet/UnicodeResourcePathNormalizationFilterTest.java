@@ -55,7 +55,7 @@ public class UnicodeResourcePathNormalizationFilterTest {
 	}
 
 	@Test
-	public void testRequestWithNonNormalizedResourceUri() throws IOException, ServletException {
+	public void testRequestWithNonNormalizedResourceUri1() throws IOException, ServletException {
 		Mockito.when(request.getPathInfo()).thenReturn("/\u0041\u030A");
 		filter.doFilter(request, response, chain);
 
@@ -68,6 +68,16 @@ public class UnicodeResourcePathNormalizationFilterTest {
 	}
 
 	@Test
+	public void testRequestWithNonNormalizedResourceUri2() throws IOException, ServletException {
+		Mockito.when(request.getPathInfo()).thenReturn("/O\u0308");
+		filter.doFilter(request, response, chain);
+
+		ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
+		Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
+		Assert.assertEquals("http://example.com/foo/Ö", wrappedReq.getValue().getRequestURL().toString());
+	}
+
+	@Test
 	public void testRequestWithNonNormalizedDestinationUri() throws IOException, ServletException {
 		Mockito.when(request.getHeader("Destination")).thenReturn("http://example.com/bar/\u0041\u030A");
 		filter.doFilter(request, response, chain);
@@ -75,17 +85,6 @@ public class UnicodeResourcePathNormalizationFilterTest {
 		ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
 		Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
 		Assert.assertEquals("http://example.com/bar/\u00C5", wrappedReq.getValue().getHeader("Destination"));
-	}
-
-	@Test
-	public void foo() throws IOException, ServletException {
-		Mockito.when(request.getPathInfo()).thenReturn("/O\u00CC\u0088");
-
-		filter.doFilter(request, response, chain);
-
-		ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
-		Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
-		Assert.assertEquals("http://example.com/foo/Ö", wrappedReq.getValue().getRequestURL().toString());
 	}
 
 }

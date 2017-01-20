@@ -20,7 +20,7 @@ class FallbackMounter implements MounterStrategy {
 
 	@Override
 	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
-		LOG.warn("Attempted to mount {}, but no applicable strategy has been found for your system. Try using the URI with a WebDAV client of your choice.", uri);
+		LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to mount: {}", uri);
 		throw new CommandFailedException("No mounting strategy found.");
 	}
 

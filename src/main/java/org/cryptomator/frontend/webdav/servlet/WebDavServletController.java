@@ -91,7 +91,9 @@ public class WebDavServletController {
 		if (!contextHandler.isStarted()) {
 			throw new IllegalStateException("Mounting only possible for running servlets.");
 		}
-		return mounter.mount(getServletRootUri(), mountParams);
+		URI uri = getServletRootUri();
+		LOG.info("Mounting {} using {}", uri, mounter.getClass().getName());
+		return mounter.mount(uri, mountParams);
 	}
 
 }

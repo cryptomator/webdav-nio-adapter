@@ -2,6 +2,7 @@ package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -39,9 +40,25 @@ class WindowsMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
 		try {
+			final String host;
+			if (uri.getHost().equals("[::1]")) {
+				host = "0--1.ipv6-literal.net";
+			} else {
+				host = uri.getHost();
+			}
+			URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), host, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+			return mountInternal(adjustedUri, mountParams);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Unable to reconstruct URI from given URI", e);
+		}
+	}
+
+	private Mount mountInternal(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
+		try {
 			tuneProxyConfig(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
-			String uncPath = "\\\\localhost@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
+
+			String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
 			ProcessBuilder mount = new ProcessBuilder("net", "use", preferredDriveLetter, uncPath);
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);

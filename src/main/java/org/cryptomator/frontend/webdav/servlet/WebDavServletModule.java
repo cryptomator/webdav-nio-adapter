@@ -11,7 +11,6 @@ package org.cryptomator.frontend.webdav.servlet;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.EnumSet;
 
@@ -31,19 +30,12 @@ public class WebDavServletModule {
 
 	private static final String WILDCARD = "/*";
 
-	private final URI contextRoot;
 	private final Path rootPath;
+	private final String contextPath;
 
-	public WebDavServletModule(URI contextRoot, Path rootPath) {
-		this.contextRoot = contextRoot;
+	public WebDavServletModule(Path rootPath, String contextPath) {
 		this.rootPath = rootPath;
-	}
-
-	@PerServlet
-	@Provides
-	@ContextRoot
-	public URI provideContextRootUri() {
-		return contextRoot;
+		this.contextPath = StringUtils.prependIfMissing(StringUtils.removeEnd(contextPath, "/"), "/");
 	}
 
 	@PerServlet
@@ -55,8 +47,14 @@ public class WebDavServletModule {
 
 	@PerServlet
 	@Provides
+	@ContextPath
+	public String provideContextRootUri() {
+		return contextPath;
+	}
+
+	@PerServlet
+	@Provides
 	public ServletContextHandler provideServletContext(WebDavServlet servlet) {
-		final String contextPath = StringUtils.removeEnd(contextRoot.getPath(), "/");
 		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, servlet);
 		servletContext.addServlet(servletHolder, WILDCARD);
@@ -71,7 +69,7 @@ public class WebDavServletModule {
 	@Qualifier
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface ContextRoot {
+	@interface ContextPath {
 	}
 
 	@Qualifier

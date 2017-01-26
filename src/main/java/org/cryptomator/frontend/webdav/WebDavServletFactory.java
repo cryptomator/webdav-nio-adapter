@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import java.net.URI;
 import java.nio.file.Path;
 
 import javax.inject.Inject;
@@ -36,12 +35,12 @@ class WebDavServletFactory {
 	 * servletCollection.mapContexts();
 	 * </pre>
 	 * 
-	 * @param contextRoot The URI of the context root. Its path will be used as the servlet's context path.
 	 * @param rootPath The location within a filesystem that shall be served via WebDAV.
+	 * @param contextPath The servlet's context path.
 	 * @return A new WebDAV servlet component.
 	 */
-	public WebDavServletComponent create(URI contextRoot, Path rootPath) {
-		WebDavServletModule webDavServletModule = new WebDavServletModule(contextRoot, rootPath);
+	public WebDavServletComponent create(Path rootPath, String contextPath) {
+		WebDavServletModule webDavServletModule = new WebDavServletModule(rootPath, contextPath);
 		return component.newWebDavServletComponent(webDavServletModule);
 	}
 

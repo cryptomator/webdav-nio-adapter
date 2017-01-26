@@ -1,6 +1,7 @@
 package org.cryptomator.frontend.webdav.servlet;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -10,8 +11,9 @@ import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
 import org.cryptomator.frontend.webdav.mount.Mounter.MountParam;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.ContextRoot;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.ContextPath;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
@@ -24,14 +26,16 @@ public class WebDavServletController {
 
 	private final ServletContextHandler contextHandler;
 	private final ContextHandlerCollection contextHandlerCollection;
-	private final URI uri;
+	private final ServerConnector connector;
+	private final String contextPath;
 	private final Mounter mounter;
 
 	@Inject
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, @ContextRoot URI uri, Mounter mounter) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, @ContextPath String contextPath, Mounter mounter) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
-		this.uri = uri;
+		this.connector = connector;
+		this.contextPath = contextPath;
 		this.mounter = mounter;
 	}
 
@@ -45,7 +49,7 @@ public class WebDavServletController {
 			contextHandlerCollection.addHandler(contextHandler);
 			contextHandlerCollection.mapContexts();
 			contextHandler.start();
-			LOG.info("WebDavServlet started: " + uri);
+			LOG.info("WebDavServlet started: " + contextPath);
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Servlet couldn't be started", e);
 		}
@@ -59,9 +63,20 @@ public class WebDavServletController {
 	public void stop() throws ServerLifecycleException {
 		try {
 			contextHandler.stop();
-			LOG.info("WebDavServlet stopped: " + uri);
+			LOG.info("WebDavServlet stopped: " + contextPath);
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Servlet couldn't be stopped", e);
+		}
+	}
+
+	/**
+	 * @return A new http URI constructed from the servers bind addr and port as well as this servlet's contextPath.
+	 */
+	public URI getServletRootUri() {
+		try {
+			return new URI("http", null, connector.getHost(), connector.getLocalPort(), contextPath, null, null);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
 		}
 	}
 
@@ -76,7 +91,7 @@ public class WebDavServletController {
 		if (!contextHandler.isStarted()) {
 			throw new IllegalStateException("Mounting only possible for running servlets.");
 		}
-		return mounter.mount(uri, mountParams);
+		return mounter.mount(getServletRootUri(), mountParams);
 	}
 
 }

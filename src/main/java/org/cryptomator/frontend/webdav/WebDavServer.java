@@ -8,25 +8,15 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.frontend.webdav.WebDavServerModule.BindAddr;
-import org.cryptomator.frontend.webdav.WebDavServerModule.CatchAll;
-import org.cryptomator.frontend.webdav.WebDavServerModule.ServerPort;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,36 +35,33 @@ public class WebDavServer {
 	private final WebDavServletFactory servletFactory;
 
 	@Inject
-	WebDavServer(@ServerPort int port, @BindAddr String bindAddr, ContextHandlerCollection servletCollection, WebDavServletFactory servletContextFactory, @CatchAll ServletContextHandler catchAllServletHandler,
-			ThreadPool threadPool) {
-		this.server = new Server(threadPool);
-		this.localConnector = new ServerConnector(server);
+	WebDavServer(Server server, ServerConnector connector, WebDavServletFactory servletContextFactory) {
+		this.server = server;
+		this.localConnector = connector;
 		this.servletFactory = servletContextFactory;
-		localConnector.setHost(bindAddr);
-		localConnector.setPort(port);
-		servletCollection.addHandler(catchAllServletHandler);
-		server.setConnectors(new Connector[] {localConnector});
-		server.setHandler(servletCollection);
 	}
 
-	/**
-	 * Creates a new WebDavServer listening on the given port. Ideally this method is invoked only once.
-	 * 
-	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
-	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
-	 * @return A fully initialized but not yet running WebDavServer.
-	 */
-	public static WebDavServer create(String bindAddr, int port) {
-		WebDavServerModule module = new WebDavServerModule(bindAddr, port);
-		WebDavServerComponent comp = DaggerWebDavServerComponent.builder().webDavServerModule(module).build();
+	public static WebDavServer create() {
+		WebDavServerComponent comp = DaggerWebDavServerComponent.create();
 		return comp.server();
 	}
 
 	/**
-	 * @return The TCP port this server is running on (if it's {@link #isRunning() running}. Otherwise {@link #start() start} it first).
+	 * Reconfigures the server socket to listen on the specified bindAddr and port.
+	 * 
+	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
+	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
+	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
 	 */
-	public int getPort() {
-		return localConnector.getLocalPort();
+	public void bind(String bindAddr, int port) {
+		try {
+			localConnector.stop();
+			localConnector.setHost(bindAddr);
+			localConnector.setPort(port);
+			localConnector.start();
+		} catch (Exception e) {
+			throw new ServerLifecycleException("Failed to restart socket.", e);
+		}
 	}
 
 	/**
@@ -92,7 +79,7 @@ public class WebDavServer {
 	public synchronized void start() throws ServerLifecycleException {
 		try {
 			server.start();
-			LOG.info("WebDavServer started on port {}.", getPort());
+			LOG.info("WebDavServer started.");
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Server couldn't be started", e);
 		}
@@ -120,17 +107,8 @@ public class WebDavServer {
 	 * @return The controller object for this new servlet
 	 */
 	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) throws ServerLifecycleException {
-		final URI uri = createUriForContextPath(contextPath);
-		WebDavServletComponent servletComp = servletFactory.create(uri, rootPath);
+		WebDavServletComponent servletComp = servletFactory.create(rootPath, contextPath);
 		return servletComp.servlet();
-	}
-
-	private URI createUriForContextPath(String contextPath) {
-		try {
-			return new URI("http", null, "localhost", getPort(), StringUtils.prependIfMissing(contextPath, "/"), null, null);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
-		}
 	}
 
 }

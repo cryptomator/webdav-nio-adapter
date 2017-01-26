@@ -28,7 +28,8 @@ public class MirroringTest {
 			System.out.println("Enter path to the directory you want to be accessible via WebDAV:");
 			Path p = Paths.get(scanner.nextLine());
 			if (Files.isDirectory(p)) {
-				WebDavServer server = WebDavServer.create("localhost", 8080);
+				WebDavServer server = WebDavServer.create();
+				server.bind("localhost", 8080);
 				server.start();
 				WebDavServletController servlet = server.createWebDavServlet(p, "test");
 				servlet.start();

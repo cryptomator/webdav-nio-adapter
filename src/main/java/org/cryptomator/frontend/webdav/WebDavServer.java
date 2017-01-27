@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The WebDAV server, that WebDAV servlets can be added to using {@link #createWebDavServlet(Path, String)}.
+ * The WebDAV server, that WebDAV servlets can be added to using {@link #createWebDavServlet()}.
  * 
  * An instance of this class can be obtained via {@link #create(String, int)}.
  */

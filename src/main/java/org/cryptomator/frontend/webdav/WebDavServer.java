@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 
 import javax.inject.Inject;
@@ -54,10 +55,21 @@ public class WebDavServer {
 	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
 	 */
 	public void bind(String bindAddr, int port) {
+		this.bind(InetSocketAddress.createUnresolved(bindAddr, port));
+	}
+
+	/**
+	 * Reconfigures the server socket to listen on the specified bindAddr and port.
+	 * 
+	 * @param socketBindAddress Socket address and port of the server. Use <code>0.0.0.0:0</code> to listen on all interfaces and auto-assign a port.
+	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
+	 */
+	public void bind(InetSocketAddress socketBindAddress) {
 		try {
 			localConnector.stop();
-			localConnector.setHost(bindAddr);
-			localConnector.setPort(port);
+			LOG.info("Binding server socket to {}:{}", socketBindAddress.getHostString(), socketBindAddress.getPort());
+			localConnector.setHost(socketBindAddress.getHostString());
+			localConnector.setPort(socketBindAddress.getPort());
 			localConnector.start();
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Failed to restart socket.", e);

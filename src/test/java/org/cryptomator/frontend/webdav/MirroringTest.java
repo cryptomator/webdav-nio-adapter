@@ -36,6 +36,7 @@ public class MirroringTest {
 
 				Map<MountParam, String> mountOptions = new HashMap<>();
 				mountOptions.put(MountParam.WIN_DRIVE_LETTER, "X:");
+				mountOptions.put(MountParam.PREFERRED_GVFS_SCHEME, "dav");
 				Mount mount = servlet.mount(mountOptions);
 				mount.reveal();
 

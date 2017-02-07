@@ -11,9 +11,13 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 class MacAppleScriptMounter implements MounterStrategy {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MacAppleScriptMounter.class);
 
 	@Inject
 	MacAppleScriptMounter() {
@@ -29,7 +33,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
 		try {
-			String mountAppleScript = String.format("mount volume \"%s\"", uri.toString());
+			String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
@@ -43,6 +47,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			Process waitProcess = wait.start();
 			ProcessUtil.waitFor(waitProcess, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(waitProcess, 0);
+			LOG.debug("Mounted {}.", uri.toASCIIString());
 			return new MountImpl(volumeIdentifier);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);

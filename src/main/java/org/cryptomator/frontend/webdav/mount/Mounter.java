@@ -19,7 +19,8 @@ public interface Mounter {
 	public enum MountParam {
 		@Deprecated MOUNT_NAME, //
 		WIN_DRIVE_LETTER, //
-		PREFERRED_GVFS_SCHEME;
+		PREFERRED_GVFS_SCHEME, //
+		UNIQUE_VAULT_ID;
 	}
 
 	/**

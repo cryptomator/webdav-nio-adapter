@@ -9,10 +9,12 @@
 package org.cryptomator.frontend.webdav;
 
 import java.nio.file.Path;
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.cryptomator.frontend.webdav.WebDavServerModule.ContextPaths;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule;
 
@@ -20,10 +22,12 @@ import org.cryptomator.frontend.webdav.servlet.WebDavServletModule;
 class WebDavServletFactory {
 
 	private final WebDavServerComponent component;
+	private final Collection<String> contextPaths;
 
 	@Inject
-	public WebDavServletFactory(WebDavServerComponent component) {
+	public WebDavServletFactory(WebDavServerComponent component, @ContextPaths Collection<String> contextPaths) {
 		this.component = component;
+		this.contextPaths = contextPaths;
 	}
 
 	/**
@@ -41,6 +45,7 @@ class WebDavServletFactory {
 	 */
 	public WebDavServletComponent create(Path rootPath, String contextPath) {
 		WebDavServletModule webDavServletModule = new WebDavServletModule(rootPath, contextPath);
+		contextPaths.add(contextPath);
 		return component.newWebDavServletComponent(webDavServletModule);
 	}
 

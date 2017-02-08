@@ -11,6 +11,8 @@ package org.cryptomator.frontend.webdav;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -88,10 +90,23 @@ class WebDavServerModule {
 		return servletContext;
 	}
 
+	@Provides
+	@Singleton
+	@ContextPaths
+	Collection<String> provideContextPaths() {
+		return new HashSet<>();
+	}
+
 	@Qualifier
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface CatchAll {
+	}
+
+	@Qualifier
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ContextPaths {
 	}
 
 }

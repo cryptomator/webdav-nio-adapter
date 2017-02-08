@@ -10,6 +10,7 @@ package org.cryptomator.frontend.webdav;
 
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,8 +43,24 @@ public class WebDavServer {
 		this.servletFactory = servletContextFactory;
 	}
 
+	/**
+	 * @return WebDAV server with plain HTTP.
+	 * @see #create(String, String)
+	 */
 	public static WebDavServer create() {
-		WebDavServerComponent comp = DaggerWebDavServerComponent.create();
+		return create(null, null);
+	}
+
+	/**
+	 * Creates an HTTPS server using the certificate and key stored in the given PKCS12 file.
+	 * 
+	 * @param pkcs12KeystorePath PKCS12 file
+	 * @param pkcs12KeystorePassword Password for the given PKCS12 file
+	 * @return WebDAV server with TLS support.
+	 */
+	public static WebDavServer create(String pkcs12KeystorePath, String pkcs12KeystorePassword) {
+		WebDavServerModule module = new WebDavServerModule(Optional.ofNullable(pkcs12KeystorePath), Optional.ofNullable(pkcs12KeystorePassword));
+		WebDavServerComponent comp = DaggerWebDavServerComponent.builder().webDavServerModule(module).build();
 		return comp.server();
 	}
 

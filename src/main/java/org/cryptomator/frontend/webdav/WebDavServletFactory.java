@@ -8,24 +8,26 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import java.net.URI;
 import java.nio.file.Path;
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.cryptomator.frontend.webdav.WebDavServerModule.ContextPaths;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 
 @Singleton
-class WebDavServletContextFactory {
+class WebDavServletFactory {
 
 	private final WebDavServerComponent component;
+	private final Collection<String> contextPaths;
 
 	@Inject
-	public WebDavServletContextFactory(WebDavServerComponent component) {
+	public WebDavServletFactory(WebDavServerComponent component, @ContextPaths Collection<String> contextPaths) {
 		this.component = component;
+		this.contextPaths = contextPaths;
 	}
 
 	/**
@@ -37,15 +39,14 @@ class WebDavServletContextFactory {
 	 * servletCollection.mapContexts();
 	 * </pre>
 	 * 
-	 * @param contextRoot The URI of the context root. Its path will be used as the servlet's context path.
 	 * @param rootPath The location within a filesystem that shall be served via WebDAV.
-	 * @return A new Jetty servlet context handler.
+	 * @param contextPath The servlet's context path.
+	 * @return A new WebDAV servlet component.
 	 */
-	public ServletContextHandler create(URI contextRoot, Path rootPath) {
-		final WebDavServletModule webDavServletModule = new WebDavServletModule(contextRoot, rootPath);
-		final WebDavServletComponent webDavServletComponent = component.newWebDavServletComponent(webDavServletModule);
-		final ServletContextHandler servletContext = webDavServletComponent.servletContext();
-		return servletContext;
+	public WebDavServletComponent create(Path rootPath, String contextPath) {
+		WebDavServletModule webDavServletModule = new WebDavServletModule(rootPath, contextPath);
+		contextPaths.add(contextPath);
+		return component.newWebDavServletComponent(webDavServletModule);
 	}
 
 }

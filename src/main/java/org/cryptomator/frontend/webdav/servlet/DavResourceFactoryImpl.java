@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Sebastian Stenzel and others.
+ * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE.txt.
  *
@@ -21,9 +21,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavMethods;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -33,16 +30,14 @@ import org.apache.jackrabbit.webdav.DavServletRequest;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.lock.LockManager;
+import org.cryptomator.frontend.webdav.servlet.ByteRange.MalformedByteRangeException;
+import org.cryptomator.frontend.webdav.servlet.ByteRange.UnsupportedRangeException;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.RootPath;
 import org.eclipse.jetty.http.HttpHeader;
 
 @PerServlet
 class DavResourceFactoryImpl implements DavResourceFactory {
-
-	private static final String RANGE_BYTE_PREFIX = "bytes=";
-	private static final char RANGE_SET_SEP = ',';
-	private static final char RANGE_SEP = '-';
 
 	private final Path rootPath;
 	private final LockManager lockManager;
@@ -163,47 +158,14 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		try {
 			// 206 for ranged resources:
-			final Pair<String, String> parsedRange = parseRangeRequestHeader(rangeHeader);
+			final ByteRange byteRange = new ByteRange(rangeHeader);
 			response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
-			return new DavFileWithRange(this, lockManager, locator, path, attr, session, parsedRange);
-		} catch (DavException ex) {
-			if (ex.getErrorCode() == DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE) {
-				// 416 for unsatisfiable ranges:
-				response.setStatus(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-				return new DavFileWithUnsatisfiableRange(this, lockManager, locator, path, attr, session);
-			} else {
-				throw new DavException(ex.getErrorCode(), ex);
-			}
+			return new DavFileWithRange(this, lockManager, locator, path, attr, session, byteRange);
+		} catch (UnsupportedRangeException ex) {
+			return createFile(locator, path, Optional.of(attr), session);
+		} catch (MalformedByteRangeException e) {
+			throw new DavException(DavServletResponse.SC_BAD_REQUEST, "Malformed range header: " + rangeHeader);
 		}
-	}
-
-	/**
-	 * Processes the given range header field, if it is supported. Only headers containing a single byte range are supported.<br/>
-	 * <code>
-	 * bytes=100-200<br/>
-	 * bytes=-500<br/>
-	 * bytes=1000-
-	 * </code>
-	 * 
-	 * @return Tuple of lower and upper range.
-	 * @throws DavException HTTP statuscode 400 for malformed requests. 416 if requested range is not supported.
-	 */
-	private Pair<String, String> parseRangeRequestHeader(String rangeHeader) throws DavException {
-		assert rangeHeader != null;
-		if (!rangeHeader.startsWith(RANGE_BYTE_PREFIX)) {
-			throw new DavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-		}
-		final String byteRangeSet = StringUtils.removeStartIgnoreCase(rangeHeader, RANGE_BYTE_PREFIX);
-		final String[] byteRanges = StringUtils.split(byteRangeSet, RANGE_SET_SEP);
-		if (byteRanges.length != 1) {
-			throw new DavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-		}
-		final String byteRange = byteRanges[0];
-		final String[] bytePos = StringUtils.splitPreserveAllTokens(byteRange, RANGE_SEP);
-		if (bytePos.length != 2 || bytePos[0].isEmpty() && bytePos[1].isEmpty()) {
-			throw new DavException(DavServletResponse.SC_BAD_REQUEST, "malformed range header: " + rangeHeader);
-		}
-		return new ImmutablePair<>(bytePos[0], bytePos[1]);
 	}
 
 	/**

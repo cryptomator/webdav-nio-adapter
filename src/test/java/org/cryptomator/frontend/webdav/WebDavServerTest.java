@@ -7,8 +7,8 @@ public class WebDavServerTest {
 
 	@Test
 	public void testConstructionOfMultipleInstances() {
-		WebDavServer server1 = WebDavServer.create("localhost", 0);
-		WebDavServer server2 = WebDavServer.create("localhost", 0);
+		WebDavServer server1 = WebDavServer.create();
+		WebDavServer server2 = WebDavServer.create();
 		Assert.assertNotSame(server1, server2);
 	}
 

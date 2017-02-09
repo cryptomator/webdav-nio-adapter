@@ -17,10 +17,8 @@ public interface Mounter {
 	Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException;
 
 	public enum MountParam {
-		@Deprecated MOUNT_NAME, //
 		WIN_DRIVE_LETTER, //
-		PREFERRED_GVFS_SCHEME, //
-		UNIQUE_VAULT_ID;
+		PREFERRED_GVFS_SCHEME //
 	}
 
 	/**

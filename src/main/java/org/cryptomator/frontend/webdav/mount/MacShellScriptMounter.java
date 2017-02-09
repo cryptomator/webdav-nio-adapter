@@ -2,14 +2,15 @@ package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.CRC32;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -54,8 +55,7 @@ class MacShellScriptMounter implements MounterStrategy {
 
 	@Override
 	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
-		String vaultId = mountParams.getOrDefault(MountParam.UNIQUE_VAULT_ID, UUID.randomUUID().toString());
-		Path mountPath = VOLUMES_PATH.resolve("Cryptomator_" + vaultId);
+		Path mountPath = VOLUMES_PATH.resolve("Cryptomator_" + Long.toHexString(crc32(uri.toASCIIString())));
 		try {
 			String mountName = StringUtils.substringAfterLast(StringUtils.removeEnd(uri.getPath(), "/"), "/");
 			Files.createDirectory(mountPath);
@@ -75,6 +75,12 @@ class MacShellScriptMounter implements MounterStrategy {
 			}
 			throw new CommandFailedException(e);
 		}
+	}
+
+	private long crc32(String str) {
+		CRC32 crc32 = new CRC32();
+		crc32.update(str.getBytes(StandardCharsets.UTF_8));
+		return crc32.getValue();
 	}
 
 	private static class MountImpl implements Mount {

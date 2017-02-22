@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>0.3.1</version>
+	<version>0.3.2</version>
 	<name>Cryptomator WebDAV-NIO Adapter</name>
 	<description>WebDAV servlets allowing access to NIO-based resources.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -106,6 +106,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.bechte.junit</groupId>
+			<artifactId>junit-hierarchicalcontextrunner</artifactId>
+			<version>4.12.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

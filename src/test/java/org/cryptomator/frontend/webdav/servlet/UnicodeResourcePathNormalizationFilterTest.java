@@ -136,7 +136,8 @@ public class UnicodeResourcePathNormalizationFilterTest {
 		public void testNfdUrlsInMultistatusResponseBody() throws IOException, ServletException {
 			ByteArrayOutputStream nfdBody = new ByteArrayOutputStream();
 			Mockito.doAnswer(invocation -> {
-				nfdBody.write(invocation.getArgumentAt(0, int.class));
+				int b = invocation.getArgument(0);
+				nfdBody.write(b);
 				return null;
 			}).when(out).write(Mockito.anyInt());
 

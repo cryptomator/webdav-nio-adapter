@@ -12,23 +12,15 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 class MacShellScriptMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacShellScriptMounter.class);
 	private static final Path VOLUMES_PATH = Paths.get("/Volumes");
-
-	@Inject
-	MacShellScriptMounter() {
-	}
 
 	@Override
 	public boolean isApplicable() {

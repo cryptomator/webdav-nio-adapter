@@ -203,7 +203,7 @@ class DavFolder extends DavNode {
 	public DavProperty<?> getProperty(DavPropertyName name) {
 		if (PROPERTY_QUOTA_AVAILABLE.equals(name)) {
 			try {
-				long availableBytes = Files.getFileStore(path).getTotalSpace();
+				long availableBytes = Files.getFileStore(path).getUsableSpace();
 				return new DefaultDavProperty<Long>(name, availableBytes);
 			} catch (IOException e) {
 				return null;

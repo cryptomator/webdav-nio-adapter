@@ -148,7 +148,7 @@ public class UnicodeResourcePathNormalizationFilterTest {
 			res.setContentLength(nfcBody.length);
 			res.getOutputStream().write(nfcBody);
 
-			Assert.assertThat(nfdBody.toString("UTF-8"), CoreMatchers.containsString("<href>http://example.com/u%cc%88/</href>"));
+			Assert.assertThat(new String(nfdBody.toByteArray(), UTF_8), CoreMatchers.containsString("<href>http://example.com/u%cc%88/</href>"));
 		}
 
 	}

@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav.servlet;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -141,7 +143,7 @@ public class UnicodeResourcePathNormalizationFilterTest {
 				return null;
 			}).when(out).write(Mockito.anyInt());
 
-			byte[] nfcBody = "<href>http://example.com/%C3%BC/</href>".getBytes();
+			byte[] nfcBody = "<href>http://example.com/%C3%BC/</href>".getBytes(UTF_8);
 			res.setStatus(207);
 			res.setContentLength(nfcBody.length);
 			res.getOutputStream().write(nfcBody);
@@ -155,12 +157,12 @@ public class UnicodeResourcePathNormalizationFilterTest {
 
 		@Test
 		public void testPreservesXmlStructure() throws XMLStreamException {
-			ByteArrayInputStream in = new ByteArrayInputStream("<?xml version=\"1.0\" ?><l:foo xmlns:l=\"LOL\"><l:bar>bar</l:bar><l:href>http://example.com/ascii/</l:href></l:foo>".getBytes());
+			ByteArrayInputStream in = new ByteArrayInputStream("<?xml version=\"1.0\" ?><l:foo xmlns:l=\"LOL\"><l:bar>bar</l:bar><l:href>http://example.com/ascii/</l:href></l:foo>".getBytes(UTF_8));
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try (MultistatusHrefNormalizer transformer = new MultistatusHrefNormalizer(in, out, Form.NFD)) {
 				transformer.transform();
 			}
-			String transformed = out.toString();
+			String transformed = new String(out.toByteArray(), UTF_8);
 			Assert.assertTrue(transformed.startsWith("<?xml"));
 			Assert.assertTrue(transformed.contains("<l:foo xmlns:l=\"LOL\">"));
 			Assert.assertTrue(transformed.contains("<l:bar>bar</l:bar>"));
@@ -170,24 +172,24 @@ public class UnicodeResourcePathNormalizationFilterTest {
 
 		@Test
 		public void testNfcToNfd() throws XMLStreamException {
-			ByteArrayInputStream in = new ByteArrayInputStream("<obj><text>\u00fc</text><href>http://example.com/%C3%BC/</href></obj>".getBytes());
+			ByteArrayInputStream in = new ByteArrayInputStream("<obj><text>\u00fc</text><href>http://example.com/%C3%BC/</href></obj>".getBytes(UTF_8));
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try (MultistatusHrefNormalizer transformer = new MultistatusHrefNormalizer(in, out, Form.NFD)) {
 				transformer.transform();
 			}
-			String transformed = out.toString();
+			String transformed = new String(out.toByteArray(), UTF_8);
 			Assert.assertTrue(transformed.contains("<text>\u00fc</text>"));
 			Assert.assertTrue(transformed.contains("<href>http://example.com/u%cc%88/</href>"));
 		}
 
 		@Test
 		public void testNfdToNfc() throws XMLStreamException {
-			ByteArrayInputStream in = new ByteArrayInputStream("<obj><text>u\u0308</text><href>http://example.com/u%CC%88/</href></obj>".getBytes());
+			ByteArrayInputStream in = new ByteArrayInputStream("<obj><text>u\u0308</text><href>http://example.com/u%CC%88/</href></obj>".getBytes(UTF_8));
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try (MultistatusHrefNormalizer transformer = new MultistatusHrefNormalizer(in, out, Form.NFC)) {
 				transformer.transform();
 			}
-			String transformed = out.toString();
+			String transformed = new String(out.toByteArray(), UTF_8);
 			Assert.assertTrue(transformed.contains("<text>u\u0308</text>"));
 			Assert.assertTrue(transformed.contains("<href>http://example.com/%c3%bc/</href>"));
 		}

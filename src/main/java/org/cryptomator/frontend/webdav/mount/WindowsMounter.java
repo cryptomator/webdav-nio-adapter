@@ -12,25 +12,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 class WindowsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String AUTOASSIGN_DRRIVE_LETTER = "*";
-
-	@Inject
-	WindowsMounter() {
-	}
 
 	@Override
 	public boolean isApplicable() {

@@ -203,7 +203,7 @@ class DavFolder extends DavNode {
 	public DavProperty<?> getProperty(DavPropertyName name) {
 		if (PROPERTY_QUOTA_AVAILABLE.equals(name)) {
 			try {
-				long availableBytes = Files.getFileStore(path).getTotalSpace();
+				long availableBytes = Files.getFileStore(path).getUsableSpace();
 				return new DefaultDavProperty<Long>(name, availableBytes);
 			} catch (IOException e) {
 				return null;
@@ -211,9 +211,9 @@ class DavFolder extends DavNode {
 		} else if (PROPERTY_QUOTA_USED.equals(name)) {
 			try {
 				long availableBytes = Files.getFileStore(path).getTotalSpace();
-				long usedBytes = Files.getFileStore(path).getUsableSpace();
-				long freeBytes = availableBytes - usedBytes;
-				return new DefaultDavProperty<Long>(name, freeBytes);
+				long freeBytes = Files.getFileStore(path).getUsableSpace();
+				long usedBytes = availableBytes - freeBytes;
+				return new DefaultDavProperty<Long>(name, usedBytes);
 			} catch (IOException e) {
 				return null;
 			}

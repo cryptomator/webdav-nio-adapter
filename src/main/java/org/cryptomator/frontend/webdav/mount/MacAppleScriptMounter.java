@@ -6,22 +6,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 class MacAppleScriptMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacAppleScriptMounter.class);
-
-	@Inject
-	MacAppleScriptMounter() {
-	}
 
 	@Override
 	public boolean isApplicable() {

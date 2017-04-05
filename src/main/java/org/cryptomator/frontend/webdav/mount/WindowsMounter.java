@@ -49,8 +49,8 @@ class WindowsMounter implements MounterStrategy {
 		try {
 			tuneProxyConfig(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
-
-			String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
+			String sslHint = "https".equalsIgnoreCase(uri.getScheme()) ? "@SSL" : "";
+			String uncPath = "\\\\" + uri.getHost() + sslHint + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
 			ProcessBuilder mount = new ProcessBuilder("net", "use", preferredDriveLetter, uncPath);
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);

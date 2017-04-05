@@ -30,10 +30,9 @@ public class MirroringTest {
 			if (Files.isDirectory(p)) {
 
 				// self-sigend:
-				// openssl genrsa -aes128 -out jetty.key
-				// openssl req -new -x509 -newkey rsa:2048 -sha256 -key jetty.key -out jetty.crt
-				// openssl pkcs12 -inkey jetty.key -in jetty.crt -export -out jetty.pkcs12
-				WebDavServer server = WebDavServer.create("/Users/sebastian/Desktop/jetty.pkcs12", "test");
+				// openssl req -x509 -days 365 -newkey rsa:2048 -sha256 -subj "/O=Cryptomator Self-Signed Loopback Certificate/CN=localhost" -nodes -out jetty.crt -keyout jetty.key
+				// openssl pkcs12 -inkey jetty.key -in jetty.crt -export -out jetty.p12 -passout pass:test
+				WebDavServer server = WebDavServer.create("/Users/sebastian/Desktop/jetty.p12", "test");
 				server.bind("localhost", 8080);
 				server.start();
 				WebDavServletController servlet = server.createWebDavServlet(p, "test");

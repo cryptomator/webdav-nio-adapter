@@ -30,7 +30,7 @@ class WindowsMounter implements MounterStrategy {
 	}
 
 	@Override
-	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			final String host;
 			if (uri.getHost().equals("[::1]")) {

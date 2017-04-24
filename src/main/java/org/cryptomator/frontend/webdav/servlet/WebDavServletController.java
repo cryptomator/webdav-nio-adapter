@@ -2,15 +2,14 @@ package org.cryptomator.frontend.webdav.servlet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.mount.Mounter.MountParam;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.ContextPath;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.eclipse.jetty.server.ServerConnector;
@@ -87,7 +86,7 @@ public class WebDavServletController {
 	 * @return A {@link Mount} instance allowing unmounting and revealing the drive.
 	 * @throws CommandFailedException If mounting failed.
 	 */
-	public Mount mount(Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(MountParams mountParams) throws CommandFailedException {
 		if (!contextHandler.isStarted()) {
 			throw new IllegalStateException("Mounting only possible for running servlets.");
 		}

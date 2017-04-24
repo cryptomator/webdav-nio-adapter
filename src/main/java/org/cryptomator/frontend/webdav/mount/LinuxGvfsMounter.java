@@ -3,7 +3,6 @@ package org.cryptomator.frontend.webdav.mount;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -36,7 +35,7 @@ class LinuxGvfsMounter implements MounterStrategy {
 	}
 
 	@Override
-	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			URI schemeCorrectedUri = new URI(mountParams.getOrDefault(MountParam.PREFERRED_GVFS_SCHEME, DEFAULT_GVFS_SCHEME), uri.getSchemeSpecificPart(), null);
 			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "gvfs-mount \"" + schemeCorrectedUri.toASCIIString() + "\"");

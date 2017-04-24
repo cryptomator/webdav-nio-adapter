@@ -1,7 +1,6 @@
 package org.cryptomator.frontend.webdav.mount;
 
 import java.net.URI;
-import java.util.Map;
 
 public interface Mounter {
 
@@ -14,12 +13,7 @@ public interface Mounter {
 	 * @throws CommandFailedException if the mount operation fails
 	 * @throws IllegalArgumentException if mountParams is missing expected options
 	 */
-	Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException;
-
-	public enum MountParam {
-		WIN_DRIVE_LETTER, //
-		PREFERRED_GVFS_SCHEME //
-	}
+	Mount mount(URI uri, MountParams mountParams) throws CommandFailedException;
 
 	/**
 	 * Represents a single mounted volume and allows certain interactions with it.

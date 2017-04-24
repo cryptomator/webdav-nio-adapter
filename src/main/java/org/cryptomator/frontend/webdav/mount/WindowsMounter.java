@@ -12,15 +12,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 class WindowsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
@@ -28,17 +24,13 @@ class WindowsMounter implements MounterStrategy {
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String AUTOASSIGN_DRRIVE_LETTER = "*";
 
-	@Inject
-	WindowsMounter() {
-	}
-
 	@Override
 	public boolean isApplicable() {
 		return SystemUtils.IS_OS_WINDOWS;
 	}
 
 	@Override
-	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			final String host;
 			if (uri.getHost().equals("[::1]")) {
@@ -62,7 +54,7 @@ class WindowsMounter implements MounterStrategy {
 			ProcessBuilder mount = new ProcessBuilder("net", "use", preferredDriveLetter, uncPath);
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
-			ProcessUtil.waitFor(mountProcess, 1, TimeUnit.SECONDS);
+			ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(mountProcess, 0);
 			String driveLetter = AUTOASSIGN_DRRIVE_LETTER.equals(preferredDriveLetter) ? getDriveLetter(stdout) : preferredDriveLetter;
 			LOG.debug("Mounted {} on drive {}", uncPath, driveLetter);
@@ -113,7 +105,7 @@ class WindowsMounter implements MounterStrategy {
 			ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
 			LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
 			Process regAddProcess = regAdd.start();
-			ProcessUtil.waitFor(regAddProcess, 1, TimeUnit.SECONDS);
+			ProcessUtil.waitFor(regAddProcess, 2, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(regAddProcess, 0);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
@@ -135,7 +127,7 @@ class WindowsMounter implements MounterStrategy {
 		public void unmount() throws CommandFailedException {
 			try {
 				Process proc = unmountCommand.start();
-				ProcessUtil.waitFor(proc, 1, TimeUnit.SECONDS);
+				ProcessUtil.waitFor(proc, 2, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(proc, 0);
 			} catch (IOException e) {
 				throw new CommandFailedException(e);
@@ -146,7 +138,7 @@ class WindowsMounter implements MounterStrategy {
 		public void reveal() throws CommandFailedException {
 			try {
 				Process proc = revealCommand.start();
-				ProcessUtil.waitFor(proc, 2, TimeUnit.SECONDS);
+				ProcessUtil.waitFor(proc, 5, TimeUnit.SECONDS);
 			} catch (IOException e) {
 				throw new CommandFailedException(e);
 			}

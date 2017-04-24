@@ -3,25 +3,16 @@ package org.cryptomator.frontend.webdav.mount;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 class MacAppleScriptMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacAppleScriptMounter.class);
-
-	@Inject
-	MacAppleScriptMounter() {
-	}
 
 	@Override
 	public boolean isApplicable() {
@@ -31,7 +22,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 	}
 
 	@Override
-	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);

@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
@@ -46,7 +45,7 @@ class MacShellScriptMounter implements MounterStrategy {
 	}
 
 	@Override
-	public Mount mount(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		Path mountPath = VOLUMES_PATH.resolve("Cryptomator_" + Long.toHexString(crc32(uri.toASCIIString())));
 		try {
 			String mountName = StringUtils.substringAfterLast(StringUtils.removeEnd(uri.getPath(), "/"), "/");

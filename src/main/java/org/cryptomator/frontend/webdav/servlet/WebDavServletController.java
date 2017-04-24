@@ -2,22 +2,19 @@ package org.cryptomator.frontend.webdav.servlet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.mount.Mounter.MountParam;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.ContextPath;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,17 +26,14 @@ public class WebDavServletController {
 	private final ServletContextHandler contextHandler;
 	private final ContextHandlerCollection contextHandlerCollection;
 	private final ServerConnector connector;
-	private boolean useTls;
 	private final String contextPath;
 	private final Mounter mounter;
 
 	@Inject
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, Optional<SslContextFactory> sslContextFactory,
-			@ContextPath String contextPath, Mounter mounter) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, @ContextPath String contextPath, Mounter mounter) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
 		this.connector = connector;
-		this.useTls = sslContextFactory.isPresent();
 		this.contextPath = contextPath;
 		this.mounter = mounter;
 	}
@@ -79,8 +73,7 @@ public class WebDavServletController {
 	 */
 	public URI getServletRootUri() {
 		try {
-			String scheme = useTls ? "https" : "http";
-			return new URI(scheme, null, connector.getHost(), connector.getLocalPort(), contextPath, null, null);
+			return new URI("http", null, connector.getHost(), connector.getLocalPort(), contextPath, null, null);
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
 		}
@@ -93,7 +86,7 @@ public class WebDavServletController {
 	 * @return A {@link Mount} instance allowing unmounting and revealing the drive.
 	 * @throws CommandFailedException If mounting failed.
 	 */
-	public Mount mount(Map<MountParam, String> mountParams) throws CommandFailedException {
+	public Mount mount(MountParams mountParams) throws CommandFailedException {
 		if (!contextHandler.isStarted()) {
 			throw new IllegalStateException("Mounting only possible for running servlets.");
 		}

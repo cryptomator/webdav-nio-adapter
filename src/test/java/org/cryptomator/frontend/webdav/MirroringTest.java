@@ -12,13 +12,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
+import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.mount.Mounter.MountParam;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 
 public class MirroringTest {
@@ -38,10 +36,11 @@ public class MirroringTest {
 				WebDavServletController servlet = server.createWebDavServlet(p, "test");
 				servlet.start();
 
-				Map<MountParam, String> mountOptions = new HashMap<>();
-				mountOptions.put(MountParam.WIN_DRIVE_LETTER, "X:");
-				mountOptions.put(MountParam.PREFERRED_GVFS_SCHEME, "dav");
-				Mount mount = servlet.mount(mountOptions);
+				MountParams mountParams = MountParams.create() //
+						.withWindowsDriveLetter("X:") //
+						.withPreferredGvfsScheme("dav") //
+						.build();
+				Mount mount = servlet.mount(mountParams);
 				mount.reveal();
 
 				System.out.println("Enter anything to stop the server...");

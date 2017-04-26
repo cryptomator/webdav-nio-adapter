@@ -95,10 +95,10 @@ class WindowsMounter implements MounterStrategy {
 				LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
 				Arrays.stream(StringUtils.split(originalOverrides, ';')).forEach(overrides::add);
 			}
-			overrides.removeIf(s -> s.startsWith("localhost:"));
+			overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
 			overrides.add("<local>");
-			overrides.add("localhost");
-			overrides.add("localhost:" + uri.getPort());
+			overrides.add(uri.getHost());
+			overrides.add(uri.getHost() + ":" + uri.getPort());
 
 			// set new value:
 			String adjustedOverrides = StringUtils.join(overrides, ';');
@@ -120,7 +120,7 @@ class WindowsMounter implements MounterStrategy {
 
 		public MountImpl(String driveLetter) {
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
-			this.revealCommand = new ProcessBuilder("explorer.exe", "/select," + driveLetter);
+			this.revealCommand = new ProcessBuilder("explorer.exe", "/root," + driveLetter);
 		}
 
 		@Override

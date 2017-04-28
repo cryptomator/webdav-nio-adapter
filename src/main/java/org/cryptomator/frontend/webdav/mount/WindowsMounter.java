@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -116,17 +117,28 @@ class WindowsMounter implements MounterStrategy {
 	private static class MountImpl implements Mount {
 
 		private final ProcessBuilder unmountCommand;
+		private final ProcessBuilder forcedUnmountCommand;
 		private final ProcessBuilder revealCommand;
 
 		public MountImpl(String driveLetter) {
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
+			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
 			this.revealCommand = new ProcessBuilder("explorer.exe", "/root," + driveLetter);
 		}
 
 		@Override
+		public Optional<UnmountOperation> forced() {
+			return Optional.of(() -> run(forcedUnmountCommand));
+		}
+
+		@Override
 		public void unmount() throws CommandFailedException {
+			run(unmountCommand);
+		}
+
+		private void run(ProcessBuilder command) throws CommandFailedException {
 			try {
-				Process proc = unmountCommand.start();
+				Process proc = command.start();
 				ProcessUtil.waitFor(proc, 2, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(proc, 0);
 			} catch (IOException e) {

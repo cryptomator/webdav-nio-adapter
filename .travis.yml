@@ -22,6 +22,13 @@ cache:
 before_deploy:
 - "if ! gpg --list-secret-keys 34C80F11; then gpg --import 34C80F11.gpg; fi"
 deploy:
+- provider: script # SNAPSHOTS
+  script: mvn clean deploy -DskipTests -Prelease --settings settings.xml
+  skip_cleanup: true
+  on:
+    repo: cryptomator/webdav-nio-adapter
+    branch: develop
+    condition: $TRAVIS_TAG = ''
 - provider: script # RELEASES
   script: mvn clean versions:set -DnewVersion=${TRAVIS_TAG} deploy -DskipTests -Prelease --settings settings.xml
   skip_cleanup: true

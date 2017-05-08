@@ -51,9 +51,9 @@ class MacShellScriptMounter implements MounterStrategy {
 			String mountName = StringUtils.substringAfterLast(StringUtils.removeEnd(uri.getPath(), "/"), "/");
 			Files.createDirectory(mountPath);
 
-			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "mount_webdav -S -v " + mountName + " " + uri.toASCIIString() + " " + mountPath);
+			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "mount_webdav -S -v " + mountName + " \"" + uri.toASCIIString() + "\" \"" + mountPath + "\"");
 			Process mountProcess = mountCmd.start();
-			ProcessUtil.waitFor(mountProcess, 1, TimeUnit.SECONDS);
+			ProcessUtil.waitFor(mountProcess, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(mountProcess, 0);
 			LOG.debug("Mounted {} to {}.", uri.toASCIIString(), mountPath);
 			return new MountImpl(mountPath);

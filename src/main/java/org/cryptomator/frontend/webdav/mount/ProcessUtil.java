@@ -33,19 +33,39 @@ class ProcessUtil {
 	}
 
 	/**
+	 * Starts a new process and invokes {@link #waitFor(Process, long, TimeUnit)}.
+	 * 
+	 * @param processBuilder The process builder used to start the new process
+	 * @param timeout Maximum time to wait
+	 * @param unit Time unit of <code>timeout</code>
+	 * @return The finished process.
+	 * @throws CommandFailedException If an I/O error occurs when starting the process.
+	 * @throws CommandTimeoutException Thrown in case of a timeout
+	 */
+	public static Process startAndWaitFor(ProcessBuilder processBuilder, long timeout, TimeUnit unit) throws CommandFailedException, CommandTimeoutException {
+		try {
+			Process proc = processBuilder.start();
+			waitFor(proc, timeout, unit);
+			return proc;
+		} catch (IOException e) {
+			throw new CommandFailedException(e);
+		}
+	}
+
+	/**
 	 * Waits for the process to terminate or throws an exception if it fails to do so within the given timeout.
 	 * 
 	 * @param proc A started process
 	 * @param timeout Maximum time to wait
 	 * @param unit Time unit of <code>timeout</code>
-	 * @throws CommandFailedException Thrown in case of a timeout
+	 * @throws CommandTimeoutException Thrown in case of a timeout
 	 */
-	public static void waitFor(Process proc, long timeout, TimeUnit unit) throws CommandFailedException {
+	public static void waitFor(Process proc, long timeout, TimeUnit unit) throws CommandTimeoutException {
 		try {
 			boolean finishedInTime = proc.waitFor(timeout, unit);
 			if (!finishedInTime) {
 				proc.destroyForcibly();
-				throw new CommandFailedException("Command timed out.");
+				throw new CommandTimeoutException();
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -54,6 +74,14 @@ class ProcessUtil {
 
 	public static String toString(InputStream in, Charset charset) throws IOException {
 		return CharStreams.toString(new InputStreamReader(in, charset));
+	}
+
+	public static class CommandTimeoutException extends CommandFailedException {
+
+		public CommandTimeoutException() {
+			super("Command timed out.");
+		}
+
 	}
 
 }

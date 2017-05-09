@@ -84,8 +84,7 @@ class WindowsMounter implements MounterStrategy {
 		try {
 			// get existing value for ProxyOverride key from reqistry:
 			ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
-			Process regQueryProcess = regQuery.start();
-			ProcessUtil.waitFor(regQueryProcess, 1, TimeUnit.SECONDS);
+			Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
 			String regQueryResult = ProcessUtil.toString(regQueryProcess.getInputStream(), StandardCharsets.UTF_8);
 
 			// determine new value for ProxyOverride key:
@@ -105,8 +104,7 @@ class WindowsMounter implements MounterStrategy {
 			String adjustedOverrides = StringUtils.join(overrides, ';');
 			ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
 			LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
-			Process regAddProcess = regAdd.start();
-			ProcessUtil.waitFor(regAddProcess, 2, TimeUnit.SECONDS);
+			Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(regAddProcess, 0);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
@@ -137,23 +135,12 @@ class WindowsMounter implements MounterStrategy {
 		}
 
 		private void run(ProcessBuilder command) throws CommandFailedException {
-			try {
-				Process proc = command.start();
-				ProcessUtil.waitFor(proc, 2, TimeUnit.SECONDS);
-				ProcessUtil.assertExitValue(proc, 0);
-			} catch (IOException e) {
-				throw new CommandFailedException(e);
-			}
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 5, TimeUnit.SECONDS), 0);
 		}
 
 		@Override
 		public void reveal() throws CommandFailedException {
-			try {
-				Process proc = revealCommand.start();
-				ProcessUtil.waitFor(proc, 5, TimeUnit.SECONDS);
-			} catch (IOException e) {
-				throw new CommandFailedException(e);
-			}
+			ProcessUtil.startAndWaitFor(revealCommand, 5, TimeUnit.SECONDS);
 		}
 
 	}

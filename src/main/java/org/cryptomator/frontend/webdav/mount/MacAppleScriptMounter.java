@@ -24,11 +24,15 @@ class MacAppleScriptMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
-			ProcessBuilder storeCredentials = new ProcessBuilder("security", "add-internet-password", "-a", "anonymous", "-s", "localhost", "-P", String.valueOf(uri.getPort()), "-r", "http", "-D",
-					"Cryptomator WebDAV Access", "-T", "/System/Library/CoreServices/NetAuthAgent.app/Contents/MacOS/NetAuthSysAgent");
-			Process storeCredentialsProcess = storeCredentials.start();
-			ProcessUtil.waitFor(storeCredentialsProcess, 1, TimeUnit.SECONDS);
-		} catch (CommandFailedException | IOException e) {
+			ProcessBuilder storeCredentials = new ProcessBuilder("security", "add-internet-password", //
+					"-a", "anonymous", //
+					"-s", "localhost", //
+					"-P", String.valueOf(uri.getPort()), //
+					"-r", "http", //
+					"-D", "Cryptomator WebDAV Access", //
+					"-T", "/System/Library/CoreServices/NetAuthAgent.app/Contents/MacOS/NetAuthSysAgent");
+			ProcessUtil.startAndWaitFor(storeCredentials, 5, TimeUnit.SECONDS);
+		} catch (CommandFailedException e) {
 			LOG.warn("Unable to store credentials for WebDAV access: {}", e.getMessage());
 		}
 		try {
@@ -36,16 +40,14 @@ class MacAppleScriptMounter implements MounterStrategy {
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
-			ProcessUtil.waitFor(mountProcess, 1, TimeUnit.SECONDS);
+			ProcessUtil.waitFor(mountProcess, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(mountProcess, 0);
 			String volumeIdentifier = StringUtils.trim(StringUtils.removeStart(stdout, "file "));
 			String waitAppleScript1 = String.format("tell application \"Finder\" to repeat while not (\"%s\" exists)", volumeIdentifier);
 			String waitAppleScript2 = "delay 0.1";
 			String waitAppleScript3 = "end repeat";
 			ProcessBuilder wait = new ProcessBuilder("/usr/bin/osascript", "-e", waitAppleScript1, "-e", waitAppleScript2, "-e", waitAppleScript3);
-			Process waitProcess = wait.start();
-			ProcessUtil.waitFor(waitProcess, 5, TimeUnit.SECONDS);
-			ProcessUtil.assertExitValue(waitProcess, 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(wait, 5, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {}.", uri.toASCIIString());
 			return new MountImpl(volumeIdentifier);
 		} catch (IOException e) {
@@ -69,24 +71,12 @@ class MacAppleScriptMounter implements MounterStrategy {
 
 		@Override
 		public void unmount() throws CommandFailedException {
-			try {
-				Process proc = unmountCommand.start();
-				ProcessUtil.waitFor(proc, 1, TimeUnit.SECONDS);
-				ProcessUtil.assertExitValue(proc, 0);
-			} catch (IOException e) {
-				throw new CommandFailedException(e);
-			}
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 5, TimeUnit.SECONDS), 0);
 		}
 
 		@Override
 		public void reveal() throws CommandFailedException {
-			try {
-				Process proc = revealCommand.start();
-				ProcessUtil.waitFor(proc, 2, TimeUnit.SECONDS);
-				ProcessUtil.assertExitValue(proc, 0);
-			} catch (IOException e) {
-				throw new CommandFailedException(e);
-			}
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 5, TimeUnit.SECONDS), 0);
 		}
 
 	}

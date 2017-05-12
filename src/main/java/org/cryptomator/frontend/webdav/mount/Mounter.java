@@ -1,6 +1,7 @@
 package org.cryptomator.frontend.webdav.mount;
 
 import java.net.URI;
+import java.util.Optional;
 
 public interface Mounter {
 
@@ -18,10 +19,21 @@ public interface Mounter {
 	/**
 	 * Represents a single mounted volume and allows certain interactions with it.
 	 */
-	public interface Mount {
-		void unmount() throws CommandFailedException;
+	public interface Mount extends UnmountOperation {
+
+		default Optional<UnmountOperation> forced() {
+			return Optional.empty();
+		}
 
 		void reveal() throws CommandFailedException;
+
+	}
+
+	@FunctionalInterface
+	public interface UnmountOperation {
+
+		void unmount() throws CommandFailedException;
+
 	}
 
 	public class CommandFailedException extends Exception {

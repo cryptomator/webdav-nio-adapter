@@ -135,7 +135,7 @@ public class WebDavServer {
 	 * @param contextPath The servlet context path, i.e. the path of the root resource.
 	 * @return The controller object for this new servlet
 	 */
-	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) throws ServerLifecycleException {
+	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) {
 		WebDavServletComponent servletComp = servletFactory.create(rootPath, contextPath);
 		return servletComp.servlet();
 	}

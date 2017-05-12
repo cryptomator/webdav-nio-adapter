@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -83,8 +84,7 @@ class WindowsMounter implements MounterStrategy {
 		try {
 			// get existing value for ProxyOverride key from reqistry:
 			ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
-			Process regQueryProcess = regQuery.start();
-			ProcessUtil.waitFor(regQueryProcess, 1, TimeUnit.SECONDS);
+			Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
 			String regQueryResult = ProcessUtil.toString(regQueryProcess.getInputStream(), StandardCharsets.UTF_8);
 
 			// determine new value for ProxyOverride key:
@@ -95,17 +95,16 @@ class WindowsMounter implements MounterStrategy {
 				LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
 				Arrays.stream(StringUtils.split(originalOverrides, ';')).forEach(overrides::add);
 			}
-			overrides.removeIf(s -> s.startsWith("localhost:"));
+			overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
 			overrides.add("<local>");
-			overrides.add("localhost");
-			overrides.add("localhost:" + uri.getPort());
+			overrides.add(uri.getHost());
+			overrides.add(uri.getHost() + ":" + uri.getPort());
 
 			// set new value:
 			String adjustedOverrides = StringUtils.join(overrides, ';');
 			ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
 			LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
-			Process regAddProcess = regAdd.start();
-			ProcessUtil.waitFor(regAddProcess, 2, TimeUnit.SECONDS);
+			Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(regAddProcess, 0);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
@@ -116,32 +115,32 @@ class WindowsMounter implements MounterStrategy {
 	private static class MountImpl implements Mount {
 
 		private final ProcessBuilder unmountCommand;
+		private final ProcessBuilder forcedUnmountCommand;
 		private final ProcessBuilder revealCommand;
 
 		public MountImpl(String driveLetter) {
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
-			this.revealCommand = new ProcessBuilder("explorer.exe", "/select," + driveLetter);
+			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
+			this.revealCommand = new ProcessBuilder("explorer.exe", "/root," + driveLetter);
+		}
+
+		@Override
+		public Optional<UnmountOperation> forced() {
+			return Optional.of(() -> run(forcedUnmountCommand));
 		}
 
 		@Override
 		public void unmount() throws CommandFailedException {
-			try {
-				Process proc = unmountCommand.start();
-				ProcessUtil.waitFor(proc, 2, TimeUnit.SECONDS);
-				ProcessUtil.assertExitValue(proc, 0);
-			} catch (IOException e) {
-				throw new CommandFailedException(e);
-			}
+			run(unmountCommand);
+		}
+
+		private void run(ProcessBuilder command) throws CommandFailedException {
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 5, TimeUnit.SECONDS), 0);
 		}
 
 		@Override
 		public void reveal() throws CommandFailedException {
-			try {
-				Process proc = revealCommand.start();
-				ProcessUtil.waitFor(proc, 5, TimeUnit.SECONDS);
-			} catch (IOException e) {
-				throw new CommandFailedException(e);
-			}
+			ProcessUtil.startAndWaitFor(revealCommand, 5, TimeUnit.SECONDS);
 		}
 
 	}

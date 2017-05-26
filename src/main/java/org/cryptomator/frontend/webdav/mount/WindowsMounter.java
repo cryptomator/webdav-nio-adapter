@@ -52,7 +52,7 @@ class WindowsMounter implements MounterStrategy {
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
 
 			String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
-			ProcessBuilder mount = new ProcessBuilder("net", "use", preferredDriveLetter, uncPath);
+			ProcessBuilder mount = new ProcessBuilder("net", "use", preferredDriveLetter, uncPath, "/persistent:no");
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
 			ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);

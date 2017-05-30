@@ -24,11 +24,14 @@ class MacAppleScriptMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
+			String secProtocolType = "https".equals(uri.getScheme()) //
+					? "htps" // (sic!) https://developer.apple.com/reference/security/secprotocoltype/ksecprotocoltypehttps
+					: "http"; // https://developer.apple.com/reference/security/secprotocoltype/ksecprotocoltypehttp
 			ProcessBuilder storeCredentials = new ProcessBuilder("security", "add-internet-password", //
 					"-a", "anonymous", //
 					"-s", "localhost", //
 					"-P", String.valueOf(uri.getPort()), //
-					"-r", "http", //
+					"-r", secProtocolType, //
 					"-D", "Cryptomator WebDAV Access", //
 					"-T", "/System/Library/CoreServices/NetAuthAgent.app/Contents/MacOS/NetAuthSysAgent");
 			ProcessUtil.startAndWaitFor(storeCredentials, 5, TimeUnit.SECONDS);

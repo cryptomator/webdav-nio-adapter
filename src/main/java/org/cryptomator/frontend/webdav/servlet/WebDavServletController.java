@@ -62,6 +62,8 @@ public class WebDavServletController {
 	public void stop() throws ServerLifecycleException {
 		try {
 			contextHandler.stop();
+			contextHandlerCollection.removeHandler(contextHandler);
+			contextHandlerCollection.mapContexts();
 			LOG.info("WebDavServlet stopped: " + contextPath);
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Servlet couldn't be stopped", e);

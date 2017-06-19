@@ -16,10 +16,10 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<dagger.version>2.10</dagger.version>
+		<dagger.version>2.11</dagger.version>
 		<jackrabbit.version>2.15.2</jackrabbit.version>
-		<jetty.version>9.4.5.v20170502</jetty.version>
-		<guava.version>21.0</guava.version>
+		<jetty.version>9.4.6.v20170531</jetty.version>
+		<guava.version>22.0</guava.version>
 		<commons.lang.version>3.5</commons.lang.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

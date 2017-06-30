@@ -1,8 +1,10 @@
 package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 class WindowsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
+	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String AUTOASSIGN_DRRIVE_LETTER = "*";
@@ -33,16 +36,20 @@ class WindowsMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
-			final String host;
-			if (uri.getHost().equals("[::1]")) {
-				host = "0--1.ipv6-literal.net";
-			} else {
-				host = uri.getHost();
-			}
+			String host = hasLocalhostAlias() ? LOCALHOST_ALIAS : uri.getHost();
 			URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), host, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
 			return mountInternal(adjustedUri, mountParams);
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Unable to reconstruct URI from given URI", e);
+		}
+	}
+	
+	private boolean hasLocalhostAlias() {
+		try {
+			InetAddress alias = InetAddress.getByName(LOCALHOST_ALIAS);
+			return alias.getHostAddress().equals("127.0.0.1");
+		} catch (UnknownHostException e) {
+			return false;
 		}
 	}
 

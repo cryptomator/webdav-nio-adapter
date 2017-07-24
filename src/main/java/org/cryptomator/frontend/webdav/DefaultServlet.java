@@ -25,6 +25,7 @@ import org.cryptomator.frontend.webdav.WebDavServerModule.ContextPaths;
 @Singleton
 class DefaultServlet extends HttpServlet {
 
+	private static final String METHOD_PROPFIND = "PROPFIND";
 	private static final int TARPIT_DELAY_MS = 5000;
 	private final Collection<String> contextPaths;
 
@@ -37,23 +38,49 @@ class DefaultServlet extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		if (!isRequestedResourcePathPartOfValidContextPath(req.getRequestURI())) {
 			try {
-				resp.addHeader("X-Tarpit-Delayed", TARPIT_DELAY_MS + "ms");
 				Thread.sleep(TARPIT_DELAY_MS);
+				resp.addHeader("X-Tarpit-Delayed", TARPIT_DELAY_MS + "ms");
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			} catch (InterruptedException e) {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Thread interrupted.");
 				Thread.currentThread().interrupt();
-				return;
 			}
+			return;
 		}
-		super.service(req, resp);
+
+		switch (req.getMethod()) {
+		case METHOD_PROPFIND:
+			doPropfind(req, resp);
+			break;
+		default:
+			super.service(req, resp);
+			break;
+		}
 	}
 
 	@Override
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.addHeader("DAV", "1, 2");
 		resp.addHeader("MS-Author-Via", "DAV");
-		resp.addHeader("Allow", "OPTIONS, GET, HEAD");
+		resp.addHeader("Allow", "OPTIONS, PROPFIND, GET, HEAD");
 		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+	}
+
+	protected void doPropfind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		resp.getWriter()
+				.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" //
+						+ "<D:multistatus xmlns:D=\"DAV:\">\n" //
+						+ "<D:response>\n" //
+						+ "  <D:href>" + req.getRequestURI() + "</D:href>\n" //
+						+ "  <D:propstat>\n" //
+						+ "    <D:prop>\n" //
+						+ "      <D:iscollection>1</D:iscollection>\n" //
+						+ "      <D:resourcetype><D:collection/></D:resourcetype>\n" //
+						+ "    </D:prop>\n" //
+						+ "  </D:propstat>\n" //
+						+ "</D:response>\n" //
+						+ "</D:multistatus>");
+		resp.getWriter().flush();
 	}
 
 	private boolean isRequestedResourcePathPartOfValidContextPath(String requestedResourcePath) {

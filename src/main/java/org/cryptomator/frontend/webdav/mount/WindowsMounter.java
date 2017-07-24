@@ -43,7 +43,7 @@ class WindowsMounter implements MounterStrategy {
 			throw new IllegalArgumentException("Unable to reconstruct URI from given URI", e);
 		}
 	}
-	
+
 	private boolean hasLocalhostAlias() {
 		try {
 			InetAddress alias = InetAddress.getByName(LOCALHOST_ALIAS);
@@ -55,7 +55,7 @@ class WindowsMounter implements MounterStrategy {
 
 	private Mount mountInternal(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
 		try {
-			tuneProxyConfig(uri);
+			tuneProxyConfigSilently(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
 
 			String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
@@ -78,6 +78,14 @@ class WindowsMounter implements MounterStrategy {
 			return matcher.group(1);
 		} else {
 			throw new CommandFailedException("Failed to get a drive letter from net use output.");
+		}
+	}
+
+	private void tuneProxyConfigSilently(URI uri) {
+		try {
+			tuneProxyConfig(uri);
+		} catch (CommandFailedException e) {
+			LOG.warn("Tuning proxy config failed.", e.getMessage());
 		}
 	}
 

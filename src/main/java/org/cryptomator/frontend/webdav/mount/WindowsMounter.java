@@ -6,7 +6,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -15,14 +14,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 class WindowsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
+	private static final boolean IS_OS_WINDOWS = System.getProperty("os.name").contains("Windows");
 	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
@@ -30,7 +31,7 @@ class WindowsMounter implements MounterStrategy {
 
 	@Override
 	public boolean isApplicable() {
-		return SystemUtils.IS_OS_WINDOWS;
+		return IS_OS_WINDOWS;
 	}
 
 	@Override
@@ -108,7 +109,7 @@ class WindowsMounter implements MounterStrategy {
 			if (regQueryProcess.exitValue() == 0 && matcher.find()) {
 				String originalOverrides = matcher.group(1);
 				LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
-				Arrays.stream(StringUtils.split(originalOverrides, ';')).forEach(overrides::add);
+				Splitter.on(';').split(originalOverrides).forEach(overrides::add);
 			}
 			overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
 			overrides.add("<local>");
@@ -116,7 +117,7 @@ class WindowsMounter implements MounterStrategy {
 			overrides.add(uri.getHost() + ":" + uri.getPort());
 
 			// set new value:
-			String adjustedOverrides = StringUtils.join(overrides, ';');
+			String adjustedOverrides = Joiner.on(';').join(overrides);
 			ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
 			LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
 			Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);

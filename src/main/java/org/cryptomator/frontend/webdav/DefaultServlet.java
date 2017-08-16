@@ -10,7 +10,6 @@ package org.cryptomator.frontend.webdav;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,8 +18,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.frontend.webdav.WebDavServerModule.ContextPaths;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 
 @Singleton
 class DefaultServlet extends HttpServlet {
@@ -88,8 +89,8 @@ class DefaultServlet extends HttpServlet {
 	}
 
 	private boolean isParentOrSamePath(String path, String potentialParent) {
-		String[] pathComponents = StringUtils.split(Objects.requireNonNull(path), '/');
-		String[] parentPathComponents = StringUtils.split(Objects.requireNonNull(potentialParent), '/');
+		String[] pathComponents = Iterables.toArray(Splitter.on('/').omitEmptyStrings().split(path), String.class);
+		String[] parentPathComponents = Iterables.toArray(Splitter.on('/').omitEmptyStrings().split(potentialParent), String.class);
 		if (pathComponents.length < parentPathComponents.length) {
 			return false; // parent can not be parent of path, if it is longer than path.
 		}

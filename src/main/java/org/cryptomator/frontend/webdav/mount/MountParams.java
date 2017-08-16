@@ -1,7 +1,5 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import static org.apache.commons.lang3.StringUtils.appendIfMissing;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +25,7 @@ public class MountParams extends HashMap<MountParam, String> {
 		}
 
 		public MountParamsBuilder withWindowsDriveLetter(String value) {
-			return with(MountParam.WIN_DRIVE_LETTER, appendIfMissing(value, ":"));
+			return with(MountParam.WIN_DRIVE_LETTER, value.endsWith(":") ? value : value + ":");
 		}
 
 		public MountParamsBuilder withPreferredGvfsScheme(String value) {

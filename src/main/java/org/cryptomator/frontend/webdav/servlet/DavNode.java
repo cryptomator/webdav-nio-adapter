@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -44,6 +43,9 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.PropEntry;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 
 abstract class DavNode implements DavResource {
 
@@ -86,8 +88,7 @@ abstract class DavNode implements DavResource {
 
 	@Override
 	public String getDisplayName() {
-		String[] pathElements = StringUtils.split(getResourcePath(), '/');
-		return pathElements[pathElements.length - 1];
+		return Iterables.getLast(Splitter.on('/').omitEmptyStrings().split(getResourcePath()));
 	}
 
 	@Override

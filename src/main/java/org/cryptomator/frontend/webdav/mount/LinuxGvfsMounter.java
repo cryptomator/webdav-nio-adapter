@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,16 +11,17 @@ class LinuxGvfsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LinuxGvfsMounter.class);
 	private static final String DEFAULT_GVFS_SCHEME = "dav";
+	private static final boolean IS_OS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
 
 	@Override
 	public boolean isApplicable() {
-		if (!SystemUtils.IS_OS_LINUX) {
+		if (!IS_OS_LINUX) {
 			// fail fast (non-blocking)
 			return false;
 		}
 
 		// check if gvfs is installed:
-		assert SystemUtils.IS_OS_LINUX;
+		assert IS_OS_LINUX;
 		try {
 			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("which", "gvfs-mount", "xdg-open");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);

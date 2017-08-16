@@ -21,11 +21,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Blocks all post requests.
  */
 public class PostRequestBlockingFilter implements HttpFilter {
 
+	private static final Logger LOG = LoggerFactory.getLogger(PostRequestBlockingFilter.class);
 	private static final String POST_METHOD = "POST";
 
 	@Override
@@ -36,6 +40,7 @@ public class PostRequestBlockingFilter implements HttpFilter {
 	@Override
 	public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 		if (isPost(request)) {
+			LOG.warn("Blocked POST request to {}", request.getRequestURI());
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else {
 			chain.doFilter(request, new FilteredResponse(response));

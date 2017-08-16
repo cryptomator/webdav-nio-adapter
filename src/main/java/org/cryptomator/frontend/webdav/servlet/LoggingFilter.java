@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoggingFilter implements HttpFilter {
 
-	private final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
 	private final AtomicLong REQUEST_ID_GEN = new AtomicLong();
 
 	@Override

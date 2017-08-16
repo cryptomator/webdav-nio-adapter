@@ -5,9 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav.servlet;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.List;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 
 /**
  * Parsed HTTP range header field (<a href="https://tools.ietf.org/html/rfc7233">RFC 7233</a>)<br/>
@@ -28,48 +29,50 @@ class ByteRange {
 	private final Long firstByte;
 	private final Long lastByte;
 
+	private ByteRange(Long firstByte, Long lastByte) throws MalformedByteRangeException {
+		if (firstByte == null && lastByte == null || //
+				firstByte != null && lastByte != null && firstByte > lastByte) {
+			throw new MalformedByteRangeException();
+		}
+		this.firstByte = firstByte;
+		this.lastByte = lastByte;
+	}
+
 	/**
 	 * @param headerValue The raw HTTP header value (i.e. without the key, e.g. <code>bytes=100-200</code>)
 	 * @throws UnsupportedRangeException thrown if the range is not supported by this implementation (range header should be ignored)
 	 * @throws MalformedByteRangeException thrown if the range is syntactically malformed (client should be informed about a bad request)
 	 */
-	public ByteRange(String headerValue) throws UnsupportedRangeException, MalformedByteRangeException {
+	public static ByteRange parse(String headerValue) throws UnsupportedRangeException, MalformedByteRangeException {
 		if (!headerValue.startsWith(RANGE_BYTE_PREFIX)) {
 			throw new UnsupportedRangeException();
 		}
 		final String byteRangeStr = getSingleByteRange(headerValue);
-		final Pair<Long, Long> range = getPositions(byteRangeStr);
-		this.firstByte = range.getLeft();
-		this.lastByte = range.getRight();
-
-		if (firstByte == null && lastByte == null || //
-				firstByte != null && lastByte != null && firstByte > lastByte) {
-			throw new MalformedByteRangeException();
-		}
+		return getPositions(byteRangeStr);
 	}
 
 	private static String getSingleByteRange(String headerValue) throws UnsupportedRangeException, MalformedByteRangeException {
-		final String byteRangeSet = StringUtils.removeStartIgnoreCase(headerValue, RANGE_BYTE_PREFIX);
-		if (StringUtils.isBlank(byteRangeSet)) {
-			throw new MalformedByteRangeException();
+		final String byteRangeSet = headerValue.substring(RANGE_BYTE_PREFIX.length());
+		if (CharMatcher.whitespace().matchesAllOf(byteRangeSet)) {
+			throw new MalformedByteRangeException(); // empty string
 		}
-		final String[] byteRanges = StringUtils.split(byteRangeSet, RANGE_SET_SEP);
-		if (byteRanges.length != 1) {
-			throw new UnsupportedRangeException();
+		List<String> byteRanges = Splitter.on(RANGE_SET_SEP).omitEmptyStrings().splitToList(byteRangeSet);
+		if (byteRanges.size() == 1) {
+			return byteRanges.get(0);
 		} else {
-			return byteRanges[0];
+			throw new UnsupportedRangeException(); // only a single range is expected
 		}
 	}
 
-	private static Pair<Long, Long> getPositions(String byteRangeStr) throws MalformedByteRangeException {
-		final String[] bytePos = StringUtils.splitPreserveAllTokens(byteRangeStr, RANGE_SEP);
-		if (bytePos.length != 2) {
+	private static ByteRange getPositions(String byteRangeStr) throws MalformedByteRangeException {
+		final List<String> bytePos = Splitter.on(RANGE_SEP).splitToList(byteRangeStr);
+		if (bytePos.size() != 2) {
 			throw new MalformedByteRangeException();
 		}
 		try {
-			Long left = bytePos[0].isEmpty() ? null : Long.valueOf(bytePos[0]);
-			Long right = bytePos[1].isEmpty() ? null : Long.valueOf(bytePos[1]);
-			return new ImmutablePair<>(left, right);
+			Long first = bytePos.get(0).isEmpty() ? null : Long.valueOf(bytePos.get(0));
+			Long last = bytePos.get(1).isEmpty() ? null : Long.valueOf(bytePos.get(1));
+			return new ByteRange(first, last);
 		} catch (NumberFormatException e) {
 			throw new MalformedByteRangeException();
 		}

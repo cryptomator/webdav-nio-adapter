@@ -15,9 +15,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
@@ -63,22 +65,25 @@ class WebDavServerModule {
 
 	@Provides
 	@Singleton
-	ThreadPool provideServerThreadPool() {
+	ExecutorService provideExecutorService() {
+		// set core pool size = MAX_THREADS and allow coreThreadTimeOut to enforce spawning threads till the maximum even if the queue is not full
 		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
-		/*
-		 * set core pool size = MAX_THREADS and allow coreThreadTimeOut
-		 * to enforce spawning threads till the maximum even if the
-		 * queue is not full
-		 */
-		ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
+		AtomicInteger threadNum = new AtomicInteger(1);
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue, r -> {
+			Thread t = new Thread(r, String.format("Server thread %03d", threadNum.getAndIncrement()));
+			t.setDaemon(true);
+			return t;
+		});
 		executor.allowCoreThreadTimeOut(true);
-		return new ExecutorThreadPool(executor);
+		return executor;
 	}
 
 	@Provides
 	@Singleton
-	Server provideServer(ThreadPool threadPool, ContextHandlerCollection servletCollection) {
+	Server provideServer(ExecutorService executor, ContextHandlerCollection servletCollection) {
+		ThreadPool threadPool = new ExecutorThreadPool(executor);
 		Server server = new Server(threadPool);
+		server.unmanage(threadPool); // prevent threadpool from being shutdown when stopping the server
 		server.setHandler(servletCollection);
 		return server;
 	}

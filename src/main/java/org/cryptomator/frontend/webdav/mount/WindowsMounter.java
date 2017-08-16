@@ -2,53 +2,37 @@ package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 class WindowsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
+	private static final boolean IS_OS_WINDOWS = System.getProperty("os.name").contains("Windows");
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String AUTOASSIGN_DRRIVE_LETTER = "*";
 
 	@Override
 	public boolean isApplicable() {
-		return SystemUtils.IS_OS_WINDOWS;
+		return IS_OS_WINDOWS;
 	}
 
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
-			final String host;
-			if (uri.getHost().equals("[::1]")) {
-				host = "0--1.ipv6-literal.net";
-			} else {
-				host = uri.getHost();
-			}
-			URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), host, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
-			return mountInternal(adjustedUri, mountParams);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Unable to reconstruct URI from given URI", e);
-		}
-	}
-
-	private Mount mountInternal(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
-		try {
-			tuneProxyConfig(uri);
+			tuneProxyConfigSilently(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
 			String sslHint = "https".equalsIgnoreCase(uri.getScheme()) ? "@SSL" : "";
 			String uncPath = "\\\\" + uri.getHost() + sslHint + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
@@ -74,6 +58,14 @@ class WindowsMounter implements MounterStrategy {
 		}
 	}
 
+	private void tuneProxyConfigSilently(URI uri) {
+		try {
+			tuneProxyConfig(uri);
+		} catch (CommandFailedException e) {
+			LOG.warn("Tuning proxy config failed.", e.getMessage());
+		}
+	}
+
 	/**
 	 * @param uri The URI for which to tune the registry settings
 	 * @throws CommandFailedException If registry access fails
@@ -93,7 +85,7 @@ class WindowsMounter implements MounterStrategy {
 			if (regQueryProcess.exitValue() == 0 && matcher.find()) {
 				String originalOverrides = matcher.group(1);
 				LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
-				Arrays.stream(StringUtils.split(originalOverrides, ';')).forEach(overrides::add);
+				Splitter.on(';').split(originalOverrides).forEach(overrides::add);
 			}
 			overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
 			overrides.add("<local>");
@@ -101,7 +93,7 @@ class WindowsMounter implements MounterStrategy {
 			overrides.add(uri.getHost() + ":" + uri.getPort());
 
 			// set new value:
-			String adjustedOverrides = StringUtils.join(overrides, ';');
+			String adjustedOverrides = Joiner.on(';').join(overrides);
 			ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
 			LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
 			Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);

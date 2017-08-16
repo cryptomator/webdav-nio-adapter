@@ -9,11 +9,11 @@
 package org.cryptomator.frontend.webdav.servlet;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 
 @PerServlet
@@ -168,9 +169,10 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	private boolean hasCorrectLockTokens(DavSession session, DavResource resource) {
 		boolean access = false;
-		final String[] providedLockTokens = session.getLockTokens();
+
+		final Set<String> providedLockTokens = ImmutableSet.copyOf(session.getLockTokens());
 		for (ActiveLock lock : resource.getLocks()) {
-			access |= ArrayUtils.contains(providedLockTokens, lock.getToken());
+			access |= providedLockTokens.contains(lock.getToken());
 		}
 		return access;
 	}

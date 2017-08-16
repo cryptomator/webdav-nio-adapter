@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavMethods;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -35,6 +34,8 @@ import org.cryptomator.frontend.webdav.servlet.ByteRange.UnsupportedRangeExcepti
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.RootPath;
 import org.eclipse.jetty.http.HttpHeader;
+
+import com.google.common.collect.ImmutableSet;
 
 @PerServlet
 class DavResourceFactoryImpl implements DavResourceFactory {
@@ -87,7 +88,7 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 
 	private DavResource createDestinationResource(DavLocatorImpl locator, DavServletRequest request, DavServletResponse response) throws DavException {
 		assert locator.equals(request.getDestinationLocator());
-		assert ArrayUtils.contains(new String[] {DavMethods.METHOD_MOVE, DavMethods.METHOD_COPY}, request.getMethod());
+		assert ImmutableSet.of(DavMethods.METHOD_MOVE, DavMethods.METHOD_COPY).contains(request.getMethod());
 		Path srcP = rootPath.resolve(request.getRequestLocator().getResourcePath());
 		Path dstP = rootPath.resolve(locator.getResourcePath());
 		Optional<BasicFileAttributes> srcAttr = readBasicFileAttributes(srcP);
@@ -158,7 +159,7 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		try {
 			// 206 for ranged resources:
-			final ByteRange byteRange = new ByteRange(rangeHeader);
+			final ByteRange byteRange = ByteRange.parse(rangeHeader);
 			response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
 			return new DavFileWithRange(this, lockManager, locator, path, attr, session, byteRange);
 		} catch (UnsupportedRangeException ex) {

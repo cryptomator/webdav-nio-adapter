@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -33,11 +34,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.util.EncodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Makes sure, all resource paths containing special unicode characters are composed of characters in {@link Form#NFC Normalization Form C}.
@@ -48,7 +50,7 @@ public class UnicodeResourcePathNormalizationFilter implements HttpFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(UnicodeResourcePathNormalizationFilter.class);
 	private static final String PROPFIND_METHOD = "PROPFIND";
 	private static final String USER_AGENT_HEADER = "User-Agent";
-	private static final String[] USER_AGENTS_EXPECTING_NFD = {"WebDAVFS"};
+	private static final Set<String> USER_AGENTS_EXPECTING_NFD = ImmutableSet.of("WebDAVFS");
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -70,7 +72,7 @@ public class UnicodeResourcePathNormalizationFilter implements HttpFilter {
 
 	private boolean isUserAgentExpectingNfdResponses(HttpServletRequest request) {
 		String userAgent = request.getHeader(USER_AGENT_HEADER);
-		return StringUtils.containsAny(userAgent, USER_AGENTS_EXPECTING_NFD);
+		return USER_AGENTS_EXPECTING_NFD.contains(userAgent);
 	}
 
 	@Override

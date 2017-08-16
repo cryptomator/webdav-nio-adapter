@@ -10,9 +10,10 @@ package org.cryptomator.frontend.webdav.servlet;
 
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.util.EncodeUtil;
+
+import com.google.common.base.CharMatcher;
 
 class DavLocatorImpl implements DavResourceLocator {
 
@@ -36,7 +37,7 @@ class DavLocatorImpl implements DavResourceLocator {
 		}
 		this.factory = Objects.requireNonNull(factory);
 		this.prefix = prefix;
-		this.resourcePath = StringUtils.removeEnd(resourcePath, "/");
+		this.resourcePath = CharMatcher.is('/').trimTrailingFrom(resourcePath);
 	}
 
 	public DavLocatorImpl resolveChild(String childName) {
@@ -53,7 +54,7 @@ class DavLocatorImpl implements DavResourceLocator {
 			return null;
 		} else if (resourcePath.contains("/")) {
 			// parent is a directory:
-			String parentResourcePath = StringUtils.substringBeforeLast(resourcePath, "/");
+			String parentResourcePath = resourcePath.substring(0, CharMatcher.is('/').lastIndexIn(resourcePath));
 			return factory.createResourceLocator(prefix, null, parentResourcePath);
 		} else {
 			// parent is root:
@@ -97,10 +98,11 @@ class DavLocatorImpl implements DavResourceLocator {
 
 	@Override
 	public String getHref(boolean isCollection) {
+		String href = getHref();
 		if (isCollection) {
-			return StringUtils.appendIfMissing(getHref(), "/");
+			return href.endsWith("/") ? href : href + "/";
 		} else {
-			return StringUtils.removeEnd(getHref(), "/");
+			return CharMatcher.is('/').trimTrailingFrom(href);
 		}
 	}
 
@@ -110,7 +112,7 @@ class DavLocatorImpl implements DavResourceLocator {
 
 	@Override
 	public boolean isRootLocation() {
-		return StringUtils.isEmpty(resourcePath);
+		return resourcePath.isEmpty();
 	}
 
 	@Override

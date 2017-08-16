@@ -10,7 +10,6 @@ package org.cryptomator.frontend.webdav.servlet;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.util.EncodeUtil;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
@@ -24,8 +23,9 @@ class DavLocatorFactoryImpl implements DavLocatorFactory {
 
 	@Override
 	public DavLocatorImpl createResourceLocator(String prefix, String href) {
-		final String canonicalPrefix = StringUtils.appendIfMissing(prefix, "/");
-		final String hrefWithoutPrefix = StringUtils.removeStart(StringUtils.removeStart(href, "/"), canonicalPrefix);
+		final String canonicalPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		final String canonicalHref = href.startsWith("/") ? href.substring(1) : href;
+		final String hrefWithoutPrefix = canonicalHref.startsWith(canonicalPrefix) ? canonicalHref.substring(canonicalPrefix.length()) : canonicalHref;
 		final String resourcePath = EncodeUtil.unescape(hrefWithoutPrefix);
 		return createResourceLocator(canonicalPrefix, null, resourcePath);
 	}

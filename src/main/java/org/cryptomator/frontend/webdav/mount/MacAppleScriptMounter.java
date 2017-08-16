@@ -5,20 +5,26 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 
 class MacAppleScriptMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacAppleScriptMounter.class);
+	private static final boolean IS_OS_MACOSX = System.getProperty("os.name").contains("Mac OS X");
+	private static final String[] OS_VERSION = Iterables.toArray(Splitter.on('.').splitToList(System.getProperty("os.version")), String.class);
 
 	@Override
 	public boolean isApplicable() {
-		return SystemUtils.IS_OS_MAC_OSX && // since macOS 10.10+
-				!SystemUtils.IS_OS_MAC_OSX_MAVERICKS && // 10.9
-				!SystemUtils.IS_OS_MAC_OSX_MOUNTAIN_LION; // 10.8; older version not supported by Java 8
+		try {
+			return IS_OS_MACOSX && OS_VERSION.length >= 2 && Integer.parseInt(OS_VERSION[1]) >= 10; // since macOS 10.10+
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -42,7 +48,11 @@ class MacAppleScriptMounter implements MounterStrategy {
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
 			ProcessUtil.waitFor(mountProcess, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(mountProcess, 0);
-			String volumeIdentifier = StringUtils.trim(StringUtils.removeStart(stdout, "file "));
+			if (!stdout.startsWith("file ")) {
+				throw new CommandFailedException("Unexpected mount result: " + stdout);
+			}
+			assert stdout.startsWith("file ");
+			String volumeIdentifier = CharMatcher.whitespace().trimFrom(stdout.substring(5)); // remove preceeding "file "
 			String waitAppleScript1 = String.format("tell application \"Finder\" to repeat while not (\"%s\" exists)", volumeIdentifier);
 			String waitAppleScript2 = "delay 0.1";
 			String waitAppleScript3 = "end repeat";

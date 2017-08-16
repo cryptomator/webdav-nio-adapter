@@ -18,9 +18,10 @@ import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.servlet.DispatcherType;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
+import com.google.common.base.CharMatcher;
 
 import dagger.Module;
 import dagger.Provides;
@@ -34,8 +35,9 @@ public class WebDavServletModule {
 	private final String contextPath;
 
 	public WebDavServletModule(Path rootPath, String contextPath) {
+		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(contextPath);
 		this.rootPath = rootPath;
-		this.contextPath = StringUtils.prependIfMissing(StringUtils.removeEnd(contextPath, "/"), "/");
+		this.contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
 	}
 
 	@PerServlet

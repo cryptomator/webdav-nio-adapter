@@ -11,22 +11,27 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 
 class MacShellScriptMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacShellScriptMounter.class);
 	private static final Path VOLUMES_PATH = Paths.get("/Volumes");
+	private static final boolean IS_OS_MACOSX = System.getProperty("os.name").contains("Mac OS X");
+	private static final String[] OS_VERSION = Iterables.toArray(Splitter.on('.').splitToList(System.getProperty("os.version")), String.class);
 
 	@Override
 	public boolean isApplicable() {
-		if (!SystemUtils.IS_OS_MAC_OSX_MAVERICKS && !SystemUtils.IS_OS_MAC_OSX_MOUNTAIN_LION) {
-			// Fail fast for systems other than 10.8 and 10.9.
-			// >=10.10 handled by MacAppleScriptMounter
-			// <10.8 is not supported by Java 8 anyway.
+		try {
+			// Fail fast for systems >= 10.9
+			if (!IS_OS_MACOSX || OS_VERSION.length < 2 || Integer.parseInt(OS_VERSION[1]) >= 10) { // since macOS 10.10+
+				return false;
+			}
+		} catch (NumberFormatException e) {
 			return false;
 		}
 
@@ -48,7 +53,7 @@ class MacShellScriptMounter implements MounterStrategy {
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		Path mountPath = VOLUMES_PATH.resolve("Cryptomator_" + Long.toHexString(crc32(uri.toASCIIString())));
 		try {
-			String mountName = StringUtils.substringAfterLast(StringUtils.removeEnd(uri.getPath(), "/"), "/");
+			String mountName = Iterables.getLast(Splitter.on("/").omitEmptyStrings().split(uri.getPath()));
 			Files.createDirectory(mountPath);
 
 			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "mount_webdav -S -v " + mountName + " \"" + uri.toASCIIString() + "\" \"" + mountPath + "\"");

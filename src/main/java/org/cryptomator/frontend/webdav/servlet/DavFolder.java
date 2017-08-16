@@ -23,10 +23,10 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
@@ -42,6 +42,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 
+import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 
 class DavFolder extends DavNode {
@@ -196,7 +197,10 @@ class DavFolder extends DavNode {
 
 	@Override
 	public DavPropertyName[] getPropertyNames() {
-		return ArrayUtils.addAll(super.getPropertyNames(), PROPERTY_QUOTA_AVAILABLE, PROPERTY_QUOTA_USED);
+		List<DavPropertyName> list = Arrays.asList(super.getPropertyNames());
+		list.add(PROPERTY_QUOTA_AVAILABLE);
+		list.add(PROPERTY_QUOTA_USED);
+		return Iterables.toArray(list, DavPropertyName.class);
 	}
 
 	@Override

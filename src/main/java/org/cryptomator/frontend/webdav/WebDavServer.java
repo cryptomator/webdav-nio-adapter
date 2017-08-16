@@ -10,6 +10,7 @@ package org.cryptomator.frontend.webdav;
 
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The WebDAV server, that WebDAV servlets can be added to using {@link #createWebDavServlet(Path, String)}.
- * 
+ *
  * An instance of this class can be obtained via {@link #create()}.
  */
 @Singleton
@@ -32,12 +33,14 @@ public class WebDavServer {
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
 
 	private final Server server;
+	private final ExecutorService executorService;
 	private final ServerConnector localConnector;
 	private final WebDavServletFactory servletFactory;
 
 	@Inject
-	WebDavServer(Server server, ServerConnector connector, WebDavServletFactory servletContextFactory) {
+	WebDavServer(Server server, ExecutorService executorService, ServerConnector connector, WebDavServletFactory servletContextFactory) {
 		this.server = server;
+		this.executorService = executorService;
 		this.localConnector = connector;
 		this.servletFactory = servletContextFactory;
 	}
@@ -49,7 +52,7 @@ public class WebDavServer {
 
 	/**
 	 * Reconfigures the server socket to listen on the specified bindAddr and port.
-	 * 
+	 *
 	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
 	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
 	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
@@ -60,7 +63,7 @@ public class WebDavServer {
 
 	/**
 	 * Reconfigures the server socket to listen on the specified bindAddr and port.
-	 * 
+	 *
 	 * @param socketBindAddress Socket address and port of the server. Use <code>0.0.0.0:0</code> to listen on all interfaces and auto-assign a port.
 	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
 	 */
@@ -85,10 +88,13 @@ public class WebDavServer {
 
 	/**
 	 * Starts the WebDAV server.
-	 * 
+	 *
 	 * @throws ServerLifecycleException If any exception occurs during server start (e.g. port not available).
 	 */
 	public synchronized void start() throws ServerLifecycleException {
+		if (executorService.isShutdown()) {
+			throw new IllegalStateException("Server has already been terminated.");
+		}
 		try {
 			server.start();
 			LOG.info("WebDavServer started.");
@@ -99,7 +105,7 @@ public class WebDavServer {
 
 	/**
 	 * Stops the WebDAV server.
-	 * 
+	 *
 	 * @throws ServerLifecycleException If the server could not be stopped for any unexpected reason.
 	 */
 	public synchronized void stop() throws ServerLifecycleException {
@@ -112,8 +118,18 @@ public class WebDavServer {
 	}
 
 	/**
-	 * Creates a new WebDAV servlet (without starting it yet).
+	 * Stops the WebDAV server and shuts down its executor service. After terminating, this instance can no longer be restarted.
 	 * 
+	 * @throws ServerLifecycleException If the server could not be stopped for any unexpected reason.
+	 */
+	public synchronized void terminate() throws ServerLifecycleException {
+		stop();
+		executorService.shutdownNow();
+	}
+
+	/**
+	 * Creates a new WebDAV servlet (without starting it yet).
+	 *
 	 * @param rootPath The path to the directory which should be served as root resource.
 	 * @param contextPath The servlet context path, i.e. the path of the root resource.
 	 * @return The controller object for this new servlet

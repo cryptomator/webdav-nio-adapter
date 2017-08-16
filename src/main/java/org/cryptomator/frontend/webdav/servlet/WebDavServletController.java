@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import javax.inject.Inject;
 
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.frontend.webdav.mount.MountParam;
 import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
@@ -74,8 +75,12 @@ public class WebDavServletController {
 	 * @return A new http URI constructed from the servers bind addr and port as well as this servlet's contextPath.
 	 */
 	public URI getServletRootUri() {
+		return getServletRootUri(connector.getHost());
+	}
+
+	private URI getServletRootUri(String hostname) {
 		try {
-			return new URI("http", null, connector.getHost(), connector.getLocalPort(), contextPath, null, null);
+			return new URI("http", null, hostname, connector.getLocalPort(), contextPath, null, null);
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
 		}
@@ -92,7 +97,7 @@ public class WebDavServletController {
 		if (!contextHandler.isStarted()) {
 			throw new IllegalStateException("Mounting only possible for running servlets.");
 		}
-		URI uri = getServletRootUri();
+		URI uri = getServletRootUri(mountParams.getOrDefault(MountParam.WEBDAV_HOSTNAME, connector.getHost()));
 		LOG.info("Mounting {} using {}", uri, mounter.getClass().getName());
 		return mounter.mount(uri, mountParams);
 	}

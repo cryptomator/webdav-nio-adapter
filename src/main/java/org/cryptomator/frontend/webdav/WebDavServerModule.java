@@ -60,6 +60,7 @@ class WebDavServerModule {
 	@Singleton
 	Server provideServer(ThreadPool threadPool, ContextHandlerCollection servletCollection) {
 		Server server = new Server(threadPool);
+		server.unmanage(threadPool); // prevent threadpool from being shutdown when stopping the server
 		server.setHandler(servletCollection);
 		return server;
 	}

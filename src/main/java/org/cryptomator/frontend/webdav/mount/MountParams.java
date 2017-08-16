@@ -32,6 +32,10 @@ public class MountParams extends HashMap<MountParam, String> {
 			return with(MountParam.PREFERRED_GVFS_SCHEME, value);
 		}
 
+		public MountParamsBuilder withWebdavHostname(String value) {
+			return with(MountParam.WEBDAV_HOSTNAME, value);
+		}
+
 		public MountParams build() {
 			return new MountParams(params);
 		}

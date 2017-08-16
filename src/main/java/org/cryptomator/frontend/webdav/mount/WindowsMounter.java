@@ -1,13 +1,9 @@
 package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +20,6 @@ class WindowsMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
 	private static final boolean IS_OS_WINDOWS = System.getProperty("os.name").contains("Windows");
-	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String AUTOASSIGN_DRRIVE_LETTER = "*";
@@ -36,25 +31,6 @@ class WindowsMounter implements MounterStrategy {
 
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
-		try {
-			String host = hasLocalhostAlias() ? LOCALHOST_ALIAS : uri.getHost();
-			URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), host, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
-			return mountInternal(adjustedUri, mountParams);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Unable to reconstruct URI from given URI", e);
-		}
-	}
-
-	private boolean hasLocalhostAlias() {
-		try {
-			InetAddress alias = InetAddress.getByName(LOCALHOST_ALIAS);
-			return alias.getHostAddress().equals("127.0.0.1");
-		} catch (UnknownHostException e) {
-			return false;
-		}
-	}
-
-	private Mount mountInternal(URI uri, Map<MountParam, String> mountParams) throws CommandFailedException {
 		try {
 			tuneProxyConfigSilently(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);

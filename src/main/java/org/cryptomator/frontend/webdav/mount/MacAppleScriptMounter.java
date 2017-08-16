@@ -48,6 +48,10 @@ class MacAppleScriptMounter implements MounterStrategy {
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
 			ProcessUtil.waitFor(mountProcess, 5, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(mountProcess, 0);
+			if (!stdout.startsWith("file ")) {
+				throw new CommandFailedException("Unexpected mount result: " + stdout);
+			}
+			assert stdout.startsWith("file ");
 			String volumeIdentifier = CharMatcher.whitespace().trimFrom(stdout.substring(5)); // remove preceeding "file "
 			String waitAppleScript1 = String.format("tell application \"Finder\" to repeat while not (\"%s\" exists)", volumeIdentifier);
 			String waitAppleScript2 = "delay 0.1";

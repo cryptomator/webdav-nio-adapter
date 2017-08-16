@@ -10,6 +10,7 @@ package org.cryptomator.frontend.webdav;
 
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,12 +33,14 @@ public class WebDavServer {
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
 
 	private final Server server;
+	private final ExecutorService executorService;
 	private final ServerConnector localConnector;
 	private final WebDavServletFactory servletFactory;
 
 	@Inject
-	WebDavServer(Server server, ServerConnector connector, WebDavServletFactory servletContextFactory) {
+	WebDavServer(Server server, ExecutorService executorService, ServerConnector connector, WebDavServletFactory servletContextFactory) {
 		this.server = server;
+		this.executorService = executorService;
 		this.localConnector = connector;
 		this.servletFactory = servletContextFactory;
 	}
@@ -89,6 +92,9 @@ public class WebDavServer {
 	 * @throws ServerLifecycleException If any exception occurs during server start (e.g. port not available).
 	 */
 	public synchronized void start() throws ServerLifecycleException {
+		if (executorService.isShutdown()) {
+			throw new IllegalStateException("Server has already been terminated.");
+		}
 		try {
 			server.start();
 			LOG.info("WebDavServer started.");
@@ -109,6 +115,16 @@ public class WebDavServer {
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Server couldn't be stopped", e);
 		}
+	}
+
+	/**
+	 * Stops the WebDAV server and shuts down its executor service. After terminating, this instance can no longer be restarted.
+	 * 
+	 * @throws ServerLifecycleException If the server could not be stopped for any unexpected reason.
+	 */
+	public synchronized void terminate() throws ServerLifecycleException {
+		stop();
+		executorService.shutdownNow();
 	}
 
 	/**

@@ -42,7 +42,7 @@ public class MirroringTest {
 				System.out.println("Enter anything to stop the server...");
 				System.in.read();
 				mount.unmount();
-				server.stop();
+				server.terminate();
 			} else {
 				System.out.println("Invalid directory.");
 				return;

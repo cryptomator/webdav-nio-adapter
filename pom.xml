@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>Cryptomator WebDAV-NIO Adapter</name>
 	<description>WebDAV servlets allowing access to NIO-based resources.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -16,7 +16,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<dagger.version>2.11</dagger.version>
+		<dagger.version>2.12</dagger.version>
 		<jackrabbit.version>2.15.5</jackrabbit.version>
 		<jetty.version>9.4.6.v20170531</jetty.version>
 		<guava.version>23.0</guava.version>
@@ -87,6 +87,11 @@
 			<artifactId>dagger</artifactId>
 			<version>${dagger.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.dagger</groupId>
+			<artifactId>dagger-compiler</artifactId>
+			<version>${dagger.version}</version>
+		</dependency>
 
 		<!-- Test -->
 		<dependency>
@@ -120,18 +125,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.2</version>
+				<version>3.7.0</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 					<showWarnings>true</showWarnings>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>com.google.dagger</groupId>
-							<artifactId>dagger-compiler</artifactId>
-							<version>${dagger.version}</version>
-						</path>
-					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>

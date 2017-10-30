@@ -91,6 +91,7 @@
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger-compiler</artifactId>
 			<version>${dagger.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Test -->

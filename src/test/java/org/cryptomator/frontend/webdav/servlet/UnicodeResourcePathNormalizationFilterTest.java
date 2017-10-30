@@ -63,24 +63,36 @@ public class UnicodeResourcePathNormalizationFilterTest {
 
 		@Test
 		public void testRequestWithNormalizedResourceUri() throws IOException, ServletException {
-			Mockito.when(request.getPathInfo()).thenReturn("/bar");
+			Mockito.when(request.getRequestURI()).thenReturn("/foo/bar");
 			filter.doFilter(request, response, chain);
 
 			ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
 			Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
-			Mockito.verify(request, Mockito.never()).getRequestURI();
+			Mockito.verify(request, Mockito.never()).getPathInfo();
 			Assert.assertEquals("/foo/bar", wrappedReq.getValue().getRequestURI());
 			Assert.assertEquals("http://example.com/foo/bar", wrappedReq.getValue().getRequestURL().toString());
 		}
 
 		@Test
-		public void testRequestWithNonNormalizedResourceUri1() throws IOException, ServletException {
-			Mockito.when(request.getPathInfo()).thenReturn("/\u0041\u030A");
+		public void testRequestWithSemicolonInURI() throws IOException, ServletException {
+			Mockito.when(request.getRequestURI()).thenReturn("/foo/bar;foo");
 			filter.doFilter(request, response, chain);
 
 			ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
 			Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
-			Mockito.verify(request, Mockito.never()).getRequestURI();
+			Mockito.verify(request, Mockito.never()).getPathInfo();
+			Assert.assertEquals("/foo/bar;foo", wrappedReq.getValue().getRequestURI());
+			Assert.assertEquals("http://example.com/foo/bar;foo", wrappedReq.getValue().getRequestURL().toString());
+		}
+
+		@Test
+		public void testRequestWithNonNormalizedResourceUri1() throws IOException, ServletException {
+			Mockito.when(request.getRequestURI()).thenReturn("/foo/\u0041\u030A");
+			filter.doFilter(request, response, chain);
+
+			ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
+			Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
+			Mockito.verify(request, Mockito.never()).getPathInfo();
 			Assert.assertEquals("/\u00C5", wrappedReq.getValue().getPathInfo());
 			Assert.assertEquals("/foo/\u00C5", wrappedReq.getValue().getRequestURI());
 			Assert.assertEquals("http://example.com/foo/\u00C5", wrappedReq.getValue().getRequestURL().toString());
@@ -88,7 +100,7 @@ public class UnicodeResourcePathNormalizationFilterTest {
 
 		@Test
 		public void testRequestWithNonNormalizedResourceUri2() throws IOException, ServletException {
-			Mockito.when(request.getPathInfo()).thenReturn("/O\u0308");
+			Mockito.when(request.getRequestURI()).thenReturn("/foo/O\u0308");
 			filter.doFilter(request, response, chain);
 
 			ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);

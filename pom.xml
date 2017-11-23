@@ -19,7 +19,7 @@
 		<dagger.version>2.12</dagger.version>
 		<jackrabbit.version>2.15.6</jackrabbit.version>
 		<jetty.version>9.4.7.v20170914</jetty.version>
-		<guava.version>23.4-jre</guava.version>
+		<guava.version>23.5-jre</guava.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

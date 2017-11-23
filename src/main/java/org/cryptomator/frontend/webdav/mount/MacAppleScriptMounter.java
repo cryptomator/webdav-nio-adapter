@@ -37,7 +37,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 					"-r", "http", //
 					"-D", "Cryptomator WebDAV Access", //
 					"-T", "/System/Library/CoreServices/NetAuthAgent.app/Contents/MacOS/NetAuthSysAgent");
-			ProcessUtil.startAndWaitFor(storeCredentials, 5, TimeUnit.SECONDS);
+			ProcessUtil.startAndWaitFor(storeCredentials, 10, TimeUnit.SECONDS);
 		} catch (CommandFailedException e) {
 			LOG.warn("Unable to store credentials for WebDAV access: {}", e.getMessage());
 		}
@@ -46,7 +46,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 			Process mountProcess = mount.start();
 			String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
-			ProcessUtil.waitFor(mountProcess, 5, TimeUnit.SECONDS);
+			ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
 			ProcessUtil.assertExitValue(mountProcess, 0);
 			if (!stdout.startsWith("file ")) {
 				throw new CommandFailedException("Unexpected mount result: " + stdout);
@@ -57,7 +57,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			String waitAppleScript2 = "delay 0.1";
 			String waitAppleScript3 = "end repeat";
 			ProcessBuilder wait = new ProcessBuilder("/usr/bin/osascript", "-e", waitAppleScript1, "-e", waitAppleScript2, "-e", waitAppleScript3);
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(wait, 5, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(wait, 30, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {}.", uri.toASCIIString());
 			return new MountImpl(volumeIdentifier);
 		} catch (IOException e) {
@@ -81,12 +81,12 @@ class MacAppleScriptMounter implements MounterStrategy {
 
 		@Override
 		public void unmount() throws CommandFailedException {
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 5, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
 		}
 
 		@Override
 		public void reveal() throws CommandFailedException {
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 5, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 10, TimeUnit.SECONDS), 0);
 		}
 
 	}

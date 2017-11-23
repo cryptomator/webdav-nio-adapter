@@ -15,7 +15,7 @@ public class MountParams extends HashMap<MountParam, String> {
 
 	public static class MountParamsBuilder {
 
-		private static final Map<MountParam, String> params = new HashMap<>();
+		private final Map<MountParam, String> params = new HashMap<>();
 
 		public MountParamsBuilder with(MountParam key, String value) {
 			if (value != null) {

@@ -105,7 +105,7 @@ class DavFolder extends DavNode {
 				if (childAttr.isDirectory()) {
 					DavFolder childFolder = factory.createFolder(childLocator, childPath, Optional.of(childAttr), session);
 					children.add(childFolder);
-				} else if (childAttr.isRegularFile()) {
+				} else {
 					DavFile childFile = factory.createFile(childLocator, childPath, Optional.of(childAttr), session);
 					children.add(childFile);
 				}

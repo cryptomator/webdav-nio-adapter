@@ -57,7 +57,7 @@ class MacShellScriptMounter implements MounterStrategy {
 			Files.createDirectory(mountPath);
 
 			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "mount_webdav -S -v " + mountName + " \"" + uri.toASCIIString() + "\" \"" + mountPath + "\"");
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 5, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 30, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {} to {}.", uri.toASCIIString(), mountPath);
 			return new MountImpl(mountPath);
 		} catch (IOException | CommandFailedException e) {
@@ -96,7 +96,7 @@ class MacShellScriptMounter implements MounterStrategy {
 				LOG.debug("Volume already unmounted.");
 				return;
 			}
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 5, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
 			try {
 				Files.deleteIfExists(mountPath);
 			} catch (IOException e) {
@@ -106,7 +106,7 @@ class MacShellScriptMounter implements MounterStrategy {
 
 		@Override
 		public void reveal() throws CommandFailedException {
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 5, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 10, TimeUnit.SECONDS), 0);
 		}
 
 	}

@@ -35,13 +35,14 @@ public class MirroringTest {
 				MountParams mountParams = MountParams.create() //
 						.withWindowsDriveLetter("X:") //
 						.withPreferredGvfsScheme("dav") //
+						.withWebdavHostname("cryptomator-vault") //
 						.build();
 				Mount mount = servlet.mount(mountParams);
 				mount.reveal();
 
 				System.out.println("Enter anything to stop the server...");
 				System.in.read();
-				mount.unmount();
+				mount.forced().orElse(mount).unmount();
 				server.terminate();
 			} else {
 				System.out.println("Invalid directory.");

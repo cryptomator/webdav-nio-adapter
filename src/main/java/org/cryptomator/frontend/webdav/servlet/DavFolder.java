@@ -44,6 +44,8 @@ import org.apache.jackrabbit.webdav.property.ResourceType;
 
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 
 class DavFolder extends DavNode {
 
@@ -105,7 +107,7 @@ class DavFolder extends DavNode {
 				if (childAttr.isDirectory()) {
 					DavFolder childFolder = factory.createFolder(childLocator, childPath, Optional.of(childAttr), session);
 					children.add(childFolder);
-				} else if (childAttr.isRegularFile()) {
+				} else {
 					DavFile childFile = factory.createFile(childLocator, childPath, Optional.of(childAttr), session);
 					children.add(childFile);
 				}
@@ -129,7 +131,7 @@ class DavFolder extends DavNode {
 	public void removeMemberInternal(DavNode member) throws DavException {
 		try {
 			// The DELETE method on a collection must act as if a "Depth: infinity" header was used on it
-			Files.walkFileTree(member.path, new DeletingFileVisitor());
+			MoreFiles.deleteRecursively(member.path, RecursiveDeleteOption.ALLOW_INSECURE);
 		} catch (NoSuchFileException e) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		} catch (IOException e) {

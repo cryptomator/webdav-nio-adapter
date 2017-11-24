@@ -15,7 +15,7 @@ public class MountParams extends HashMap<MountParam, String> {
 
 	public static class MountParamsBuilder {
 
-		private static final Map<MountParam, String> params = new HashMap<>();
+		private final Map<MountParam, String> params = new HashMap<>();
 
 		public MountParamsBuilder with(MountParam key, String value) {
 			if (value != null) {
@@ -25,7 +25,11 @@ public class MountParams extends HashMap<MountParam, String> {
 		}
 
 		public MountParamsBuilder withWindowsDriveLetter(String value) {
-			return with(MountParam.WIN_DRIVE_LETTER, value.endsWith(":") ? value : value + ":");
+			if (value == null) {
+				return this;
+			} else {
+				return with(MountParam.WIN_DRIVE_LETTER, value.endsWith(":") ? value : value + ":");
+			}
 		}
 
 		public MountParamsBuilder withPreferredGvfsScheme(String value) {

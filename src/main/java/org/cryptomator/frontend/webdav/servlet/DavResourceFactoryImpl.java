@@ -75,14 +75,12 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 			return createFile(locator, p, Optional.empty(), request.getDavSession());
 		} else if (!attr.isPresent()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
-		} else if (attr.get().isRegularFile() && DavMethods.METHOD_GET.equals(request.getMethod()) && request.getHeader(HttpHeader.RANGE.asString()) != null) {
-			return createFileRange(locator, p, attr.get(), request.getDavSession(), request, response);
-		} else if (attr.get().isRegularFile()) {
-			return createFile(locator, p, attr, request.getDavSession());
 		} else if (attr.get().isDirectory()) {
 			return createFolder(locator, p, attr, request.getDavSession());
+		} else if (DavMethods.METHOD_GET.equals(request.getMethod()) && request.getHeader(HttpHeader.RANGE.asString()) != null) {
+			return createFileRange(locator, p, attr.get(), request.getDavSession(), request, response);
 		} else {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
+			return createFile(locator, p, attr, request.getDavSession());
 		}
 	}
 
@@ -95,12 +93,10 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 		Optional<BasicFileAttributes> dstAttr = readBasicFileAttributes(dstP);
 		if (!srcAttr.isPresent()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
-		} else if (srcAttr.get().isRegularFile()) {
-			return createFile(locator, dstP, dstAttr, request.getDavSession());
 		} else if (srcAttr.get().isDirectory()) {
 			return createFolder(locator, dstP, dstAttr, request.getDavSession());
 		} else {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
+			return createFile(locator, dstP, dstAttr, request.getDavSession());
 		}
 	}
 
@@ -118,12 +114,10 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 		Optional<BasicFileAttributes> attr = readBasicFileAttributes(p);
 		if (!attr.isPresent()) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
-		} else if (attr.get().isRegularFile()) {
-			return createFile(locator, p, attr, session);
 		} else if (attr.get().isDirectory()) {
 			return createFolder(locator, p, attr, session);
 		} else {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, "Resource is neither file nor directory.");
+			return createFile(locator, p, attr, session);
 		}
 	}
 

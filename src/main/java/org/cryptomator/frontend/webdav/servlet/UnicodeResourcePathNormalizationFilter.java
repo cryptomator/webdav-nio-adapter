@@ -93,13 +93,25 @@ public class UnicodeResourcePathNormalizationFilter implements HttpFilter {
 
 		@Override
 		public String getPathInfo() {
-			return Normalizer.normalize(super.getPathInfo(), Form.NFC);
+			int lengthContextPath = this.getContextPath().length();
+			String path = getNormalizedRequestURI().getPath();
+			assert (path.length() >= lengthContextPath);
+			return path.substring(lengthContextPath);
 		}
 
 		@Override
 		public String getRequestURI() {
+			return getNormalizedRequestURI().toString();
+		}
+
+		private URI getNormalizedRequestURI() {
 			try {
-				return new URI(null, null, getContextPath() + getPathInfo(), null).toString();
+				URI uri = URI.create(super.getRequestURI());
+				if (!uri.getPath().startsWith(this.getContextPath())) {
+					throw new IllegalStateException("URI does not match to Context Path.");
+				}
+				String normedUri = Normalizer.normalize(uri.getPath(), Form.NFC);
+				return new URI(null, null, normedUri, null);
 			} catch (URISyntaxException e) {
 				throw new IllegalStateException(e);
 			}

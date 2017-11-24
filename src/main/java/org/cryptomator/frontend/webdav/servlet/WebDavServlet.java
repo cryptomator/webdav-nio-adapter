@@ -99,14 +99,21 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		throw new UnsupportedOperationException("Setting resourceFactory not supported.");
 	}
 
-	/* Unchecked DAV exception rewrapping */
+	/* Unchecked DAV exception rewrapping and logging */
 
 	@Override
 	protected boolean execute(WebdavRequest request, WebdavResponse response, int method, DavResource resource) throws ServletException, IOException, DavException {
 		try {
-			return super.execute(request, response, method, resource);
-		} catch (UncheckedDavException e) {
-			throw e.toDavException();
+			try {
+				return super.execute(request, response, method, resource);
+			} catch (UncheckedDavException e) {
+				throw e.toDavException();
+			}
+		} catch (DavException e) {
+			if (e.getErrorCode() == DavServletResponse.SC_INTERNAL_SERVER_ERROR) {
+				LOG.error("Unexpected DavException.", e);
+			}
+			throw e;
 		}
 	}
 
@@ -119,9 +126,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		} catch (EofException e) {
 			// Jetty EOF (other than IO EOF) is thrown when the connection is closed by the client.
 			// If the client is no longer interested in further content, we don't care.
-			if (LOG.isDebugEnabled()) {
-				LOG.trace("Unexpected end of stream during GET (client hung up).");
-			}
+			LOG.trace("Unexpected end of stream during GET (client hung up).");
 		}
 	}
 

@@ -22,6 +22,7 @@ cache:
   directories:
   - $HOME/.m2
 before_deploy:
+- jdk_switcher use oraclejdk9
 - "if ! gpg --list-secret-keys 34C80F11; then gpg --import 34C80F11.gpg; fi"
 deploy:
 - provider: script # SNAPSHOTS

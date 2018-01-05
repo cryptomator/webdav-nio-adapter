@@ -15,11 +15,10 @@
 	</scm>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<dagger.version>2.12</dagger.version>
-		<jackrabbit.version>2.15.6</jackrabbit.version>
-		<jetty.version>9.4.7.v20170914</jetty.version>
-		<guava.version>23.5-jre</guava.version>
+		<dagger.version>2.14.1</dagger.version>
+		<jackrabbit.version>2.17.0</jackrabbit.version>
+		<jetty.version>9.4.8.v20171121</jetty.version>
+		<guava.version>23.6-jre</guava.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -129,8 +128,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.7.0</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<release>8</release>
+					<source>1.8</source>
+					<target>1.8</target>
 					<showWarnings>true</showWarnings>
 				</configuration>
 			</plugin>
@@ -164,20 +164,6 @@
 
 		<profile>
 			<id>coverage</id>
-			<dependencies>
-				<dependency>
-					<groupId>com.codacy</groupId>
-					<artifactId>codacy-coverage-reporter</artifactId>
-					<version>2.0.1</version>
-					<classifier>assembly</classifier>
-					<exclusions>
-						<exclusion>
-							<groupId>*</groupId>
-							<artifactId>*</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-			</dependencies>
 			<build>
 				<plugins>
 					<plugin>
@@ -190,28 +176,6 @@
 								<goals>
 									<goal>prepare-agent</goal>
 								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.6.0</version>
-						<executions>
-							<execution>
-								<phase>verify</phase>
-								<goals>
-									<goal>java</goal>
-								</goals>
-								<configuration>
-									<mainClass>com.codacy.CodacyCoverageReporter</mainClass>
-									<arguments>
-										<argument>-l</argument>
-										<argument>Java</argument>
-										<argument>-r</argument>
-										<argument>${project.build.directory}/site/jacoco/jacoco.xml</argument>
-									</arguments>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -247,7 +211,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
+						<version>3.0.0</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>

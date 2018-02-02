@@ -17,7 +17,10 @@ import java.util.EnumSet;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.servlet.DispatcherType;
+import javax.servlet.Servlet;
 
+import org.cryptomator.webdav.core.filters.*;
+import org.cryptomator.webdav.core.servlet.NioWebDavServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -42,13 +45,6 @@ public class WebDavServletModule {
 
 	@PerServlet
 	@Provides
-	@RootPath
-	public Path provideRootPath() {
-		return rootPath;
-	}
-
-	@PerServlet
-	@Provides
 	@ContextPath
 	public String provideContextRootUri() {
 		return contextPath;
@@ -56,9 +52,11 @@ public class WebDavServletModule {
 
 	@PerServlet
 	@Provides
-	public ServletContextHandler provideServletContext(WebDavServlet servlet) {
+	public ServletContextHandler provideServletContext() {
+		final Servlet servlet = new NioWebDavServlet();
 		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, servlet);
+		servletHolder.setInitParameter(NioWebDavServlet.INIT_PARAM_ROOT_PATH, rootPath.toString());
 		servletContext.addServlet(servletHolder, WILDCARD);
 		servletContext.addFilter(LoggingFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(UnicodeResourcePathNormalizationFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
@@ -73,12 +71,6 @@ public class WebDavServletModule {
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ContextPath {
-	}
-
-	@Qualifier
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface RootPath {
 	}
 
 	@Scope

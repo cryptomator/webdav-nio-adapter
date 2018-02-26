@@ -103,9 +103,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.7.0</version>
 				<configuration>
-					<release>8</release>
-					<source>1.8</source>
-					<target>1.8</target>
+					<release>9</release>
+					<source>9</source>
+					<target>9</target>
 					<showWarnings>true</showWarnings>
 					<annotationProcessorPaths>
 						<path>
@@ -200,16 +200,6 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
-								<configuration>
-									<additionalDependencies>
-										<additionalDependency>
-											<!-- javax.annotation.Generated used by Dagger -->
-											<groupId>javax.annotation</groupId>
-											<artifactId>jsr250-api</artifactId>
-											<version>1.0</version>
-										</additionalDependency>
-									</additionalDependencies>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>

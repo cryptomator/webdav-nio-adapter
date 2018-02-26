@@ -201,9 +201,14 @@
 									<goal>jar</goal>
 								</goals>
 								<configuration>
-									<sourceFileExcludes>
-										<sourceFileExclude>${build.directory}/generated-sources/**/*</sourceFileExclude>
-									</sourceFileExcludes>
+									<additionalDependencies>
+										<additionalDependency>
+											<!-- javax.annotation.Generated used by Dagger -->
+											<groupId>javax.annotation</groupId>
+											<artifactId>jsr250-api</artifactId>
+											<version>1.0</version>
+										</additionalDependency>
+									</additionalDependencies>
 								</configuration>
 							</execution>
 						</executions>

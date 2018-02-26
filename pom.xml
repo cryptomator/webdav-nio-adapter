@@ -200,6 +200,11 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
+								<configuration>
+									<sourceFileExcludes>
+										<sourceFileExclude>${build.directory}/generated-sources/**/*</sourceFileExclude>
+									</sourceFileExcludes>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>

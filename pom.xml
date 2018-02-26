@@ -201,14 +201,10 @@
 									<goal>jar</goal>
 								</goals>
 								<configuration>
-									<additionalDependencies>
-										<additionalDependency>
-											<!-- javax.annotation.Generated used by Dagger -->
-											<groupId>javax.annotation</groupId>
-											<artifactId>jsr250-api</artifactId>
-											<version>1.0</version>
-										</additionalDependency>
-									</additionalDependencies>
+									<sourceFileExcludes>
+										<sourceFileExclude>**\/\Dagger*.java</sourceFileExclude>
+										<sourceFileExclude>**\/\*_*.java</sourceFileExclude>
+									</sourceFileExcludes>
 								</configuration>
 							</execution>
 						</executions>

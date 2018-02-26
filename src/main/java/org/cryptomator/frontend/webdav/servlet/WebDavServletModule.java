@@ -19,15 +19,17 @@ import javax.inject.Scope;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 
-import org.cryptomator.webdav.core.filters.*;
-import org.cryptomator.webdav.core.servlet.NioWebDavServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-
 import com.google.common.base.CharMatcher;
-
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.webdav.core.filters.AcceptRangeFilter;
+import org.cryptomator.webdav.core.filters.LoggingFilter;
+import org.cryptomator.webdav.core.filters.MacChunkedPutCompatibilityFilter;
+import org.cryptomator.webdav.core.filters.MkcolComplianceFilter;
+import org.cryptomator.webdav.core.filters.PostRequestBlockingFilter;
+import org.cryptomator.webdav.core.filters.UnicodeResourcePathNormalizationFilter;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 @Module
 public class WebDavServletModule {
@@ -53,10 +55,9 @@ public class WebDavServletModule {
 	@PerServlet
 	@Provides
 	public ServletContextHandler provideServletContext() {
-		final Servlet servlet = new NioWebDavServlet();
+		final Servlet servlet = new FixedPathNioWebDavServlet(rootPath);
 		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, servlet);
-		servletHolder.setInitParameter(NioWebDavServlet.INIT_PARAM_ROOT_PATH, rootPath.toString());
 		servletContext.addServlet(servletHolder, WILDCARD);
 		servletContext.addFilter(LoggingFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(UnicodeResourcePathNormalizationFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));

@@ -16,9 +16,9 @@
 
 	<properties>
 		<webdavservlet.version>1.0.0</webdavservlet.version>
-		<dagger.version>2.14.1</dagger.version>
-		<jetty.version>9.4.8.v20171121</jetty.version>
-		<guava.version>23.6-jre</guava.version>
+		<dagger.version>2.15</dagger.version>
+		<jetty.version>9.4.10.v20180503</jetty.version>
+		<guava.version>25.0-jre</guava.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

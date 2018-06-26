@@ -103,9 +103,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.7.0</version>
 				<configuration>
-					<release>9</release>
-					<source>9</source>
-					<target>9</target>
+					<release>8</release>
+					<source>1.8</source>
+					<target>1.8</target>
 					<showWarnings>true</showWarnings>
 					<annotationProcessorPaths>
 						<path>

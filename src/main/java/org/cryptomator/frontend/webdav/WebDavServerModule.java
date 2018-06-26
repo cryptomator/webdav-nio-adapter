@@ -30,6 +30,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.ExecutorSizedThreadPool;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 
@@ -46,7 +47,7 @@ class WebDavServerModule {
 
 	@Provides
 	@Singleton
-	ExecutorService provideExecutorService() {
+	ThreadPoolExecutor provideThreadPoolExecutor() {
 		// set core pool size = MAX_THREADS and allow coreThreadTimeOut to enforce spawning threads till the maximum even if the queue is not full
 		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		AtomicInteger threadNum = new AtomicInteger(1);
@@ -61,8 +62,14 @@ class WebDavServerModule {
 
 	@Provides
 	@Singleton
-	Server provideServer(ExecutorService executor, ContextHandlerCollection servletCollection) {
-		ThreadPool threadPool = new ExecutorThreadPool(executor);
+	ExecutorService provideExecutorService(ThreadPoolExecutor executorService) {
+		return executorService;
+	}
+
+	@Provides
+	@Singleton
+	Server provideServer(ThreadPoolExecutor executorService, ContextHandlerCollection servletCollection) {
+		ThreadPool threadPool = new ExecutorThreadPool(executorService);
 		Server server = new Server(threadPool);
 		server.unmanage(threadPool); // prevent threadpool from being shutdown when stopping the server
 		server.setHandler(servletCollection);

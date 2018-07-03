@@ -16,8 +16,8 @@
 
 	<properties>
 		<webdavservlet.version>1.0.0</webdavservlet.version>
-		<dagger.version>2.15</dagger.version>
-		<jetty.version>9.4.10.v20180503</jetty.version>
+		<dagger.version>2.16</dagger.version>
+		<jetty.version>9.4.11.v20180605</jetty.version>
 		<guava.version>25.0-jre</guava.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -80,6 +80,12 @@
 			<artifactId>dagger</artifactId>
 			<version>${dagger.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.dagger</groupId>
+			<artifactId>dagger-compiler</artifactId>
+			<version>${dagger.version}</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- Test -->
 		<dependency>
@@ -107,13 +113,6 @@
 					<source>1.8</source>
 					<target>1.8</target>
 					<showWarnings>true</showWarnings>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>com.google.dagger</groupId>
-							<artifactId>dagger-compiler</artifactId>
-							<version>${dagger.version}</version>
-						</path>
-					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -193,7 +192,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.0.0</version>
+						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>

@@ -20,10 +20,10 @@ class LinuxGvfsMounter implements MounterStrategy {
 			return false;
 		}
 
-		// check if gvfs is installed:
+		// check if gio is installed:
 		assert IS_OS_LINUX;
 		try {
-			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("which", "gvfs-mount", "xdg-open");
+			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("which", "gio", "xdg-open");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);
 			return true;
 		} catch (CommandFailedException e) {
@@ -35,7 +35,7 @@ class LinuxGvfsMounter implements MounterStrategy {
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			URI schemeCorrectedUri = new URI(mountParams.getOrDefault(MountParam.PREFERRED_GVFS_SCHEME, DEFAULT_GVFS_SCHEME), uri.getSchemeSpecificPart(), null);
-			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "gvfs-mount \"" + schemeCorrectedUri.toASCIIString() + "\"");
+			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "gio mount \"" + schemeCorrectedUri.toASCIIString() + "\"");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 5, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {}", schemeCorrectedUri.toASCIIString());
 			return new MountImpl(schemeCorrectedUri);
@@ -51,9 +51,9 @@ class LinuxGvfsMounter implements MounterStrategy {
 		private final ProcessBuilder unmountCmd;
 
 		private MountImpl(URI uri) {
-			this.revealCmd = new ProcessBuilder("sh", "-c", "gvfs-open \"" + uri.toASCIIString() + "\"");
-			this.isMountedCmd = new ProcessBuilder("sh", "-c", "test `gvfs-mount --list | grep \"" + uri.toASCIIString() + "\" | wc -l` -eq 1");
-			this.unmountCmd = new ProcessBuilder("sh", "-c", "gvfs-mount -u \"" + uri.toASCIIString() + "\"");
+			this.revealCmd = new ProcessBuilder("sh", "-c", "gio open \"" + uri.toASCIIString() + "\"");
+			this.isMountedCmd = new ProcessBuilder("sh", "-c", "test `gio mount --list | grep \"" + uri.toASCIIString() + "\" | wc -l` -eq 1");
+			this.unmountCmd = new ProcessBuilder("sh", "-c", "gio mount -u \"" + uri.toASCIIString() + "\"");
 		}
 
 		@Override

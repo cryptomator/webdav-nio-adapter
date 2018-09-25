@@ -44,7 +44,7 @@ class LinuxVfsMounter implements MounterStrategy {
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			URI schemeCorrectedUri = new URI(mountParams.getOrDefault(MountParam.PREFERRED_GVFS_SCHEME, DEFAULT_VFS_SCHEME), uri.getSchemeSpecificPart(), null);
-			ProcessBuilder mountCmd = (mountCommand.equals("gio")) ?
+			ProcessBuilder mountCmd = ("gio".equals(mountCommand)) ?
 					new ProcessBuilder("sh", "-c", "gio mount \"" + schemeCorrectedUri.toASCIIString() + "\"") :
 					new ProcessBuilder("sh", "-c", "gvfs-mount \"" + schemeCorrectedUri.toASCIIString() + "\"");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 5, TimeUnit.SECONDS), 0);
@@ -62,7 +62,7 @@ class LinuxVfsMounter implements MounterStrategy {
 		private final ProcessBuilder unmountCmd;
 
 		private MountImpl(URI uri) {
-			if (mountCommand.equals("gio")) {
+			if ("gio".equals(mountCommand)) {
 				this.revealCmd = new ProcessBuilder("sh", "-c", "gio open \"" + uri.toASCIIString() + "\"");
 				this.isMountedCmd = new ProcessBuilder("sh", "-c", "test `gio mount --list | grep \"" + uri.toASCIIString() + "\" | wc -l` -eq 1");
 				this.unmountCmd = new ProcessBuilder("sh", "-c", "gio mount -u \"" + uri.toASCIIString() + "\"");

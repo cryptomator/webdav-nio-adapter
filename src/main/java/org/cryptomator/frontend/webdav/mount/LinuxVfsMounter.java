@@ -7,10 +7,10 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class LinuxGvfsMounter implements MounterStrategy {
+class LinuxVfsMounter implements MounterStrategy {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LinuxGvfsMounter.class);
-	private static final String DEFAULT_GVFS_SCHEME = "dav";
+	private static final Logger LOG = LoggerFactory.getLogger(LinuxVfsMounter.class);
+	private static final String DEFAULT_VFS_SCHEME = "dav";
 	private static final boolean IS_OS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
 	private static String mountCommand = null;
 
@@ -43,7 +43,7 @@ class LinuxGvfsMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
-			URI schemeCorrectedUri = new URI(mountParams.getOrDefault(MountParam.PREFERRED_GVFS_SCHEME, DEFAULT_GVFS_SCHEME), uri.getSchemeSpecificPart(), null);
+			URI schemeCorrectedUri = new URI(mountParams.getOrDefault(MountParam.PREFERRED_GVFS_SCHEME, DEFAULT_VFS_SCHEME), uri.getSchemeSpecificPart(), null);
 			ProcessBuilder mountCmd = (mountCommand.equals("gio")) ?
 					new ProcessBuilder("sh", "-c", "gio mount \"" + schemeCorrectedUri.toASCIIString() + "\"") :
 					new ProcessBuilder("sh", "-c", "gvfs-mount \"" + schemeCorrectedUri.toASCIIString() + "\"");

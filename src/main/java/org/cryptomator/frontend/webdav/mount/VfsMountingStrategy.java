@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 abstract class VfsMountingStrategy implements MounterStrategy {
 
-	abstract class MountImpl implements Mount {
+	protected abstract class MountImpl implements Mount {
 
 		ProcessBuilder revealCmd;
 		ProcessBuilder isMountedCmd;

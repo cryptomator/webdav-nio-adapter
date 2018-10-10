@@ -36,6 +36,12 @@ public class MounterModule {
 
 	@Provides
 	@IntoSet
+	MounterStrategy provideLinuxGioMounter() {
+		return new LinuxGioMounter();
+	}
+
+	@Provides
+	@IntoSet
 	MounterStrategy provideLinuxGvfsMounter() {
 		return new LinuxGvfsMounter();
 	}

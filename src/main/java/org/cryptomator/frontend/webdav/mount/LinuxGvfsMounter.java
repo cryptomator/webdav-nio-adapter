@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class LinuxGvfsMounter implements MounterStrategy {
+class LinuxGvfsMounter extends VfsMountingStrategy implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LinuxGvfsMounter.class);
 	private static final String DEFAULT_GVFS_SCHEME = "dav";
@@ -38,36 +38,18 @@ class LinuxGvfsMounter implements MounterStrategy {
 			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "gvfs-mount \"" + schemeCorrectedUri.toASCIIString() + "\"");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 5, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {}", schemeCorrectedUri.toASCIIString());
-			return new MountImpl(schemeCorrectedUri);
+			return new MountGvfsImpl(schemeCorrectedUri);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException("URI constructed from elements known to be valid.", e);
 		}
 	}
 
-	private static class MountImpl implements Mount {
+	private class MountGvfsImpl extends MountImpl implements Mount {
 
-		private final ProcessBuilder revealCmd;
-		private final ProcessBuilder isMountedCmd;
-		private final ProcessBuilder unmountCmd;
-
-		private MountImpl(URI uri) {
+		private MountGvfsImpl(URI uri) {
 			this.revealCmd = new ProcessBuilder("sh", "-c", "gvfs-open \"" + uri.toASCIIString() + "\"");
 			this.isMountedCmd = new ProcessBuilder("sh", "-c", "test `gvfs-mount --list | grep \"" + uri.toASCIIString() + "\" | wc -l` -eq 1");
 			this.unmountCmd = new ProcessBuilder("sh", "-c", "gvfs-mount -u \"" + uri.toASCIIString() + "\"");
-		}
-
-		@Override
-		public void unmount() throws CommandFailedException {
-			Process isMountedProcess = ProcessUtil.startAndWaitFor(isMountedCmd, 5, TimeUnit.SECONDS);
-			if (isMountedProcess.exitValue() == 0) {
-				// only unmount if volume is still mounted, noop otherwise
-				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCmd, 5, TimeUnit.SECONDS), 0);
-			}
-		}
-
-		@Override
-		public void reveal() throws CommandFailedException {
-			ProcessUtil.startAndWaitFor(revealCmd, 5, TimeUnit.SECONDS);
 		}
 
 	}

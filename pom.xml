@@ -118,8 +118,6 @@
 				<version>3.8.0</version>
 				<configuration>
 					<release>8</release>
-					<source>1.8</source>
-					<target>1.8</target>
 					<showWarnings>true</showWarnings>
 				</configuration>
 			</plugin>

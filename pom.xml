@@ -15,10 +15,10 @@
 	</scm>
 
 	<properties>
-		<webdavservlet.version>1.0.2</webdavservlet.version>
-		<dagger.version>2.16</dagger.version>
-		<jetty.version>9.4.12.v20180830</jetty.version>
-		<guava.version>26.0-jre</guava.version>
+		<webdavservlet.version>1.0.3</webdavservlet.version>
+		<dagger.version>2.20</dagger.version>
+		<jetty.version>9.4.14.v20181114</jetty.version>
+		<guava.version>27.0-jre</guava.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -88,12 +88,6 @@
 			<artifactId>dagger</artifactId>
 			<version>${dagger.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger-compiler</artifactId>
-			<version>${dagger.version}</version>
-			<optional>true</optional>
-		</dependency>
 
 		<!-- Test -->
 		<dependency>
@@ -119,6 +113,13 @@
 				<configuration>
 					<release>8</release>
 					<showWarnings>true</showWarnings>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>com.google.dagger</groupId>
+							<artifactId>dagger-compiler</artifactId>
+							<version>${dagger.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -132,7 +133,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>3.3.2</version>
+						<version>4.0.2</version>
 						<configuration>
 							<cveValidForHours>24</cveValidForHours>
 							<failBuildOnCVSS>6</failBuildOnCVSS>
@@ -156,12 +157,18 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.2</version>
+						<version>0.8.3</version>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
 								<goals>
 									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<goals>
+									<goal>report</goal>
 								</goals>
 							</execution>
 						</executions>

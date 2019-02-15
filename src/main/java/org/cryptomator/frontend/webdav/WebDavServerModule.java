@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
+import com.google.common.base.Preconditions;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.frontend.webdav.mount.MounterModule;
@@ -42,17 +43,14 @@ class WebDavServerModule {
 	private static final int THREAD_IDLE_SECONDS = 60;
 	private static final String ROOT_PATH = "/";
 
+	private AtomicInteger threadNum = new AtomicInteger(1);
+
 	@Provides
 	@Singleton
 	ThreadPoolExecutor provideThreadPoolExecutor() {
 		// set core pool size = MAX_THREADS and allow coreThreadTimeOut to enforce spawning threads till the maximum even if the queue is not full
 		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
-		AtomicInteger threadNum = new AtomicInteger(1);
-		ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue, r -> {
-			Thread t = new Thread(r, String.format("Server thread %03d", threadNum.getAndIncrement()));
-			t.setDaemon(true);
-			return t;
-		});
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
 		executor.allowCoreThreadTimeOut(true);
 		return executor;
 	}
@@ -65,10 +63,29 @@ class WebDavServerModule {
 
 	@Provides
 	@Singleton
-	Server provideServer(ThreadPoolExecutor executorService, ContextHandlerCollection servletCollection) {
-		ThreadPool threadPool = new ExecutorThreadPool(executorService);
+	ExecutorThreadPool provideThreadPool(ThreadPoolExecutor executorService) {
+		ExecutorThreadPool threadPool = new ExecutorThreadPool(executorService);
+		executorService.setThreadFactory(this::createServerThread);
+		try {
+			threadPool.start();
+			return threadPool;
+		} catch (Exception e) {
+			throw new IllegalStateException("Implementation known not to throw an exception.", e);
+		}
+	}
+
+	private Thread createServerThread(Runnable runnable) {
+		Thread t = new Thread(runnable, String.format("webdav-%03d", threadNum.getAndIncrement()));
+		t.setDaemon(true);
+		return t;
+	}
+
+
+	@Provides
+	@Singleton
+	Server provideServer(ExecutorThreadPool threadPool, ContextHandlerCollection servletCollection) {
+		Preconditions.checkState(threadPool.isStarted()); // otherwise addBean() will make the threadpool managed, i.e. it will be shut down when the server is stopped
 		Server server = new Server(threadPool);
-		server.unmanage(threadPool); // prevent threadpool from being shutdown when stopping the server
 		server.setHandler(servletCollection);
 		return server;
 	}

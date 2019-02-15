@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 	<name>WebDAV-NIO Adapter</name>
 	<description>Embedded Jetty serving a WebDAV servlet to access resources at a given NIO path.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -15,7 +15,7 @@
 	</scm>
 
 	<properties>
-		<webdavservlet.version>1.0.3</webdavservlet.version>
+		<webdavservlet.version>1.0.4</webdavservlet.version>
 		<dagger.version>2.20</dagger.version>
 		<jetty.version>9.4.14.v20181114</jetty.version>
 		<guava.version>27.0-jre</guava.version>

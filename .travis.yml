@@ -13,6 +13,10 @@ before_script:
 - mvn --update-snapshots dependency-check:check -Pdependency-check
 script:
 - mvn clean test jacoco:report verify -Pcoverage
+- |
+  if [[ "$TRAVIS_BRANCH" =~ ^release/.* ]]; then
+    mvn -B javadoc:jar;
+  fi
 after_success:
 - curl -o ~/codacy-coverage-reporter.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.3/codacy-coverage-reporter-4.0.3-assembly.jar
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r target/site/jacoco/jacoco.xml
@@ -27,4 +31,4 @@ deploy:
     repo: cryptomator/webdav-nio-adapter
     tags: true
 after_deploy:
-  - "echo '{\"close\": \"1\"}' | curl -X POST -u cryptobot:${BINTRAY_API_KEY} https://api.bintray.com/maven_central_sync/cryptomator/maven/webdav-nio-adapter/versions/${TRAVIS_TAG}"
+  - "echo '{\"close\": \"1\"}' | curl --max-time 10 -X POST -u cryptobot:${BINTRAY_API_KEY} https://api.bintray.com/maven_central_sync/cryptomator/maven/webdav-nio-adapter/versions/${TRAVIS_TAG}"

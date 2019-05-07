@@ -1,3 +1,4 @@
+dist: xenial
 language: java
 sudo: false
 jdk:
@@ -31,4 +32,4 @@ deploy:
     repo: cryptomator/webdav-nio-adapter
     tags: true
 after_deploy:
-  - "echo '{\"close\": \"1\"}' | curl --max-time 10 -X POST -u cryptobot:${BINTRAY_API_KEY} https://api.bintray.com/maven_central_sync/cryptomator/maven/webdav-nio-adapter/versions/${TRAVIS_TAG}"
+  - "echo '{\"close\": \"1\"}' | curl --max-time 120 -X POST -u cryptobot:${BINTRAY_API_KEY} https://api.bintray.com/maven_central_sync/cryptomator/maven/webdav-nio-adapter/versions/${TRAVIS_TAG}"

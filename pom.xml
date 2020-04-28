@@ -15,7 +15,7 @@
 	</scm>
 
 	<properties>
-		<webdavservlet.version>1.0.6</webdavservlet.version>
+		<webdavservlet.version>1.0.7</webdavservlet.version>
 		<dagger.version>2.27</dagger.version>
 		<jetty.version>9.4.28.v20200408</jetty.version>
 		<guava.version>29.0-jre</guava.version>

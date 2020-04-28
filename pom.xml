@@ -16,10 +16,10 @@
 
 	<properties>
 		<webdavservlet.version>1.0.6</webdavservlet.version>
-		<dagger.version>2.22.1</dagger.version>
-		<jetty.version>9.4.17.v20190418</jetty.version>
-		<guava.version>27.1-jre</guava.version>
-		<slf4j.version>1.7.26</slf4j.version>
+		<dagger.version>2.27</dagger.version>
+		<jetty.version>9.4.28.v20200408</jetty.version>
+		<guava.version>29.0-jre</guava.version>
+		<slf4j.version>1.7.30</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -45,7 +45,7 @@
 		<repository>
 			<id>bintray</id>
 			<name>bintray</name>
-			<url>http://jcenter.bintray.com</url>
+			<url>https://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
 
@@ -109,7 +109,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<release>8</release>
 					<showWarnings>true</showWarnings>
@@ -133,7 +133,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>4.0.2</version>
+						<version>5.3.2</version>
 						<configuration>
 							<cveValidForHours>24</cveValidForHours>
 							<failBuildOnCVSS>6</failBuildOnCVSS>
@@ -157,7 +157,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.3</version>
+						<version>0.8.5</version>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
@@ -189,7 +189,7 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>3.0.1</version>
+						<version>3.2.1</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -201,7 +201,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.1.0</version>
+						<version>3.2.0</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>

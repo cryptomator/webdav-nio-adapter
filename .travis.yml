@@ -8,10 +8,10 @@ env:
   - secure: "bT1lpgLsR/HIXG4qgR+dnYS0dGhTzu1Y1atoRs/71pFhykTwXH4A9kPyIV3q2XWUH4IAl7nwbOAC5X22RgqfpXhZI5r1qPkw7nncoNKF+CU37DPmG9JWUNTnJmJNva8e6WZ6flneMOTzx/u8tcV+vhH1+MLPzrYdH/c4W60HBrQF1WlXkOGBSHRr+p4bNvzglSX4w2bIGLRW6XJrcovCt3BDqq1/K8pM4YsQ19+0ddl1vVgGlVosoonxSloOUUDKbFM7KYCFMT3KjdEu1dWdvg1Z9bc9Mc0WAGO8BrTIfuQxnKHWpTEj+jTJrzVv/jlRLCvoh0KEhc/Fowhkby6QsFlWWwGgK1zo7Sk6t9urfxNPwtVYZrL2ZSPtqjlCKeG4fvMf7NEYqWmCOv02Jmmhgc19agpxT1VcpByrZxPURPv1Frwek8ZI+2EH2hdccB7ZIUW3xxRKdw9siaYu/78BlJRlvsXCvrVj9ceVcj2qm+jy6ZxRNZ+X587OtQLZoLuIRFDIlJJzDQfvvbeiMNNyRCfBiKF0chnuGjt7lYGtonrCpuJ0rd+a4zLrosOX1OkecXetGF6ARdsTOovFwch9KXDCHklg8bSeUk696HsHbop3vf5sWnxkvqfu7SKI2J0rktY3LAYQlya7YyNGGCMVlAq5VXfMVR83qxfkuEPvp1M=" # CODACY_PROJECT_TOKEN
   - secure: "H0EGUR2PiA/60hCuwAIWTCOdy7SL3GREiRPUHu9kgLR15Lw3UNG69UBcL2e6aueKuUnvXRCdzk9/xY7SutjvtieRsSgqyxIchMkSP5LMHE143b0RLrjJTxSERhnDoBXyjhErhA34nLRU9XmA/k88S6LhALJnlHUZvWzjr7g3Wmtz6oMiKq+cKlj50uEnu1g2bobntex0QOuYtlTaO7/P4bIBezHK9kmsQb0MfqNTaMr1XstFBT3NzxdBp3hEaTNF1zVcsO1uXZOEb7Xqr1KPYFgkWIBT2LlYGTEUhJedYJMzD7DiGxjNufxlL9z2OTLb2u2+6exnW/Xv1JwyXuG3pN9hUsHBj7ErvHzlgDX7Mp52+SZtXBErsXI/9zalBB8ElKYRWBjS2boGHN207OlxznWnB27RNdWxeeiJcni8gBvb4G3Lnjze3EyzHW5P1hOzdKcJAtDGZPeu4hsNcqUmTxU1Xlpsnmh2RHBl3vT4kzQyyd4VYpSHeuF3rurfxeZrwUNMhfWILAlsGPBfp8K0NQNcNib1NbNXAgv713LBgCtZXsK3+AYYbAf4sHfGuithmH5AUiIZJ6MP8kDgrm0h4J2m7MOLjslNUzcMjofrdlhvqArpRAOg+esk7rqU3+FDz4sIOtrzGxUx3xY4zOK+xMg0YjHeRoB43iJc0LEPQsw=" # BINTRAY_API_KEY
 install:
-- curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/e60ee486e34ee0c79f89f947abe2c83b4290c6bb/settings.xml
-- mvn source:help javadoc:help dependency:go-offline -Pdependency-check,coverage,release
+- curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/fb3fe9a6db00cdac09788285b108a3645193a45b/settings.xml
 before_script:
-- mvn --update-snapshots dependency-check:check -Pdependency-check
+- mvn -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN --update-snapshots dependency-check:check -Pdependency-check
+- if [ -n "$TRAVIS_TAG" ]; then mvn versions:set -DnewVersion=${TRAVIS_TAG}; fi
 script:
 - mvn clean test jacoco:report verify -Pcoverage
 - |
@@ -19,7 +19,7 @@ script:
     mvn -B javadoc:jar;
   fi
 after_success:
-- curl -o ~/codacy-coverage-reporter.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.3/codacy-coverage-reporter-4.0.3-assembly.jar
+- curl -o ~/codacy-coverage-reporter.jar https://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0.jar
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r target/site/jacoco/jacoco.xml
 cache:
   directories:

@@ -43,12 +43,12 @@ jobs:
       - name: Build and Test
         id: buildandtest
         run: mvn -B install
-      - name: Upload snapshot artifact {{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
+      - name: Upload snapshot artifact ${{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
         id: uploadsnapshot
         uses: actions/upload-artifact@v2
         with:
-          name: {{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
-          path: target/{{ env.PROJECT_NAME }}-*.jar
+          name: ${{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
+          path: target/${{ env.PROJECT_NAME }}-*.jar
       - name: Deploy to jcenter
         id: deploytojcenter
         run: mvn -B deploy

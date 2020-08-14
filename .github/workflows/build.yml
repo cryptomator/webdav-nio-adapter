@@ -31,26 +31,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Ensure to use tagged version
-        id: taggedversion
+        id: taggedVersion
         run: mvn versions:set --file ./pom.xml -DnewVersion=${GITHUB_REF##*/}
         if: startsWith(github.ref, 'refs/tags/') # Run if ref is tagged (e.g. "v.1.4")
       - name: Export the project version to the job environment and fix it as an ouput of this step
-        id: setversion # Output used above (outputs.artifact-version)
+        id: setVersion # Output used above (outputs.artifact-version)
         run: |
           v=$(mvn help:evaluate "-Dexpression=project.version" -q -DforceStdout)
           echo "::set-env name=BUILD_VERSION::${v}"
           echo "::set-output name=version::${v}"
       - name: Build and Test
-        id: buildandtest
+        id: buildAndTest
+        run: mvn clean test jacoco:report verify -Pcoverage
+      - name: Analyze Converage
+        id: analyzeCoverage
+        run: |
+          curl -o ~/codacy-coverage-reporter.jar https://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/${{ env.CODACY_VERSION }}/codacy-coverage-reporter-${{ env.CODACY_VERSION }}.jar
+          java -jar ~/codacy-coverage-reporter.jar report -l Java -r target/site/jacoco/jacoco.xml
+        env:
+          CODACY_VERSION: 7.1.0
+      - name: Install Artifact
+        id: installArtifact
         run: mvn -B install
       - name: Upload snapshot artifact ${{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
-        id: uploadsnapshot
+        id: uploadSnapshot
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
           path: target/${{ env.PROJECT_NAME }}-*.jar
       - name: Deploy to jcenter
-        id: deploytojcenter
+        id: deployToJcenter
         run: mvn -B deploy
         if: startsWith(github.ref, 'refs/tags/') # Run if ref is tagged (e.g. "v.1.4")
         env:

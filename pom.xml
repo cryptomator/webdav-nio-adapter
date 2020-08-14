@@ -49,6 +49,13 @@
 		</repository>
 	</repositories>
 
+	<distributionManagement>
+		<repository>
+			<id>bintray-jcenter</id>
+			<url>https://api.bintray.com/maven/cryptomator/maven/fuse-cloud-access-adapter/;publish=1</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.cryptomator</groupId>

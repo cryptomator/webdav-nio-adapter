@@ -48,7 +48,7 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: jacoco.xml
+          coverage-reports: jacoco.xml -r target/site/jacoco/jacoco.xml
         env:
           CODACY_REPORTER_VERSION: 7.1.0
       - name: Install Artifact

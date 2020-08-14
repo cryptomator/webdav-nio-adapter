@@ -8,17 +8,22 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
     outputs:
+      # Get from step "setversion"
       artifact-version: ${{ steps.setversion.outputs.version }}
     env:
       BUILD_VERSION: SNAPSHOT
+      # Name of the project; used in multiple steps (e.g. for upload)
+      PROJECT_NAME: webdav-nio-adapter
     steps:
+      # Foreign Action: Checkout the current commit
       - uses: actions/checkout@v2
+      # Foreign Action: Setup Java Runtime Environment
       - uses: actions/setup-java@v1
         with:
           java-version: 11
           server-id: bintray-jcenter
-          server-username: BINTRAY_USERNAME
-          server-password: BINTRAY_API_KEY
+          server-username: BINTRAY_USERNAME # Defined in step "deploytojcenter"
+          server-password: BINTRAY_API_KEY # See above
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
@@ -26,24 +31,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Ensure to use tagged version
+        id: taggedversion
         run: mvn versions:set --file ./pom.xml -DnewVersion=${GITHUB_REF##*/}
-        if: startsWith(github.ref, 'refs/tags/')
-      - name: Export the project version to the job environment and fix it as an ouput of this job
-        id: setversion
+        if: startsWith(github.ref, 'refs/tags/') # Run if ref is tagged (e.g. "v.1.4")
+      - name: Export the project version to the job environment and fix it as an ouput of this step
+        id: setversion # Output used above (outputs.artifact-version)
         run: |
           v=$(mvn help:evaluate "-Dexpression=project.version" -q -DforceStdout)
           echo "::set-env name=BUILD_VERSION::${v}"
           echo "::set-output name=version::${v}"
       - name: Build and Test
+        id: buildandtest
         run: mvn -B install
-      - name: Upload snapshot artifact webdav-nio-adapter-${{ env.BUILD_VERSION }}.jar
+      - name: Upload snapshot artifact {{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
+        id: uploadsnapshot
         uses: actions/upload-artifact@v2
         with:
-          name: webdav-nio-adapter-${{ env.BUILD_VERSION }}.jar
-          path: target/webdav-nio-adapter-*.jar
+          name: {{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
+          path: target/{{ env.PROJECT_NAME }}-*.jar
       - name: Deploy to jcenter
+        id: deploytojcenter
         run: mvn -B deploy
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') # Run if ref is tagged (e.g. "v.1.4")
         env:
           BINTRAY_USERNAME: cryptobot
           BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}

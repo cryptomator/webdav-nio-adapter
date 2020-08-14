@@ -43,13 +43,14 @@ jobs:
       - name: Build and Test
         id: buildAndTest
         run: mvn clean test jacoco:report verify -Pcoverage
-      - name: Analyze Converage
-        id: analyzeCoverage
-        run: |
-          curl -o ~/codacy-coverage-reporter.jar https://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/${{ env.CODACY_VERSION }}/codacy-coverage-reporter-${{ env.CODACY_VERSION }}.jar
-          java -jar ~/codacy-coverage-reporter.jar report -l Java -r target/site/jacoco/jacoco.xml
+      - name: Run Codacy-coverage-reporter
+        id: coverageReporter
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: jacoco.xml
         env:
-          CODACY_VERSION: 7.1.0
+          CODACY_REPORTER_VERSION: 7.1.0
       - name: Install Artifact
         id: installArtifact
         run: mvn -B install

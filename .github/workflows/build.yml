@@ -43,12 +43,13 @@ jobs:
       - name: Build and Test
         id: buildAndTest
         run: |
-          mvn clean install jacoco:report -Pcoverage,dependency-check
+          mvn -B clean install jacoco:report -Pcoverage
       - name: Upload code coverage report
         id: codacyCoverageReporter
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        continue-on-error: true
       - name: Upload snapshot artifact ${{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
         id: uploadSnapshot
         uses: actions/upload-artifact@v2

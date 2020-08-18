@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/cryptomator/webdav-nio-adapter.svg?branch=develop)](https://travis-ci.org/cryptomator/webdav-nio-adapter)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cb25035c651d4cbf92d21e00137f47d7)](https://www.codacy.com/app/cryptomator/webdav-nio-adapter?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cryptomator/webdav-nio-adapter&amp;utm_campaign=Badge_Grade)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/cb25035c651d4cbf92d21e00137f47d7)](https://www.codacy.com/app/cryptomator/webdav-nio-adapter?utm_source=github.com&utm_medium=referral&utm_content=cryptomator/webdav-nio-adapter&utm_campaign=Badge_Coverage)
+[![Build Status](https://github.com/cryptomator/webdav-nio-adapter/workflows/Build/badge.svg)](https://github.com/cryptomator/webdav-nio-adapter/actions?query=workflow%3ABuild)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cb25035c651d4cbf92d21e00137f47d7)](https://www.codacy.com/app/cryptomator/webdav-nio-adapter)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/cb25035c651d4cbf92d21e00137f47d7)](https://www.codacy.com/app/cryptomator/webdav-nio-adapter)
 [![Maven Central](https://img.shields.io/maven-central/v/org.cryptomator/webdav-nio-adapter.svg?maxAge=86400)](https://repo1.maven.org/maven2/org/cryptomator/webdav-nio-adapter/)
 [![Javadocs](http://www.javadoc.io/badge/org.cryptomator/webdav-nio-adapter.svg)](http://www.javadoc.io/doc/org.cryptomator/webdav-nio-adapter)
 

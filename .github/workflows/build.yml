@@ -64,7 +64,7 @@ jobs:
           path: target/${{ env.PROJECT_NAME }}-*.jar
       - name: Deploy to jcenter
         id: deployToJcenter
-        run: mvn -B deploy
+        run: mvn -B deploy -Prelease -DskipTests
         if: startsWith(github.ref, 'refs/tags/') # Run if ref is tagged (e.g. "v.1.4")
         env:
           BINTRAY_USERNAME: cryptobot

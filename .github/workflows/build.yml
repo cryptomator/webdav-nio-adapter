@@ -43,19 +43,12 @@ jobs:
       - name: Build and Test
         id: buildAndTest
         run: |
-          mvn clean test jacoco:report verify -Pcoverage
-          cp target/site/jacoco/jacoco.xml jacoco.xml
-      - name: Run Codacy-coverage-reporter
-        id: coverageReporter
-        uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: jacoco.xml
+          mvn clean install jacoco:report -Pcoverage,dependency-check
+      - name: Upload code coverage report
+        id: codacyCoverageReporter
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
         env:
-          CODACY_REPORTER_VERSION: 7.1.0
-      - name: Install Artifact
-        id: installArtifact
-        run: mvn -B install
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
       - name: Upload snapshot artifact ${{ env.PROJECT_NAME }}-${{ env.BUILD_VERSION }}.jar
         id: uploadSnapshot
         uses: actions/upload-artifact@v2

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>1.0.12</version>
+	<version>1.0.13</version>
 	<name>WebDAV-NIO Adapter</name>
 	<description>Embedded Jetty serving a WebDAV servlet to access resources at a given NIO path.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -17,8 +17,8 @@
 	<properties>
 		<webdavservlet.version>1.0.8</webdavservlet.version>
 		<dagger.version>2.28.3</dagger.version>
-		<jetty.version>9.4.31.v20200723</jetty.version>
-		<guava.version>29.0-jre</guava.version>
+		<jetty.version>9.4.33.v20201020</jetty.version>
+		<guava.version>30.0-jre</guava.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -157,7 +157,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.5</version>
+						<version>0.8.6</version>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>

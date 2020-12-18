@@ -23,7 +23,7 @@ class LinuxGvfsMounter extends VfsMountingStrategy implements MounterStrategy {
 		// check if gvfs is installed:
 		assert IS_OS_LINUX;
 		try {
-			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("which", "gvfs-mount", "xdg-open");
+			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("test ", "`command -v gvfs-mount`");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);
 			return true;
 		} catch (CommandFailedException e) {

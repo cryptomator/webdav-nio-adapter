@@ -23,7 +23,7 @@ class LinuxGioMounter extends VfsMountingStrategy implements MounterStrategy {
 		// check if gio is installed:
 		assert IS_OS_LINUX;
 		try {
-			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("which", "gio", "xdg-open");
+			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("test", " `command -v gio`");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);
 			return true;
 		} catch (CommandFailedException e) {

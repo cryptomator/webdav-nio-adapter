@@ -35,7 +35,7 @@ public class MirroringTest {
 				MountParams mountParams = MountParams.create() //
 						.withWindowsDriveLetter("X:") //
 						.withPreferredGvfsScheme("dav") //
-						.withWebdavHostname("cryptomator-vault") //
+						// .withWebdavHostname("cryptomator-vault") // uncomment only if hostname is set in /etc/hosts!
 						.build();
 				Mount mount = servlet.mount(mountParams);
 				mount.reveal();

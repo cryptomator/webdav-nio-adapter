@@ -84,11 +84,6 @@ class MacAppleScriptMounter implements MounterStrategy {
 				return;
 			}
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
-			try {
-				Files.deleteIfExists(mountPath);
-			} catch (IOException e) {
-				LOG.warn("Could not delete {} due to exception: {}", mountPath, e.getMessage());
-			}
 		}
 
 		@Override

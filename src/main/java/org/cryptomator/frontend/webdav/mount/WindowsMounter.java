@@ -34,10 +34,8 @@ class WindowsMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
-			URL url = uri.toURL();
 			tuneProxyConfigSilently(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
-
 			String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
 			ProcessBuilder mount = new ProcessBuilder("net", "use", preferredDriveLetter, uncPath, "/persistent:no");
 			Process mountProcess = mount.start();
@@ -46,7 +44,7 @@ class WindowsMounter implements MounterStrategy {
 			ProcessUtil.assertExitValue(mountProcess, 0);
 			String driveLetter = AUTOASSIGN_DRRIVE_LETTER.equals(preferredDriveLetter) ? getDriveLetter(stdout) : preferredDriveLetter;
 			LOG.debug("Mounted {} on drive {}", uncPath, driveLetter);
-			return new MountImpl(url, driveLetter);
+			return new MountImpl(uri, driveLetter);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
 		}
@@ -113,15 +111,15 @@ class WindowsMounter implements MounterStrategy {
 		private final ProcessBuilder forcedUnmountCommand;
 		private final ProcessBuilder revealCommand;
 
-		private final URL accessURL;
+		private final URI accessURI;
 		private final Path mountpoint;
 
-		public MountImpl(URL url, String driveLetter) {
+		public MountImpl(URI uri, String driveLetter) {
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
 			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
 			this.revealCommand = new ProcessBuilder("explorer.exe", "/root," + driveLetter);
 			this.mountpoint = Paths.get(driveLetter);
-			this.accessURL = url;
+			this.accessURI = uri;
 		}
 
 		@Override
@@ -130,8 +128,8 @@ class WindowsMounter implements MounterStrategy {
 		}
 
 		@Override
-		public URL getURLofWebDAVDirectory() {
-			return accessURL;
+		public URI getURIofWebDAVDirectory() {
+			return accessURI;
 		}
 
 		@Override

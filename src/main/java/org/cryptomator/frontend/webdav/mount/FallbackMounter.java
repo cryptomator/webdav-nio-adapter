@@ -25,15 +25,15 @@ class FallbackMounter implements MounterStrategy {
 
 	static class FallbackMount implements Mounter.Mount {
 
-		private final URL url;
+		private final URI uri;
 
-		FallbackMount(URL url){
-			this.url = url;
+		FallbackMount(URI uri){
+			this.uri = uri;
 		}
 
 		@Override
-		public URL getURLofWebDAVDirectory() {
-			return url;
+		public URI getURIofWebDAVDirectory() {
+			return uri;
 		}
 
 		@Override

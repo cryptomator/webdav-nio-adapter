@@ -42,7 +42,6 @@ class MacAppleScriptMounter implements MounterStrategy {
 			LOG.warn("Unable to store credentials for WebDAV access: {}", e.getMessage());
 		}
 		try {
-			URL accessUrl = uri.toURL();
 			String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 			Process mountProcess = mount.start();
@@ -60,7 +59,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			ProcessBuilder wait = new ProcessBuilder("/usr/bin/osascript", "-e", waitAppleScript1, "-e", waitAppleScript2, "-e", waitAppleScript3);
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(wait, 30, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {}.", uri.toASCIIString());
-			return new MountImpl(accessUrl, volumeIdentifier);
+			return new MountImpl(uri, volumeIdentifier);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
 		}
@@ -70,16 +69,16 @@ class MacAppleScriptMounter implements MounterStrategy {
 
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
-		private final URL accessURL;
+		private final URI accessURI;
 
-		private MountImpl(URL accessURL, String volumeIdentifier) {
+		private MountImpl(URI accessURI, String volumeIdentifier) {
 			String openAppleScript = String.format("tell application \"Finder\" to open \"%s\"", volumeIdentifier);
 			String activateAppleScript = String.format("tell application \"Finder\" to activate \"%s\"", volumeIdentifier);
 			String ejectAppleScript = String.format("tell application \"Finder\" to if \"%s\" exists then eject \"%s\"", volumeIdentifier, volumeIdentifier);
 
 			this.revealCommand = new ProcessBuilder("/usr/bin/osascript", "-e", openAppleScript, "-e", activateAppleScript);
 			this.unmountCommand = new ProcessBuilder("/usr/bin/osascript", "-e", ejectAppleScript);
-			this.accessURL = accessURL;
+			this.accessURI = accessURI;
 		}
 
 		@Override
@@ -88,8 +87,8 @@ class MacAppleScriptMounter implements MounterStrategy {
 		}
 
 		@Override
-		public URL getURLofWebDAVDirectory() {
-			return accessURL;
+		public URI getURIofWebDAVDirectory() {
+			return accessURI;
 		}
 
 		@Override

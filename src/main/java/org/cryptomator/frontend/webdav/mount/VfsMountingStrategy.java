@@ -2,7 +2,6 @@ package org.cryptomator.frontend.webdav.mount;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 abstract class VfsMountingStrategy implements MounterStrategy {
@@ -25,12 +24,8 @@ abstract class VfsMountingStrategy implements MounterStrategy {
 		}
 
 		@Override
-		public URL getURLofWebDAVDirectory() {
-			try {
-				return uri.toURL();
-			} catch (MalformedURLException e) {
-				return null; // should not happen
-			}
+		public URI getURIofWebDAVDirectory() {
+			return uri;
 		}
 
 		@Override

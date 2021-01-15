@@ -55,14 +55,13 @@ class MacShellScriptMounter implements MounterStrategy {
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		Path mountPath = VOLUMES_PATH.resolve("Cryptomator_" + Long.toHexString(crc32(uri.toASCIIString())));
 		try {
-			URL url = uri.toURL();
 			String mountName = Iterables.getLast(Splitter.on("/").omitEmptyStrings().split(uri.getPath()));
 			Files.createDirectory(mountPath);
 
 			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "mount_webdav -S -v " + mountName + " \"" + uri.toASCIIString() + "\" \"" + mountPath + "\"");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 30, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {} to {}.", uri.toASCIIString(), mountPath);
-			return new MountImpl(url, mountPath);
+			return new MountImpl(uri, mountPath);
 		} catch (IOException | CommandFailedException e) {
 			try {
 				// cleanup:
@@ -85,11 +84,11 @@ class MacShellScriptMounter implements MounterStrategy {
 		private final Path mountPath;
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
-		private final URL url;
+		private final URI uri;
 
-		private MountImpl(URL url, Path mountPath) {
+		private MountImpl(URI uri, Path mountPath) {
 			this.mountPath = mountPath;
-			this.url = url;
+			this.uri = uri;
 			this.revealCommand = new ProcessBuilder("open", mountPath.toString());
 			this.unmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount \"" + mountPath + "\"");
 		}
@@ -115,8 +114,8 @@ class MacShellScriptMounter implements MounterStrategy {
 		}
 
 		@Override
-		public URL getURLofWebDAVDirectory() {
-			return url;
+		public URI getURIofWebDAVDirectory() {
+			return uri;
 		}
 
 		@Override

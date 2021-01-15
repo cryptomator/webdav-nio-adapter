@@ -27,7 +27,7 @@ public interface Mounter {
 			return Optional.empty();
 		}
 
-		URL getURLofWebDAVDirectory();
+		URI getURIofWebDAVDirectory();
 
 		default Optional<UnmountOperation> forced() {
 			return Optional.empty();

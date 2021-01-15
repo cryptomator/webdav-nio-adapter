@@ -21,31 +21,32 @@ public interface Mounter {
 	/**
 	 * Represents a single mounted volume and allows certain interactions with it.
 	 */
-	public interface Mount extends UnmountOperation {
+	interface Mount extends UnmountOperation {
 
 		default Optional<Path> getMountPoint() {
 			return Optional.empty();
 		}
 
-		URI getURIofWebDAVDirectory();
+		URI getWebDavUri();
 
 		default Optional<UnmountOperation> forced() {
 			return Optional.empty();
 		}
 
+		@Deprecated
 		void reveal() throws CommandFailedException;
 
 		void reveal(Revealer revealer) throws RevealException;
 
 	}
 
-	public interface UnmountOperation {
+	interface UnmountOperation {
 
 		void unmount() throws CommandFailedException;
 
 	}
 
-	public class CommandFailedException extends Exception {
+	class CommandFailedException extends Exception {
 
 		public CommandFailedException(String message) {
 			super(message);
@@ -57,11 +58,15 @@ public interface Mounter {
 
 	}
 
+	@FunctionalInterface
 	interface Revealer {
-		public void reveal(Path p) throws RevealException;
+
+		void reveal(Path path) throws RevealException;
+
 	}
 
 	class RevealException extends Exception {
+
 		public RevealException(String msg) {
 			super(msg);
 		}
@@ -73,5 +78,6 @@ public interface Mounter {
 		public RevealException(String msg, Throwable cause) {
 			super(msg, cause);
 		}
+
 	}
 }

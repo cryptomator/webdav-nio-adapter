@@ -128,7 +128,7 @@ class WindowsMounter implements MounterStrategy {
 		}
 
 		@Override
-		public URI getURIofWebDAVDirectory() {
+		public URI getWebDavUri() {
 			return accessURI;
 		}
 

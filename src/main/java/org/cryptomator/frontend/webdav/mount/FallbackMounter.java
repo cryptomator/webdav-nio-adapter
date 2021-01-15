@@ -32,7 +32,7 @@ class FallbackMounter implements MounterStrategy {
 		}
 
 		@Override
-		public URI getURIofWebDAVDirectory() {
+		public URI getWebDavUri() {
 			return uri;
 		}
 

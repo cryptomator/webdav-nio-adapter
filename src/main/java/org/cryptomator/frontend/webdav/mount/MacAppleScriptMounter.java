@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,21 +70,32 @@ class MacAppleScriptMounter implements MounterStrategy {
 		private final Path mountPath;
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
+		private final ProcessBuilder forcedUnmountCommand;
 
 		private MountImpl(Path mountPath) {
 			this.mountPath = mountPath;
 			this.revealCommand = new ProcessBuilder("open", mountPath.toString());
 			this.unmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount \"" + mountPath + "\"");
+			this.forcedUnmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount force \"" + mountPath + "\"");
 		}
 
 		@Override
 		public void unmount() throws CommandFailedException {
+			unmount(unmountCommand);
+		}
+
+		@Override
+		public Optional<UnmountOperation> forced() {
+			return Optional.of(() -> unmount(forcedUnmountCommand));
+		}
+
+		private void unmount(ProcessBuilder command) throws CommandFailedException {
 			if (!Files.isDirectory(mountPath)) {
 				// unmounting a mounted drive will delete the associated mountpoint (at least under OS X 10.11)
 				LOG.debug("Volume already unmounted.");
 				return;
 			}
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 10, TimeUnit.SECONDS), 0);
 		}
 
 		@Override

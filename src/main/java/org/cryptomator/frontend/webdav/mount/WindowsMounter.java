@@ -1,20 +1,22 @@
 package org.cryptomator.frontend.webdav.mount;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 
 class WindowsMounter implements MounterStrategy {
 
@@ -32,6 +34,7 @@ class WindowsMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
+			URL url = uri.toURL();
 			tuneProxyConfigSilently(uri);
 			String preferredDriveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, AUTOASSIGN_DRRIVE_LETTER);
 
@@ -43,7 +46,7 @@ class WindowsMounter implements MounterStrategy {
 			ProcessUtil.assertExitValue(mountProcess, 0);
 			String driveLetter = AUTOASSIGN_DRRIVE_LETTER.equals(preferredDriveLetter) ? getDriveLetter(stdout) : preferredDriveLetter;
 			LOG.debug("Mounted {} on drive {}", uncPath, driveLetter);
-			return new MountImpl(driveLetter);
+			return new MountImpl(url, driveLetter);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
 		}
@@ -110,10 +113,25 @@ class WindowsMounter implements MounterStrategy {
 		private final ProcessBuilder forcedUnmountCommand;
 		private final ProcessBuilder revealCommand;
 
-		public MountImpl(String driveLetter) {
+		private final URL accessURL;
+		private final Path mountpoint;
+
+		public MountImpl(URL url, String driveLetter) {
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
 			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
 			this.revealCommand = new ProcessBuilder("explorer.exe", "/root," + driveLetter);
+			this.mountpoint = Paths.get(driveLetter);
+			this.accessURL = url;
+		}
+
+		@Override
+		public Optional<Path> getMountPoint() {
+			return Optional.of(mountpoint);
+		}
+
+		@Override
+		public URL getURLofWebDAVDirectory() {
+			return accessURL;
 		}
 
 		@Override
@@ -133,6 +151,11 @@ class WindowsMounter implements MounterStrategy {
 		@Override
 		public void reveal() throws CommandFailedException {
 			ProcessUtil.startAndWaitFor(revealCommand, 5, TimeUnit.SECONDS);
+		}
+
+		@Override
+		public void reveal(Revealer revealer) throws RevealException {
+			revealer.reveal(mountpoint);
 		}
 
 	}

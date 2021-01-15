@@ -2,11 +2,13 @@ package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
@@ -53,13 +55,14 @@ class MacShellScriptMounter implements MounterStrategy {
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		Path mountPath = VOLUMES_PATH.resolve("Cryptomator_" + Long.toHexString(crc32(uri.toASCIIString())));
 		try {
+			URL url = uri.toURL();
 			String mountName = Iterables.getLast(Splitter.on("/").omitEmptyStrings().split(uri.getPath()));
 			Files.createDirectory(mountPath);
 
 			ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "mount_webdav -S -v " + mountName + " \"" + uri.toASCIIString() + "\" \"" + mountPath + "\"");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(mountCmd, 30, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {} to {}.", uri.toASCIIString(), mountPath);
-			return new MountImpl(mountPath);
+			return new MountImpl(url, mountPath);
 		} catch (IOException | CommandFailedException e) {
 			try {
 				// cleanup:
@@ -82,9 +85,11 @@ class MacShellScriptMounter implements MounterStrategy {
 		private final Path mountPath;
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
+		private final URL url;
 
-		private MountImpl(Path mountPath) {
+		private MountImpl(URL url, Path mountPath) {
 			this.mountPath = mountPath;
+			this.url = url;
 			this.revealCommand = new ProcessBuilder("open", mountPath.toString());
 			this.unmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount \"" + mountPath + "\"");
 		}
@@ -105,8 +110,24 @@ class MacShellScriptMounter implements MounterStrategy {
 		}
 
 		@Override
+		public Optional<Path> getMountPoint() {
+			return Optional.of(mountPath);
+		}
+
+		@Override
+		public URL getURLofWebDAVDirectory() {
+			return url;
+		}
+
+		@Override
 		public void reveal() throws CommandFailedException {
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 10, TimeUnit.SECONDS), 0);
+		}
+
+		@Override
+		public void reveal(Revealer revealer) throws RevealException {
+			revealer.reveal(mountPath);
+			//TODO: maybe try the other reveal on error?
 		}
 
 	}

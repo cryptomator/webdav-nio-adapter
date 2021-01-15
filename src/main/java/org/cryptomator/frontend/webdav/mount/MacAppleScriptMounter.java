@@ -1,16 +1,16 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 class MacAppleScriptMounter implements MounterStrategy {
 
@@ -42,6 +42,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			LOG.warn("Unable to store credentials for WebDAV access: {}", e.getMessage());
 		}
 		try {
+			URL accessUrl = uri.toURL();
 			String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 			Process mountProcess = mount.start();
@@ -59,7 +60,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			ProcessBuilder wait = new ProcessBuilder("/usr/bin/osascript", "-e", waitAppleScript1, "-e", waitAppleScript2, "-e", waitAppleScript3);
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(wait, 30, TimeUnit.SECONDS), 0);
 			LOG.debug("Mounted {}.", uri.toASCIIString());
-			return new MountImpl(volumeIdentifier);
+			return new MountImpl(accessUrl, volumeIdentifier);
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
 		}
@@ -69,14 +70,16 @@ class MacAppleScriptMounter implements MounterStrategy {
 
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
+		private final URL accessURL;
 
-		private MountImpl(String volumeIdentifier) {
+		private MountImpl(URL accessURL, String volumeIdentifier) {
 			String openAppleScript = String.format("tell application \"Finder\" to open \"%s\"", volumeIdentifier);
 			String activateAppleScript = String.format("tell application \"Finder\" to activate \"%s\"", volumeIdentifier);
 			String ejectAppleScript = String.format("tell application \"Finder\" to if \"%s\" exists then eject \"%s\"", volumeIdentifier, volumeIdentifier);
 
 			this.revealCommand = new ProcessBuilder("/usr/bin/osascript", "-e", openAppleScript, "-e", activateAppleScript);
 			this.unmountCommand = new ProcessBuilder("/usr/bin/osascript", "-e", ejectAppleScript);
+			this.accessURL = accessURL;
 		}
 
 		@Override
@@ -85,8 +88,18 @@ class MacAppleScriptMounter implements MounterStrategy {
 		}
 
 		@Override
+		public URL getURLofWebDAVDirectory() {
+			return accessURL;
+		}
+
+		@Override
 		public void reveal() throws CommandFailedException {
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 10, TimeUnit.SECONDS), 0);
+		}
+
+		@Override
+		public void reveal(Revealer revealer) throws RevealException {
+			throw new RevealException("No mountpoint present to reveal");
 		}
 
 	}

@@ -20,8 +20,13 @@ class LinuxGvfsMounter extends VfsMountingStrategy implements MounterStrategy {
 			return false;
 		}
 
-		// check if gvfs is installed:
 		assert IS_OS_LINUX;
+
+		if( System.getenv().getOrDefault("XDG_CURRENT_DESKTOP", "").equals("KDE")) {
+			return false;	//see https://github.com/cryptomator/cryptomator/issues/1381
+		}
+
+		// check if gvfs is installed:
 		try {
 			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("test ", "`command -v gvfs-mount`");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);

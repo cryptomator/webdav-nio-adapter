@@ -69,22 +69,33 @@ class MacAppleScriptMounter implements MounterStrategy {
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
 		private final URI uri;
+		private final ProcessBuilder forcedUnmountCommand;
 
 		private MountImpl(URI uri, Path mountPath) {
 			this.mountPath = mountPath;
 			this.uri = uri;
 			this.revealCommand = new ProcessBuilder("open", mountPath.toString());
 			this.unmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount \"" + mountPath + "\"");
+			this.forcedUnmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount force \"" + mountPath + "\"");
 		}
 
 		@Override
 		public void unmount() throws CommandFailedException {
+			unmount(unmountCommand);
+		}
+
+		@Override
+		public Optional<UnmountOperation> forced() {
+			return Optional.of(() -> unmount(forcedUnmountCommand));
+		}
+
+		private void unmount(ProcessBuilder command) throws CommandFailedException {
 			if (!Files.isDirectory(mountPath)) {
 				// unmounting a mounted drive will delete the associated mountpoint (at least under OS X 10.11)
 				LOG.debug("Volume already unmounted.");
 				return;
 			}
-			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
+			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 10, TimeUnit.SECONDS), 0);
 		}
 
 		@Override

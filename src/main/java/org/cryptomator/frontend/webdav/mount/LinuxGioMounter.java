@@ -20,8 +20,12 @@ class LinuxGioMounter extends VfsMountingStrategy implements MounterStrategy {
 			return false;
 		}
 
-		// check if gio is installed:
 		assert IS_OS_LINUX;
+		if( System.getenv().getOrDefault("XDG_CURRENT_DESKTOP", "").equals("KDE")) {
+			return false;	//see https://github.com/cryptomator/cryptomator/issues/1381
+		}
+
+		// check if gio is installed:
 		try {
 			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("test", " `command -v gio`");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);

@@ -1,9 +1,9 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import java.net.URI;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 
 class FallbackMounter implements MounterStrategy {
 
@@ -11,13 +11,13 @@ class FallbackMounter implements MounterStrategy {
 
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
-		LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to mount: {}", uri);
-		throw new CommandFailedException("No mounting strategy found.");
+		LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
+		throw new UnsupportedSystemException(uri);
 	}
 
 	@Override
 	public boolean isApplicable() {
-		return false;
+		return true;
 	}
 
 }

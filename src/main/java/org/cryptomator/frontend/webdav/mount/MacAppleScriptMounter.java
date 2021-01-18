@@ -1,5 +1,10 @@
 package org.cryptomator.frontend.webdav.mount;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -10,13 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 
 class MacAppleScriptMounter implements MounterStrategy {
 
@@ -56,7 +54,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 			if (mountPointMatcher.find()) {
 				String mountPoint = mountPointMatcher.group(1);
 				LOG.debug("Mounted {} on {}.", uri.toASCIIString(), mountPoint);
-				return new MountImpl(Paths.get(mountPoint));
+				return new MountImpl(uri, Paths.get(mountPoint));
 			} else {
 				throw new CommandFailedException("Mount succeeded, but failed to determine mount point in string: " + stdout);
 			}
@@ -70,10 +68,12 @@ class MacAppleScriptMounter implements MounterStrategy {
 		private final Path mountPath;
 		private final ProcessBuilder revealCommand;
 		private final ProcessBuilder unmountCommand;
+		private final URI uri;
 		private final ProcessBuilder forcedUnmountCommand;
 
-		private MountImpl(Path mountPath) {
+		private MountImpl(URI uri, Path mountPath) {
 			this.mountPath = mountPath;
+			this.uri = uri;
 			this.revealCommand = new ProcessBuilder("open", mountPath.toString());
 			this.unmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount \"" + mountPath + "\"");
 			this.forcedUnmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount force \"" + mountPath + "\"");
@@ -99,8 +99,23 @@ class MacAppleScriptMounter implements MounterStrategy {
 		}
 
 		@Override
+		public Optional<Path> getMountPoint() {
+			return Optional.of(mountPath);
+		}
+
+		@Override
+		public URI getWebDavUri() {
+			return uri;
+		}
+
+		@Override
 		public void reveal() throws CommandFailedException {
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(revealCommand, 10, TimeUnit.SECONDS), 0);
+		}
+
+		@Override
+		public void reveal(Revealer revealer) throws RevealException {
+			revealer.reveal(mountPath);
 		}
 
 	}

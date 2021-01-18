@@ -1,11 +1,11 @@
 package org.cryptomator.frontend.webdav.mount;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class LinuxGvfsMounter extends VfsMountingStrategy implements MounterStrategy {
 
@@ -55,6 +55,7 @@ class LinuxGvfsMounter extends VfsMountingStrategy implements MounterStrategy {
 			this.revealCmd = new ProcessBuilder("sh", "-c", "gvfs-open \"" + uri.toASCIIString() + "\"");
 			this.isMountedCmd = new ProcessBuilder("sh", "-c", "test `gvfs-mount --list | grep \"" + uri.toASCIIString() + "\" | wc -l` -eq 1");
 			this.unmountCmd = new ProcessBuilder("sh", "-c", "gvfs-mount -u \"" + uri.toASCIIString() + "\"");
+			this.uri = uri;
 		}
 
 	}

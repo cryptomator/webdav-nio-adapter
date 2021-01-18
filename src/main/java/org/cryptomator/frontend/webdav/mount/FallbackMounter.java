@@ -12,7 +12,7 @@ class FallbackMounter implements MounterStrategy {
 	@Override
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
-		throw new CommandFailedException(new UnsupportedSystemSetupException(uri));
+		throw new CommandFailedException(new UnsupportedSystemException(uri));
 	}
 
 	@Override
@@ -20,18 +20,4 @@ class FallbackMounter implements MounterStrategy {
 		return true;
 	}
 
-	static class UnsupportedSystemSetupException extends Exception {
-
-		private static final String MESSAGE = "No applicable mounting strategy found for this system.";
-		private final URI uri;
-
-		public UnsupportedSystemSetupException(URI uri) {
-			super(MESSAGE);
-			this.uri = uri;
-		}
-
-		public URI getUri() {
-			return uri;
-		}
-	}
 }

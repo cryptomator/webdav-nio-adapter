@@ -1,5 +1,7 @@
 package org.cryptomator.frontend.webdav.mount;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 abstract class VfsMountingStrategy implements MounterStrategy {
@@ -9,6 +11,8 @@ abstract class VfsMountingStrategy implements MounterStrategy {
 		ProcessBuilder revealCmd;
 		ProcessBuilder isMountedCmd;
 		ProcessBuilder unmountCmd;
+
+		protected URI uri;
 
 		@Override
 		public void unmount() throws CommandFailedException {
@@ -20,8 +24,22 @@ abstract class VfsMountingStrategy implements MounterStrategy {
 		}
 
 		@Override
+		public URI getWebDavUri() {
+			return uri;
+		}
+
+		@Override
 		public void reveal() throws CommandFailedException {
 			ProcessUtil.startAndWaitFor(revealCmd, 5, TimeUnit.SECONDS);
+		}
+
+		@Override
+		public void reveal(Revealer revealer) throws RevealException {
+			try {
+				reveal();
+			} catch (CommandFailedException e) {
+				throw new RevealException(e);
+			}
 		}
 	}
 }

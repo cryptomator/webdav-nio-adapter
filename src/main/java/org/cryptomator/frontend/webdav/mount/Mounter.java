@@ -35,7 +35,7 @@ public interface Mounter {
 		@Deprecated
 		void reveal() throws CommandFailedException;
 
-		void reveal(Revealer revealer) throws RevealException;
+		void reveal(Revealer revealer) throws Exception;
 
 	}
 
@@ -84,23 +84,8 @@ public interface Mounter {
 	@FunctionalInterface
 	interface Revealer {
 
-		void reveal(Path path) throws RevealException;
+		void reveal(Path path) throws Exception;
 
 	}
 
-	class RevealException extends Exception {
-
-		public RevealException(String msg) {
-			super(msg);
-		}
-
-		public RevealException(Throwable cause) {
-			super(cause);
-		}
-
-		public RevealException(String msg, Throwable cause) {
-			super(msg, cause);
-		}
-
-	}
 }

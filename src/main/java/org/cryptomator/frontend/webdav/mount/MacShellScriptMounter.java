@@ -2,7 +2,6 @@ package org.cryptomator.frontend.webdav.mount;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -124,9 +123,8 @@ class MacShellScriptMounter implements MounterStrategy {
 		}
 
 		@Override
-		public void reveal(Revealer revealer) throws RevealException {
+		public void reveal(Revealer revealer) throws Exception {
 			revealer.reveal(mountPath);
-			//TODO: maybe try the other reveal on error?
 		}
 
 	}

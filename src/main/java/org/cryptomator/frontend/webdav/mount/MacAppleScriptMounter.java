@@ -114,7 +114,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 		}
 
 		@Override
-		public void reveal(Revealer revealer) throws RevealException {
+		public void reveal(Revealer revealer) throws Exception {
 			revealer.reveal(mountPath);
 		}
 

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -152,7 +151,7 @@ class WindowsMounter implements MounterStrategy {
 		}
 
 		@Override
-		public void reveal(Revealer revealer) throws RevealException {
+		public void reveal(Revealer revealer) throws Exception {
 			revealer.reveal(mountpoint);
 		}
 

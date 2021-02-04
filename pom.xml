@@ -45,9 +45,12 @@
 
 	<repositories>
 		<repository>
-			<id>bintray</id>
-			<name>bintray</name>
-			<url>https://jcenter.bintray.com</url>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/github/webdav-nio-adapter-servlet</url>
 		</repository>
 	</repositories>
 
@@ -124,6 +127,39 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<additionalDependencies>
+						<additionalDependency> <!-- needed for javax.annotation.Generated annotations of dagger-generated sources (at least with Java 8) -->
+							<groupId>javax.annotation</groupId>
+							<artifactId>jsr250-api</artifactId>
+							<version>1.0</version>
+						</additionalDependency>
+					</additionalDependencies>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -182,50 +218,52 @@
 		</profile>
 
 		<profile>
-			<id>release</id>
-			<distributionManagement>
-				<repository>
-					<id>bintray-jcenter</id>
-					<url>https://api.bintray.com/maven/cryptomator/maven/webdav-nio-adapter/;publish=1</url>
-				</repository>
-			</distributionManagement>
+			<id>sign</id>
 			<build>
 				<plugins>
 					<plugin>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>3.2.1</version>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
 						<executions>
 							<execution>
-								<id>attach-sources</id>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
 								<goals>
-									<goal>jar-no-fork</goal>
+									<goal>sign</goal>
 								</goals>
+								<configuration>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.2.0</version>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<additionalDependencies>
-								<additionalDependency> <!-- needed for javax.annotation.Generated annotations of dagger-generated sources (at least with Java 8) -->
-									<groupId>javax.annotation</groupId>
-									<artifactId>jsr250-api</artifactId>
-									<version>1.0</version>
-								</additionalDependency>
-							</additionalDependencies>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+
+		<profile>
+			<id>deploy-central</id>
+			<distributionManagement>
+				<repository>
+					<id>ossrh</id>
+					<name>Maven Central</name>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
+			<id>deploy-github</id>
+			<distributionManagement>
+				<repository>
+					<id>github</id>
+					<name>GitHub Packages</name>
+					<url>https://maven.pkg.github.com/cryptomator/webdav-nio-adapter</url>
+				</repository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 </project>

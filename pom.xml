@@ -18,7 +18,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
-		<webdavservlet.version>1.0.9</webdavservlet.version>
+		<webdavservlet.version>1.0.10-beta4</webdavservlet.version>
 		<dagger.version>2.29.1</dagger.version>
 		<jetty.version>9.4.35.v20201120</jetty.version>
 		<guava.version>30.0-jre</guava.version>
@@ -50,7 +50,9 @@
 		</repository>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/github/webdav-nio-adapter-servlet</url>
+			<!-- Basic auth via access token with `read:packages` scope, see https://github.community/t/download-from-github-package-registry-without-authentication/14407/38 -->
+			<!-- Remove auth as soon as GitHub fixes public access to packages -->
+			<url>https://anon:&#99;&#56;&#53;&#54;&#98;&#97;&#51;&#48;&#98;&#54;&#52;&#49;&#57;&#55;&#52;&#100;&#102;&#53;&#98;&#52;&#52;&#102;&#49;&#55;&#54;&#100;&#57;&#50;&#101;&#55;&#97;&#57;&#98;&#98;&#57;&#97;&#55;&#99;&#48;&#102;@maven.pkg.github.com/cryptomator/*</url>
 		</repository>
 	</repositories>
 

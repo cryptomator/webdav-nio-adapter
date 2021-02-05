@@ -16,6 +16,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<ghpackages.accessToken.1>c856ba30b641974df5b4</ghpackages.accessToken.1>
+		<ghpackages.accessToken.2>4f176d92e7a9bb9a7c0f</ghpackages.accessToken.2>
 
 		<!-- dependencies -->
 		<webdavservlet.version>1.0.10-beta4</webdavservlet.version>
@@ -52,7 +54,7 @@
 			<id>github</id>
 			<!-- Basic auth via access token with `read:packages` scope, see https://github.community/t/download-from-github-package-registry-without-authentication/14407/38 -->
 			<!-- Remove auth as soon as GitHub fixes public access to packages -->
-			<url>https://anon:&#99;&#56;&#53;&#54;&#98;&#97;&#51;&#48;&#98;&#54;&#52;&#49;&#57;&#55;&#52;&#100;&#102;&#53;&#98;&#52;&#52;&#102;&#49;&#55;&#54;&#100;&#57;&#50;&#101;&#55;&#97;&#57;&#98;&#98;&#57;&#97;&#55;&#99;&#48;&#102;@maven.pkg.github.com/cryptomator/*</url>
+			<url>https://anon:${ghpackages.accessToken.1}${ghpackages.accessToken.2}@maven.pkg.github.com/cryptomator/*</url>
 		</repository>
 	</repositories>
 

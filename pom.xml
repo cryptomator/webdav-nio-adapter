@@ -16,14 +16,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<ghpackages.accessToken.1>c856ba30b641974df5b4</ghpackages.accessToken.1>
-		<ghpackages.accessToken.2>4f176d92e7a9bb9a7c0f</ghpackages.accessToken.2>
 
 		<!-- dependencies -->
-		<webdavservlet.version>1.0.10-beta4</webdavservlet.version>
-		<dagger.version>2.29.1</dagger.version>
-		<jetty.version>9.4.35.v20201120</jetty.version>
-		<guava.version>30.0-jre</guava.version>
+		<webdavservlet.version>1.0.11</webdavservlet.version>
+		<dagger.version>2.31.2</dagger.version>
+		<jetty.version>9.4.36.v20210114</jetty.version>
+		<guava.version>30.1-jre</guava.version>
 		<slf4j.version>1.7.30</slf4j.version>
 	</properties>
 
@@ -44,19 +42,6 @@
 			<organizationUrl>http://cryptomator.org</organizationUrl>
 		</developer>
 	</developers>
-
-	<repositories>
-		<repository>
-			<id>central</id>
-			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>github</id>
-			<!-- Basic auth via access token with `read:packages` scope, see https://github.community/t/download-from-github-package-registry-without-authentication/14407/38 -->
-			<!-- Remove auth as soon as GitHub fixes public access to packages -->
-			<url>https://anon:${ghpackages.accessToken.1}${ghpackages.accessToken.2}@maven.pkg.github.com/cryptomator/*</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -120,7 +105,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<release>8</release>
+					<release>11</release>
 					<showWarnings>true</showWarnings>
 					<annotationProcessorPaths>
 						<path>
@@ -154,15 +139,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<additionalDependencies>
-						<additionalDependency> <!-- needed for javax.annotation.Generated annotations of dagger-generated sources (at least with Java 8) -->
-							<groupId>javax.annotation</groupId>
-							<artifactId>jsr250-api</artifactId>
-							<version>1.0</version>
-						</additionalDependency>
-					</additionalDependencies>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -257,6 +233,21 @@
 					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 
 		<profile>

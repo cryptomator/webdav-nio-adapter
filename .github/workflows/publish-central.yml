@@ -1,12 +1,18 @@
 name: Publish to Maven Central
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag'
+        required: true
+        default: '0.0.0'
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') # only allow publishing tagged versions
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: "refs/tags/${{ github.event.inputs.tag }}"
       - uses: actions/setup-java@v1
         with:
           java-version: 11
@@ -21,8 +27,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Apply version from tag
-        run: mvn versions:set -B -DnewVersion=${GITHUB_REF##*/}
+      - name: Enforce project version ${{ github.event.inputs.tag }}
+        run: mvn versions:set -B -DnewVersion=${{ github.event.inputs.tag }}
       - name: Deploy
         run: mvn deploy -B -DskipTests -Psign,deploy-central --no-transfer-progress
         env:

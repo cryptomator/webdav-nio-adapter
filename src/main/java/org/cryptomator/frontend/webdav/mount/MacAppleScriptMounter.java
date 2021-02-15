@@ -36,7 +36,7 @@ class MacAppleScriptMounter implements MounterStrategy {
 	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
 		try {
 			// mount:
-			String mountAppleScript = String.format("mount volume \"%s\" as user name \"anonymous\" with password \"\"", uri.toASCIIString());
+			String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 			ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 			Process mountProcess = mount.start();
 			ProcessUtil.waitFor(mountProcess, 60, TimeUnit.SECONDS); // huge timeout since the user might need to confirm connecting via http

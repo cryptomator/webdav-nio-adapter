@@ -20,7 +20,7 @@
 		<!-- dependencies -->
 		<webdavservlet.version>1.0.11</webdavservlet.version>
 		<dagger.version>2.32</dagger.version>
-		<jetty.version>9.4.36.v20210114</jetty.version>
+		<jetty.version>9.4.37.v20210219</jetty.version>
 		<guava.version>30.1-jre</guava.version>
 		<slf4j.version>1.7.30</slf4j.version>
 	</properties>

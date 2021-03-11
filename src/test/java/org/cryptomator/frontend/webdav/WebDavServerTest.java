@@ -1,7 +1,7 @@
 package org.cryptomator.frontend.webdav;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class WebDavServerTest {
 
@@ -9,7 +9,7 @@ public class WebDavServerTest {
 	public void testConstructionOfMultipleInstances() {
 		WebDavServer server1 = WebDavServer.create();
 		WebDavServer server2 = WebDavServer.create();
-		Assert.assertNotSame(server1, server2);
+		Assertions.assertNotSame(server1, server2);
 	}
 
 }

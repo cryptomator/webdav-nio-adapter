@@ -1,7 +1,7 @@
 module org.cryptomator.frontend.webdav {
 	requires org.cryptomator.frontend.webdav.servlet;
 	requires org.eclipse.jetty.server;
-	requires org.eclipse.jetty.webapp;
+	requires org.eclipse.jetty.servlet;
 	requires com.google.common;
 	requires org.slf4j;
 

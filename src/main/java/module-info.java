@@ -4,9 +4,12 @@ module org.cryptomator.frontend.webdav {
 	requires org.eclipse.jetty.servlet;
 	requires com.google.common;
 	requires org.slf4j;
-
-	/* TODO: filename-based modules: */
 	requires dagger;
+
+	// filename-based module required by dagger
+	// we will probably need to live with this for a while:
+	// https://github.com/javax-inject/javax-inject/issues/33
+	// May be provided by another lib during runtime
 	requires static javax.inject;
 
 	exports org.cryptomator.frontend.webdav;

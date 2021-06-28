@@ -1,7 +1,6 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
+import org.cryptomator.frontend.webdav.VersionCompare;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +18,14 @@ import java.util.regex.Pattern;
 class MacAppleScriptMounter implements MounterStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacAppleScriptMounter.class);
-	private static final boolean IS_OS_MACOSX = System.getProperty("os.name").contains("Mac OS X");
-	private static final String[] OS_VERSION = Iterables.toArray(Splitter.on('.').splitToList(System.getProperty("os.version")), String.class);
+	private static final boolean IS_OS_MAC = System.getProperty("os.name").contains("Mac OS X");
+	private static final String OS_VERSION = System.getProperty("os.version");
 	private static final Pattern MOUNT_PATTERN = Pattern.compile(".* on (\\S+) \\(.*\\)"); // catches mount point in "http://host:port/foo/ on /Volumes/foo (webdav, nodev, noexec, nosuid)"
 
 	@Override
 	public boolean isApplicable() {
 		try {
-			return IS_OS_MACOSX && OS_VERSION.length >= 2 && Integer.parseInt(OS_VERSION[1]) >= 10; // since macOS 10.10+
+			return IS_OS_MAC && VersionCompare.compareVersions(OS_VERSION, "10.10") >= 0; // since macOS 10.10+
 		} catch (NumberFormatException e) {
 			return false;
 		}

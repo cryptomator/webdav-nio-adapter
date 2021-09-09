@@ -12,7 +12,10 @@ import com.google.common.base.Preconditions;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.frontend.webdav.mount.MounterModule;
+import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -92,8 +95,10 @@ class WebDavServerModule {
 	@Provides
 	@Singleton
 	ServerConnector provideServerConnector(Server server) {
-		ServerConnector connector = new ServerConnector(server);
-		server.setConnectors(new Connector[] {connector});
+		HttpConfiguration config = new HttpConfiguration();
+		config.setUriCompliance(UriCompliance.from("0,AMBIGUOUS_PATH_SEPARATOR,AMBIGUOUS_PATH_ENCODING"));
+		ServerConnector connector = new ServerConnector(server, new HttpConnectionFactory(config));
+		server.setConnectors(new Connector[]{connector});
 		return connector;
 	}
 

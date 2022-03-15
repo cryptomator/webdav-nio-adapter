@@ -19,13 +19,13 @@
 
 		<!-- dependencies -->
 		<webdavservlet.version>1.2.0</webdavservlet.version>
-		<dagger.version>2.37</dagger.version>
-		<jetty.version>10.0.6</jetty.version>
-		<guava.version>30.1.1-jre</guava.version>
-		<slf4j.version>1.7.31</slf4j.version>
+		<dagger.version>2.41</dagger.version>
+		<jetty.version>10.0.8</jetty.version>
+		<guava.version>31.1-jre</guava.version>
+		<slf4j.version>1.7.36</slf4j.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.7.2</junit.jupiter.version>
+		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
 		<dependency-check.version>7.0.0</dependency-check.version>
@@ -111,7 +111,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.10.1</version>
 				<configuration>
 					<release>11</release>
 					<showWarnings>true</showWarnings>
@@ -132,7 +132,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.2.2</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -148,7 +148,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.2</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>

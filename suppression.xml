@@ -13,4 +13,13 @@
 		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
 		<cpe regex="true">.*</cpe>
 	</suppress>
+	<suppress>
+		<notes><![CDATA[
+			Incorrectly matched CPE, see https://github.com/jeremylong/DependencyCheck/issues/4177git
+		]]></notes>
+		<gav regex="true">org\.cryptomator:.*</gav>
+		<cpe>cpe:/a:cryptomator:cryptomator</cpe>
+		<cve>CVE-2022-25366</cve>
+	</suppress>
+
 </suppressions>

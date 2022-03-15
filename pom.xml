@@ -26,6 +26,11 @@
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.7.2</junit.jupiter.version>
+
+		<!-- mvn plugin dependencies -->
+		<dependency-check.version>7.0.0</dependency-check.version>
+		<jacoco.version>0.8.7</jacoco.version>
+		<nexus-staging.version>1.6.8</nexus-staging.version>
 	</properties>
 
 	<licenses>
@@ -164,7 +169,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>6.2.2</version>
+						<version>${dependency-check.version}</version>
 						<configuration>
 							<cveValidForHours>24</cveValidForHours>
 							<failBuildOnCVSS>0</failBuildOnCVSS>
@@ -193,7 +198,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.7</version>
+						<version>${jacoco.version}</version>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
@@ -254,7 +259,7 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.8</version>
+						<version>${nexus-staging.version}</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>

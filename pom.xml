@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>1.2.6</version>
+	<version>1.2.7</version>
 	<name>WebDAV-NIO Adapter</name>
 	<description>Embedded Jetty serving a WebDAV servlet to access resources at a given NIO path.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -18,14 +18,19 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
-		<webdavservlet.version>1.2.0</webdavservlet.version>
-		<dagger.version>2.37</dagger.version>
-		<jetty.version>10.0.6</jetty.version>
-		<guava.version>30.1.1-jre</guava.version>
-		<slf4j.version>1.7.31</slf4j.version>
+		<webdavservlet.version>1.2.1</webdavservlet.version>
+		<dagger.version>2.41</dagger.version>
+		<jetty.version>10.0.8</jetty.version>
+		<guava.version>31.1-jre</guava.version>
+		<slf4j.version>1.7.36</slf4j.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.7.2</junit.jupiter.version>
+		<junit.jupiter.version>5.8.2</junit.jupiter.version>
+
+		<!-- mvn plugin dependencies -->
+		<dependency-check.version>7.0.0</dependency-check.version>
+		<jacoco.version>0.8.7</jacoco.version>
+		<nexus-staging.version>1.6.8</nexus-staging.version>
 	</properties>
 
 	<licenses>
@@ -106,7 +111,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.10.1</version>
 				<configuration>
 					<release>11</release>
 					<showWarnings>true</showWarnings>
@@ -127,7 +132,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.2.2</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -143,7 +148,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.2</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -164,7 +169,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>6.2.2</version>
+						<version>${dependency-check.version}</version>
 						<configuration>
 							<cveValidForHours>24</cveValidForHours>
 							<failBuildOnCVSS>0</failBuildOnCVSS>
@@ -193,7 +198,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.7</version>
+						<version>${jacoco.version}</version>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
@@ -246,7 +251,7 @@
 				<repository>
 					<id>ossrh</id>
 					<name>Maven Central</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+					<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
 			<build>
@@ -254,11 +259,11 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.8</version>
+						<version>${nexus-staging.version}</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
 					</plugin>

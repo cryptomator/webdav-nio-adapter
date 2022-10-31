@@ -8,15 +8,6 @@ import java.util.Set;
 @Deprecated
 public interface LegacyMounter {
 
-	static LegacyMounter find() {
-		Set<MounterStrategy> strategies = Set.of(
-				new WindowsMounter(),
-				new LinuxGioMounter(),
-				new LinuxGvfsMounter()
-		);
-		return strategies.stream().filter(MounterStrategy::isApplicable).findFirst().orElseThrow();
-	}
-
 	/**
 	 * Tries to mount a given webdav share.
 	 *

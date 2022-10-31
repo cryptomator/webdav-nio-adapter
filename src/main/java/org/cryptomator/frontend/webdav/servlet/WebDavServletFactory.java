@@ -45,8 +45,7 @@ public class WebDavServletFactory {
 		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(untrimmedContextPath);
 		String contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
 		ServletContextHandler contextHandler = createServletContext(rootPath, contextPath);
-		LegacyMounter mounter = LegacyMounter.find(); // TODO remove
-		return new WebDavServletController(contextHandler, contextHandlerCollection, serverConnector, contextPath, mounter);
+		return new WebDavServletController(contextHandler, contextHandlerCollection, serverConnector, contextPath);
 	}
 
 }

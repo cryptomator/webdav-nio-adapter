@@ -1,23 +1,71 @@
 package org.cryptomator.frontend.webdav.mount;
 
+import org.cryptomator.frontend.webdav.WebDavServerHandle;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.cryptomator.integrations.common.Priority;
+import org.cryptomator.integrations.mount.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.util.Set;
 
-class FallbackMounter implements MounterStrategy {
+@Priority(Priority.FALLBACK)
+public class FallbackMounter implements MountProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FallbackMounter.class);
 
 	@Override
-	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
-		LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
-		throw new UnsupportedSystemException(uri);
+	public String displayName() {
+		return "WebDAV (Fallback)";
 	}
 
 	@Override
-	public boolean isApplicable() {
+	public boolean isSupported() {
 		return true;
 	}
 
+	@Override
+	public Set<MountFeature> supportedFeatures() {
+		return Set.of(MountFeature.PORT);
+	}
+
+	@Override
+	public MountBuilder forFileSystem(Path path) {
+		return new MountBuilderImpl(path);
+	}
+
+	private static class MountBuilderImpl extends AbstractMountBuilder {
+
+		public MountBuilderImpl(Path vfsRoot) {
+			super(vfsRoot);
+		}
+
+		@Override
+		public MountBuilder setMountpoint(Path path) {
+			// FIXME in API
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
+			LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
+			return new MountImpl(serverHandle, servlet, uri);
+		}
+
+	}
+
+	private static class MountImpl extends AbstractMount {
+		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
+			super(serverHandle, servlet);
+		}
+
+		@Override
+		public Path getMountpoint() {
+			// FIXME in API
+			throw new UnsupportedOperationException();
+		}
+
+	}
 }

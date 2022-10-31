@@ -5,17 +5,16 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
+@Deprecated
 public interface LegacyMounter {
 
 	static LegacyMounter find() {
-		FallbackMounter fallback = new FallbackMounter();
 		Set<MounterStrategy> strategies = Set.of(
 				new WindowsMounter(),
-				new MacShellScriptMounter(),
 				new LinuxGioMounter(),
 				new LinuxGvfsMounter()
 		);
-		return strategies.stream().filter(MounterStrategy::isApplicable).findFirst().orElse(fallback);
+		return strategies.stream().filter(MounterStrategy::isApplicable).findFirst().orElseThrow();
 	}
 
 	/**

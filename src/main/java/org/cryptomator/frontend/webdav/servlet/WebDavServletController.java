@@ -19,14 +19,12 @@ public class WebDavServletController {
 	private final ContextHandlerCollection contextHandlerCollection;
 	private final ServerConnector connector;
 	private final String contextPath;
-	private final LegacyMounter mounter;
 
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath, LegacyMounter mounter) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
 		this.connector = connector;
 		this.contextPath = contextPath;
-		this.mounter = mounter;
 	}
 
 	/**

@@ -44,7 +44,6 @@ public class MirroringTest {
 			}
 
 			try (var mount = mountBuilder.mount()) {
-				LOG.info("Mounted successfully to: {}", mount.getMountpoint());
 				LOG.info("Enter anything to unmount...");
 				System.in.read();
 

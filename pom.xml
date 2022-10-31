@@ -18,18 +18,18 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
-		<webdavservlet.version>1.2.1</webdavservlet.version>
+		<webdavservlet.version>1.2.2</webdavservlet.version>
 		<dagger.version>2.41</dagger.version>
-		<jetty.version>10.0.10</jetty.version>
+		<jetty.version>10.0.12</jetty.version>
 		<guava.version>31.1-jre</guava.version>
-		<slf4j.version>1.7.36</slf4j.version>
+		<slf4j.version>2.0.3</slf4j.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.8.2</junit.jupiter.version>
+		<junit.jupiter.version>5.9.0</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
-		<dependency-check.version>7.0.0</dependency-check.version>
-		<jacoco.version>0.8.7</jacoco.version>
+		<dependency-check.version>7.2.1</dependency-check.version>
+		<jacoco.version>0.8.8</jacoco.version>
 		<nexus-staging.version>1.6.8</nexus-staging.version>
 	</properties>
 
@@ -127,12 +127,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0-M7</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>3.3.0</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -148,7 +148,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.2</version>
+				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>

@@ -3,8 +3,21 @@ package org.cryptomator.frontend.webdav.mount;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 
 public interface Mounter {
+
+	static Mounter find() {
+		FallbackMounter fallback = new FallbackMounter();
+		Set<MounterStrategy> strategies = Set.of(
+				new WindowsMounter(),
+				new MacAppleScriptMounter(),
+				new MacShellScriptMounter(),
+				new LinuxGioMounter(),
+				new LinuxGvfsMounter()
+		);
+		return strategies.stream().filter(MounterStrategy::isApplicable).findFirst().orElse(fallback);
+	}
 
 	/**
 	 * Tries to mount a given webdav share.

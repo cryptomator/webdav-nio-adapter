@@ -9,7 +9,7 @@
 package org.cryptomator.frontend.webdav;
 
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletModule;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -42,7 +42,7 @@ public class WebDavServer {
 	}
 
 	public static WebDavServer create() {
-		return WebDavServerModule.createWebDavServer();
+		return WebDavServerFactory.createWebDavServer();
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class WebDavServer {
 	 * @return The controller object for this new servlet
 	 */
 	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) {
-		return WebDavServletModule.createServletController(rootPath, contextPath, localConnector, servletCollectionCtx);
+		return WebDavServletFactory.createServletController(rootPath, contextPath, localConnector, servletCollectionCtx);
 	}
 
 }

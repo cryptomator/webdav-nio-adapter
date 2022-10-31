@@ -10,7 +10,6 @@ package org.cryptomator.frontend.webdav.servlet;
 
 import com.google.common.base.CharMatcher;
 import org.cryptomator.frontend.webdav.mount.Mounter;
-import org.cryptomator.frontend.webdav.mount.MounterModule;
 import org.cryptomator.webdav.core.filters.*;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -22,7 +21,9 @@ import javax.servlet.Servlet;
 import java.nio.file.Path;
 import java.util.EnumSet;
 
-public class WebDavServletModule {
+public class WebDavServletFactory {
+
+	private WebDavServletFactory(){}
 
 	private static final String WILDCARD = "/*";
 
@@ -44,7 +45,7 @@ public class WebDavServletModule {
 		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(untrimmedContextPath);
 		String contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
 		ServletContextHandler contextHandler = createServletContext(rootPath, contextPath);
-		Mounter mounter = MounterModule.findMounter();
+		Mounter mounter = Mounter.find();
 		return new WebDavServletController(contextHandler, contextHandlerCollection, serverConnector, contextPath, mounter);
 	}
 

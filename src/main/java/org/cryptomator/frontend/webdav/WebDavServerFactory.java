@@ -23,14 +23,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class WebDavServerModule {
+class WebDavServerFactory {
 
 	private static final int MAX_PENDING_REQUESTS = 400;
 	private static final int MAX_THREADS = 100;
 	private static final int THREAD_IDLE_SECONDS = 60;
 	private static final String ROOT_PATH = "/";
-
 	private static final AtomicInteger THREAD_NUM = new AtomicInteger();
+
+	private WebDavServerFactory(){}
 
 	private static ThreadPoolExecutor createThreadPoolExecutor() {
 		// set core pool size = MAX_THREADS and allow coreThreadTimeOut to enforce spawning threads till the maximum even if the queue is not full
@@ -42,7 +43,7 @@ class WebDavServerModule {
 
 	private static ExecutorThreadPool createThreadPool(ThreadPoolExecutor executorService) {
 		ExecutorThreadPool threadPool = new ExecutorThreadPool(executorService);
-		executorService.setThreadFactory(WebDavServerModule::createServerThread);
+		executorService.setThreadFactory(WebDavServerFactory::createServerThread);
 		try {
 			threadPool.start();
 			return threadPool;

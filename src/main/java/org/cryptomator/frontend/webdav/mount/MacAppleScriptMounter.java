@@ -60,13 +60,10 @@ public class MacAppleScriptMounter implements MountProvider {
 		return new MountBuilderImpl(path);
 	}
 
-	private static class MountBuilderImpl implements MountBuilder {
-
-		private final Path vfsRoot;
-		int port;
+	private static class MountBuilderImpl extends AbstractMountBuilder {
 
 		public MountBuilderImpl(Path vfsRoot) {
-			this.vfsRoot = vfsRoot;
+			super(vfsRoot);
 		}
 
 		@Override
@@ -76,31 +73,7 @@ public class MacAppleScriptMounter implements MountProvider {
 		}
 
 		@Override
-		public MountBuilder setPort(@Range(from = 0L, to = 32767L) int port) {
-			this.port = port;
-			return this;
-		}
-
-		@Override
-		public Mount mount() throws MountFailedException {
-			WebDavServerHandle serverHandle;
-			try {
-				serverHandle = WebDavServerManager.getOrCreateServer(port);
-			} catch (ServerLifecycleException e) {
-				throw new MountFailedException("Failed to start server", e);
-			}
-
-			WebDavServletController servlet;
-			try {
-				servlet = serverHandle.server().createWebDavServlet(vfsRoot, "TODO"); // TODO api needs a volume name
-				servlet.start();
-			} catch (ServerLifecycleException e) {
-				throw new MountFailedException("Failed to create WebDAV servlet", e);
-			}
-
-			var uri = servlet.getServletRootUri();
-			LOG.info("Mounting {}...", uri);
-
+		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
 			try {
 				// mount:
 				String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
@@ -131,17 +104,14 @@ public class MacAppleScriptMounter implements MountProvider {
 		}
 	}
 
-	private static class MountImpl implements Mount {
+	private static class MountImpl extends AbstractMount {
 
-		private final WebDavServerHandle serverHandle;
-		private final WebDavServletController servlet;
 		private final Path mountPath;
 		private final ProcessBuilder unmountCommand;
 		private final ProcessBuilder forcedUnmountCommand;
 
 		private MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, Path mountPath) {
-			this.serverHandle = serverHandle;
-			this.servlet = servlet;
+			super(serverHandle, servlet);
 			this.mountPath = mountPath;
 			this.unmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount \"" + mountPath + "\"");
 			this.forcedUnmountCommand = new ProcessBuilder("sh", "-c", "diskutil umount force \"" + mountPath + "\"");
@@ -174,12 +144,6 @@ public class MacAppleScriptMounter implements MountProvider {
 			} catch (LegacyMounter.CommandFailedException e) {
 				throw new UnmountFailedException(e);
 			}
-		}
-
-		@Override
-		public void close() throws UnmountFailedException {
-			Mount.super.close();
-			serverHandle.close();
 		}
 
 	}

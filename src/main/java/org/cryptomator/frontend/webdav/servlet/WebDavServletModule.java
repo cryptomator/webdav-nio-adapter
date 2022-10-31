@@ -8,53 +8,25 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav.servlet;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.nio.file.Path;
-import java.util.EnumSet;
-
-import javax.inject.Qualifier;
-import javax.inject.Scope;
-import javax.servlet.DispatcherType;
-import javax.servlet.Servlet;
-
 import com.google.common.base.CharMatcher;
-import dagger.Module;
-import dagger.Provides;
-import org.cryptomator.webdav.core.filters.AcceptRangeFilter;
-import org.cryptomator.webdav.core.filters.LoggingFilter;
-import org.cryptomator.webdav.core.filters.MacChunkedPutCompatibilityFilter;
-import org.cryptomator.webdav.core.filters.MkcolComplianceFilter;
-import org.cryptomator.webdav.core.filters.PostRequestBlockingFilter;
-import org.cryptomator.webdav.core.filters.UnicodeResourcePathNormalizationFilter;
+import org.cryptomator.frontend.webdav.mount.Mounter;
+import org.cryptomator.frontend.webdav.mount.MounterModule;
+import org.cryptomator.webdav.core.filters.*;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-@Module
+import javax.servlet.DispatcherType;
+import javax.servlet.Servlet;
+import java.nio.file.Path;
+import java.util.EnumSet;
+
 public class WebDavServletModule {
 
 	private static final String WILDCARD = "/*";
 
-	private final Path rootPath;
-	private final String contextPath;
-
-	public WebDavServletModule(Path rootPath, String contextPath) {
-		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(contextPath);
-		this.rootPath = rootPath;
-		this.contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
-	}
-
-	@PerServlet
-	@Provides
-	@ContextPath
-	public String provideContextRootUri() {
-		return contextPath;
-	}
-
-	@PerServlet
-	@Provides
-	public ServletContextHandler provideServletContext() {
+	public static ServletContextHandler createServletContext(Path rootPath, String contextPath) {
 		final Servlet servlet = new FixedPathNioWebDavServlet(rootPath);
 		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, servlet);
@@ -68,16 +40,12 @@ public class WebDavServletModule {
 		return servletContext;
 	}
 
-	@Qualifier
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface ContextPath {
-	}
-
-	@Scope
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface PerServlet {
+	public static WebDavServletController createServletController(Path rootPath, String untrimmedContextPath, ServerConnector serverConnector, ContextHandlerCollection contextHandlerCollection) {
+		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(untrimmedContextPath);
+		String contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
+		ServletContextHandler contextHandler = createServletContext(rootPath, contextPath);
+		Mounter mounter = MounterModule.findMounter();
+		return new WebDavServletController(contextHandler, contextHandlerCollection, serverConnector, contextPath, mounter);
 	}
 
 }

@@ -84,13 +84,6 @@
 			<version>${slf4j.version}</version>
 		</dependency>
 
-		<!-- DI -->
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger</artifactId>
-			<version>${dagger.version}</version>
-		</dependency>
-
 		<!-- Test -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -115,13 +108,6 @@
 				<configuration>
 					<release>11</release>
 					<showWarnings>true</showWarnings>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>com.google.dagger</groupId>
-							<artifactId>dagger-compiler</artifactId>
-							<version>${dagger.version}</version>
-						</path>
-					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -9,35 +9,20 @@
 package org.cryptomator.frontend.webdav;
 
 import com.google.common.base.Preconditions;
-import dagger.Module;
-import dagger.Provides;
-import org.cryptomator.frontend.webdav.mount.MounterModule;
 import org.eclipse.jetty.http.UriCompliance;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Module(includes = {MounterModule.class})
 class WebDavServerModule {
 
 	private static final int MAX_PENDING_REQUESTS = 400;
@@ -45,11 +30,9 @@ class WebDavServerModule {
 	private static final int THREAD_IDLE_SECONDS = 60;
 	private static final String ROOT_PATH = "/";
 
-	private AtomicInteger threadNum = new AtomicInteger(1);
+	private static final AtomicInteger THREAD_NUM = new AtomicInteger();
 
-	@Provides
-	@Singleton
-	ThreadPoolExecutor provideThreadPoolExecutor() {
+	private static ThreadPoolExecutor createThreadPoolExecutor() {
 		// set core pool size = MAX_THREADS and allow coreThreadTimeOut to enforce spawning threads till the maximum even if the queue is not full
 		BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_THREADS, MAX_THREADS, THREAD_IDLE_SECONDS, TimeUnit.SECONDS, queue);
@@ -57,17 +40,9 @@ class WebDavServerModule {
 		return executor;
 	}
 
-	@Provides
-	@Singleton
-	ExecutorService provideExecutorService(ThreadPoolExecutor executorService) {
-		return executorService;
-	}
-
-	@Provides
-	@Singleton
-	ExecutorThreadPool provideThreadPool(ThreadPoolExecutor executorService) {
+	private static ExecutorThreadPool createThreadPool(ThreadPoolExecutor executorService) {
 		ExecutorThreadPool threadPool = new ExecutorThreadPool(executorService);
-		executorService.setThreadFactory(this::createServerThread);
+		executorService.setThreadFactory(WebDavServerModule::createServerThread);
 		try {
 			threadPool.start();
 			return threadPool;
@@ -76,25 +51,21 @@ class WebDavServerModule {
 		}
 	}
 
-	private Thread createServerThread(Runnable runnable) {
-		Thread t = new Thread(runnable, String.format("webdav-%03d", threadNum.getAndIncrement()));
+	private static Thread createServerThread(Runnable runnable) {
+		Thread t = new Thread(runnable, String.format("webdav-%03d", THREAD_NUM.incrementAndGet()));
 		t.setDaemon(true);
 		return t;
 	}
 
 
-	@Provides
-	@Singleton
-	Server provideServer(ExecutorThreadPool threadPool, ContextHandlerCollection servletCollection) {
+	private static Server createServer(ExecutorThreadPool threadPool, ContextHandlerCollection servletCollection) {
 		Preconditions.checkState(threadPool.isStarted()); // otherwise addBean() will make the threadpool managed, i.e. it will be shut down when the server is stopped
 		Server server = new Server(threadPool);
 		server.setHandler(servletCollection);
 		return server;
 	}
 
-	@Provides
-	@Singleton
-	ServerConnector provideServerConnector(Server server) {
+	private static ServerConnector createServerConnector(Server server) {
 		HttpConfiguration config = new HttpConfiguration();
 		config.setUriCompliance(UriCompliance.from("0,AMBIGUOUS_PATH_SEPARATOR,AMBIGUOUS_PATH_ENCODING"));
 		ServerConnector connector = new ServerConnector(server, new HttpConnectionFactory(config));
@@ -102,41 +73,29 @@ class WebDavServerModule {
 		return connector;
 	}
 
-	@Provides
-	@Singleton
-	ContextHandlerCollection provideContextHandlerCollection(@CatchAll ServletContextHandler catchAllServletHandler) {
+	private static ContextHandlerCollection createContextHandlerCollection(ServletContextHandler catchAllServletHandler) {
 		ContextHandlerCollection collection = new ContextHandlerCollection();
 		collection.addHandler(catchAllServletHandler);
 		return collection;
 	}
 
-	@Provides
-	@Singleton
-	@CatchAll
-	ServletContextHandler provideServletContextHandler(DefaultServlet servlet) {
+	private static ServletContextHandler createDefaultServletContext(DefaultServlet servlet) {
 		final ServletContextHandler servletContext = new ServletContextHandler(null, ROOT_PATH, ServletContextHandler.NO_SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(ROOT_PATH, servlet);
 		servletContext.addServlet(servletHolder, ROOT_PATH);
 		return servletContext;
 	}
 
-	@Provides
-	@Singleton
-	@ContextPaths
-	Collection<String> provideContextPaths() {
-		return new HashSet<>();
-	}
-
-	@Qualifier
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface CatchAll {
-	}
-
-	@Qualifier
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface ContextPaths {
+	public static WebDavServer createWebDavServer() {
+		var contextPaths = new HashSet<String>();
+		var executorService = createThreadPoolExecutor();
+		var threadPool = createThreadPool(executorService);
+		var defaultServlet = new DefaultServlet(contextPaths);
+		var defaultServletCtx = createDefaultServletContext(defaultServlet);
+		var servletCollectionCtx = createContextHandlerCollection(defaultServletCtx);
+		var server = createServer(threadPool, servletCollectionCtx);
+		var serverConnector = createServerConnector(server);
+		return new WebDavServer(server, executorService, serverConnector, servletCollectionCtx);
 	}
 
 }

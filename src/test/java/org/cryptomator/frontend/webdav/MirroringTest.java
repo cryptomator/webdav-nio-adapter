@@ -8,26 +8,28 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
+import org.cryptomator.frontend.webdav.mount.LegacyMounter;
+import org.cryptomator.frontend.webdav.mount.MountParams;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
-import org.cryptomator.frontend.webdav.mount.MountParams;
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
-import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
-
 public class MirroringTest {
 
-	public static void main(String[] args) throws IOException, CommandFailedException {
+	public static void main(String[] args) throws IOException, LegacyMounter.CommandFailedException {
 		try (Scanner scanner = new Scanner(System.in)) {
 			System.out.println("Enter path to the directory you want to be accessible via WebDAV:");
 			Path p = Paths.get(scanner.nextLine());
 			if (Files.isDirectory(p)) {
-				WebDavServer server = WebDavServer.create();
-				server.bind("localhost", 8080);
+				WebDavServer server = WebDavServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 8080));
 				server.start();
 				WebDavServletController servlet = server.createWebDavServlet(p, "test");
 				servlet.start();
@@ -37,7 +39,7 @@ public class MirroringTest {
 						.withPreferredGvfsScheme("dav") //
 						// .withWebdavHostname("cryptomator-vault") // uncomment only if hostname is set in /etc/hosts!
 						.build();
-				Mount mount = servlet.mount(mountParams);
+				LegacyMounter.Mount mount = servlet.mount(mountParams);
 				mount.reveal();
 
 				System.out.println("Enter anything to stop the server...");

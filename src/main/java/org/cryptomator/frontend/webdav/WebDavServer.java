@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * The WebDAV server, that WebDAV servlets can be added to using {@link #createWebDavServlet(Path, String)}.
  *
- * An instance of this class can be obtained via {@link #create()}.
+ * An instance of this class can be obtained via {@link #create(InetSocketAddress)}.
  */
 public class WebDavServer {
 
@@ -41,44 +41,8 @@ public class WebDavServer {
 		this.servletCollectionCtx = servletCollectionCtx;
 	}
 
-	public static WebDavServer create() {
-		return WebDavServerFactory.createWebDavServer();
-	}
-
-	/**
-	 * Reconfigures the server socket to listen on the specified bindAddr and port.
-	 *
-	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
-	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
-	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
-	 */
-	public void bind(String bindAddr, int port) {
-		this.bind(InetSocketAddress.createUnresolved(bindAddr, port));
-	}
-
-	/**
-	 * Reconfigures the server socket to listen on the specified bindAddr and port.
-	 *
-	 * @param socketBindAddress Socket address and port of the server. Use <code>0.0.0.0:0</code> to listen on all interfaces and auto-assign a port.
-	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
-	 */
-	public void bind(InetSocketAddress socketBindAddress) {
-		try {
-			localConnector.stop();
-			LOG.info("Binding server socket to {}:{}", socketBindAddress.getHostString(), socketBindAddress.getPort());
-			localConnector.setHost(socketBindAddress.getHostString());
-			localConnector.setPort(socketBindAddress.getPort());
-			localConnector.start();
-		} catch (Exception e) {
-			throw new ServerLifecycleException("Failed to restart socket.", e);
-		}
-	}
-
-	/**
-	 * @return <code>true</code> if the server is currently running.
-	 */
-	public boolean isRunning() {
-		return server.isRunning();
+	public static WebDavServer create(InetSocketAddress bindAddr) {
+		return WebDavServerFactory.createWebDavServer(bindAddr);
 	}
 
 	/**

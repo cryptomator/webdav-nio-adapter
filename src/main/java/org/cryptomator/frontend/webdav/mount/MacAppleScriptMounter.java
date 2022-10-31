@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 import static org.cryptomator.integrations.mount.MountFeature.*;
 
-@Priority(100)
+@Priority(50)
 @OperatingSystem(OperatingSystem.Value.MAC)
 public class MacAppleScriptMounter implements MountProvider {
 

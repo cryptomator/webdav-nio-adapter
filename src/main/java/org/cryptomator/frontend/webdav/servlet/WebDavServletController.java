@@ -3,9 +3,9 @@ package org.cryptomator.frontend.webdav.servlet;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.frontend.webdav.mount.MountParam;
 import org.cryptomator.frontend.webdav.mount.MountParams;
-import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
+import org.cryptomator.frontend.webdav.mount.LegacyMounter;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -23,9 +23,9 @@ public class WebDavServletController {
 	private final ContextHandlerCollection contextHandlerCollection;
 	private final ServerConnector connector;
 	private final String contextPath;
-	private final Mounter mounter;
+	private final LegacyMounter mounter;
 
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath, Mounter mounter) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath, LegacyMounter mounter) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
 		this.connector = connector;

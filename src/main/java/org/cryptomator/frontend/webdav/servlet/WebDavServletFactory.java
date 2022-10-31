@@ -9,7 +9,7 @@
 package org.cryptomator.frontend.webdav.servlet;
 
 import com.google.common.base.CharMatcher;
-import org.cryptomator.frontend.webdav.mount.Mounter;
+import org.cryptomator.frontend.webdav.mount.LegacyMounter;
 import org.cryptomator.webdav.core.filters.*;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -45,7 +45,7 @@ public class WebDavServletFactory {
 		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(untrimmedContextPath);
 		String contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
 		ServletContextHandler contextHandler = createServletContext(rootPath, contextPath);
-		Mounter mounter = Mounter.find();
+		LegacyMounter mounter = LegacyMounter.find(); // TODO remove
 		return new WebDavServletController(contextHandler, contextHandlerCollection, serverConnector, contextPath, mounter);
 	}
 

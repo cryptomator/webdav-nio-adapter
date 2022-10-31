@@ -5,13 +5,12 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
-public interface Mounter {
+public interface LegacyMounter {
 
-	static Mounter find() {
+	static LegacyMounter find() {
 		FallbackMounter fallback = new FallbackMounter();
 		Set<MounterStrategy> strategies = Set.of(
 				new WindowsMounter(),
-				new MacAppleScriptMounter(),
 				new MacShellScriptMounter(),
 				new LinuxGioMounter(),
 				new LinuxGvfsMounter()

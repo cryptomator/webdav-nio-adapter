@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
+import org.cryptomator.frontend.webdav.mount.LegacyMounter.CommandFailedException;
 
 import com.google.common.io.CharStreams;
 

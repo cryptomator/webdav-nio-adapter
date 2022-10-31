@@ -1,25 +1,20 @@
 package org.cryptomator.frontend.webdav.servlet;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.inject.Inject;
-
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.frontend.webdav.mount.MountParam;
 import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.ContextPath;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PerServlet
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class WebDavServletController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServletController.class);
@@ -30,8 +25,7 @@ public class WebDavServletController {
 	private final String contextPath;
 	private final Mounter mounter;
 
-	@Inject
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, @ContextPath String contextPath, Mounter mounter) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath, Mounter mounter) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
 		this.connector = connector;

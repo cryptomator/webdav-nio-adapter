@@ -8,15 +8,15 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import org.cryptomator.frontend.webdav.mount.LegacyMounter;
-import org.cryptomator.frontend.webdav.mount.MountParams;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.cryptomator.integrations.mount.MountFailedException;
+import org.cryptomator.integrations.mount.MountFeature;
+import org.cryptomator.integrations.mount.MountProvider;
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,31 +24,42 @@ import java.util.Scanner;
 
 public class MirroringTest {
 
-	public static void main(String[] args) throws IOException, LegacyMounter.CommandFailedException {
+	private static final Logger LOG = LoggerFactory.getLogger(MirroringTest.class);
+
+	public static void main(String[] args) throws MountFailedException, IOException {
+		var mountProvider = MountProvider.get().findAny().orElseThrow(() -> new MountFailedException("Did not find a mount provider"));
+		LOG.info("Using mount provider: {}", mountProvider.displayName());
+
 		try (Scanner scanner = new Scanner(System.in)) {
-			System.out.println("Enter path to the directory you want to be accessible via WebDAV:");
-			Path p = Paths.get(scanner.nextLine());
-			if (Files.isDirectory(p)) {
-				WebDavServer server = WebDavServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 8080));
-				server.start();
-				WebDavServletController servlet = server.createWebDavServlet(p, "test");
-				servlet.start();
+			LOG.info("Enter path to the directory you want to be accessible via WebDAV:");
+			Path pathToMirror = Paths.get(scanner.nextLine());
+			if (!Files.isDirectory(pathToMirror)) {
+				LOG.error("Invalid directory.");
+				System.exit(1);
+			}
 
-				MountParams mountParams = MountParams.create() //
-						.withWindowsDriveLetter("X:") //
-						.withPreferredGvfsScheme("dav") //
-						// .withWebdavHostname("cryptomator-vault") // uncomment only if hostname is set in /etc/hosts!
-						.build();
-				LegacyMounter.Mount mount = servlet.mount(mountParams);
-				mount.reveal();
+			var mountBuilder = mountProvider.forFileSystem(pathToMirror);
+			if (mountProvider.supportedFeatures().contains(MountFeature.PORT)) {
+				mountBuilder.setPort(8080);
+			}
 
-				System.out.println("Enter anything to stop the server...");
+			try (var mount = mountBuilder.mount()) {
+				LOG.info("Mounted successfully to: {}", mount.getMountpoint());
+				LOG.info("Enter anything to unmount...");
 				System.in.read();
-				mount.forced().orElse(mount).unmount();
-				server.terminate();
-			} else {
-				System.out.println("Invalid directory.");
-				return;
+
+				try {
+					mount.unmout();
+					LOG.info("Gracefully unmounted.");
+				} catch (UnmountFailedException e) {
+					if (mountProvider.supportedFeatures().contains(MountFeature.UNMOUNT_FORCED)) {
+						LOG.warn("Graceful unmount failed. Attempting force-unmount...");
+						mount.unmountForced();
+						LOG.info("Forcefully unmounted.");
+					}
+				}
+			} catch (UnmountFailedException e) {
+				LOG.warn("Unmount failed.", e);
 			}
 		}
 	}

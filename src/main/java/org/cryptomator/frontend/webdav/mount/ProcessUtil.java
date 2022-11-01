@@ -6,8 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-
-import org.cryptomator.frontend.webdav.mount.LegacyMounter.CommandFailedException;
+import java.util.concurrent.TimeoutException;
 
 import com.google.common.io.CharStreams;
 
@@ -18,16 +17,16 @@ class ProcessUtil {
 	 * 
 	 * @param proc A finished process
 	 * @param expectedExitValue Exit code returned by the process
-	 * @throws CommandFailedException Thrown in case of unexpected exit values
+	 * @throws IOException Thrown in case of unexpected exit values
 	 */
-	public static void assertExitValue(Process proc, int expectedExitValue) throws CommandFailedException {
+	public static void assertExitValue(Process proc, int expectedExitValue) throws IOException {
 		int actualExitValue = proc.exitValue();
 		if (actualExitValue != expectedExitValue) {
 			try {
 				String error = toString(proc.getErrorStream(), StandardCharsets.UTF_8);
-				throw new CommandFailedException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ". Stderr: " + error);
+				throw new IOException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ". Stderr: " + error);
 			} catch (IOException e) {
-				throw new CommandFailedException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ".");
+				throw new IOException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ".");
 			}
 		}
 	}
@@ -39,17 +38,13 @@ class ProcessUtil {
 	 * @param timeout Maximum time to wait
 	 * @param unit Time unit of <code>timeout</code>
 	 * @return The finished process.
-	 * @throws CommandFailedException If an I/O error occurs when starting the process.
-	 * @throws CommandTimeoutException Thrown in case of a timeout
+	 * @throws IOException If an I/O error occurs when starting the process.
+	 * @throws TimeoutException Thrown in case of a timeout
 	 */
-	public static Process startAndWaitFor(ProcessBuilder processBuilder, long timeout, TimeUnit unit) throws CommandFailedException, CommandTimeoutException {
-		try {
+	public static Process startAndWaitFor(ProcessBuilder processBuilder, long timeout, TimeUnit unit) throws IOException, TimeoutException {
 			Process proc = processBuilder.start();
 			waitFor(proc, timeout, unit);
 			return proc;
-		} catch (IOException e) {
-			throw new CommandFailedException(e);
-		}
 	}
 
 	/**
@@ -58,14 +53,14 @@ class ProcessUtil {
 	 * @param proc A started process
 	 * @param timeout Maximum time to wait
 	 * @param unit Time unit of <code>timeout</code>
-	 * @throws CommandTimeoutException Thrown in case of a timeout
+	 * @throws TimeoutException Thrown in case of a timeout
 	 */
-	public static void waitFor(Process proc, long timeout, TimeUnit unit) throws CommandTimeoutException {
+	public static void waitFor(Process proc, long timeout, TimeUnit unit) throws TimeoutException {
 		try {
 			boolean finishedInTime = proc.waitFor(timeout, unit);
 			if (!finishedInTime) {
 				proc.destroyForcibly();
-				throw new CommandTimeoutException();
+				throw new TimeoutException();
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -74,14 +69,6 @@ class ProcessUtil {
 
 	public static String toString(InputStream in, Charset charset) throws IOException {
 		return CharStreams.toString(new InputStreamReader(in, charset));
-	}
-
-	public static class CommandTimeoutException extends CommandFailedException {
-
-		public CommandTimeoutException() {
-			super("Command timed out.");
-		}
-
 	}
 
 }

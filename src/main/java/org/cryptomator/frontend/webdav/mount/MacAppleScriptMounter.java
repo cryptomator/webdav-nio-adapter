@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,7 +93,7 @@ public class MacAppleScriptMounter implements MountProvider {
 				} else {
 					throw new MountFailedException("Mount succeeded, but failed to determine mount point in string: " + stdout);
 				}
-			} catch (IOException | LegacyMounter.CommandFailedException e) {
+			} catch (IOException | TimeoutException e) {
 				throw new MountFailedException("Mounting failed");
 			}
 		}
@@ -135,7 +136,7 @@ public class MacAppleScriptMounter implements MountProvider {
 			try {
 				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 10, TimeUnit.SECONDS), 0);
 				servlet.stop();
-			} catch (LegacyMounter.CommandFailedException e) {
+			} catch (IOException | TimeoutException e) {
 				throw new UnmountFailedException(e);
 			}
 		}

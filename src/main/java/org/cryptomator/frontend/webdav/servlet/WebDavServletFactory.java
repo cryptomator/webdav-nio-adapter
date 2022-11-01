@@ -9,7 +9,6 @@
 package org.cryptomator.frontend.webdav.servlet;
 
 import com.google.common.base.CharMatcher;
-import org.cryptomator.frontend.webdav.mount.LegacyMounter;
 import org.cryptomator.webdav.core.filters.*;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;

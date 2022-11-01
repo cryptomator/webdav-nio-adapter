@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +83,7 @@ public class WindowsMounter implements MountProvider {
 				ProcessUtil.assertExitValue(mountProcess, 0);
 				LOG.debug("Mounted {} on drive {}", uncPath, mountPoint);
 				return new MountImpl(serverHandle, servlet, mountPoint);
-			} catch (IOException | LegacyMounter.CommandFailedException e) {
+			} catch (IOException | TimeoutException e) {
 				throw new MountFailedException(e);
 			}
 
@@ -93,47 +94,43 @@ public class WindowsMounter implements MountProvider {
 	private static void tuneProxyConfigSilently(URI uri) {
 		try {
 			tuneProxyConfig(uri);
-		} catch (LegacyMounter.CommandFailedException e) {
+		} catch (IOException | TimeoutException e) {
 			LOG.warn("Tuning proxy config failed.", e);
 		}
 	}
 
 	/**
 	 * @param uri The URI for which to tune the registry settings
-	 * @throws LegacyMounter.CommandFailedException If registry access fails
+	 * @throws IOException If registry access fails
+	 * @throws TimeoutException If registry access does not finish in time
 	 * @deprecated TODO overheadhunter: check if this is really necessary.
 	 */
 	@Deprecated
-	private static void tuneProxyConfig(URI uri) throws LegacyMounter.CommandFailedException {
-		try {
-			// get existing value for ProxyOverride key from reqistry:
-			ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
-			Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
-			String regQueryResult = ProcessUtil.toString(regQueryProcess.getInputStream(), StandardCharsets.UTF_8);
+	private static void tuneProxyConfig(URI uri) throws IOException, TimeoutException {
+		// get existing value for ProxyOverride key from reqistry:
+		ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
+		Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
+		String regQueryResult = ProcessUtil.toString(regQueryProcess.getInputStream(), StandardCharsets.UTF_8);
 
-			// determine new value for ProxyOverride key:
-			Set<String> overrides = new HashSet<>();
-			Matcher matcher = REG_QUERY_PROXY_OVERRIDES_PATTERN.matcher(regQueryResult);
-			if (regQueryProcess.exitValue() == 0 && matcher.find()) {
-				String originalOverrides = matcher.group(1);
-				LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
-				Splitter.on(';').split(originalOverrides).forEach(overrides::add);
-			}
-			overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
-			overrides.add("<local>");
-			overrides.add(uri.getHost());
-			overrides.add(uri.getHost() + ":" + uri.getPort());
-
-			// set new value:
-			String adjustedOverrides = Joiner.on(';').join(overrides);
-			ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
-			LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
-			Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);
-			ProcessUtil.assertExitValue(regAddProcess, 0);
-		} catch (IOException e) {
-			throw new LegacyMounter.CommandFailedException(e);
+		// determine new value for ProxyOverride key:
+		Set<String> overrides = new HashSet<>();
+		Matcher matcher = REG_QUERY_PROXY_OVERRIDES_PATTERN.matcher(regQueryResult);
+		if (regQueryProcess.exitValue() == 0 && matcher.find()) {
+			String originalOverrides = matcher.group(1);
+			LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
+			Splitter.on(';').split(originalOverrides).forEach(overrides::add);
 		}
+		overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
+		overrides.add("<local>");
+		overrides.add(uri.getHost());
+		overrides.add(uri.getHost() + ":" + uri.getPort());
 
+		// set new value:
+		String adjustedOverrides = Joiner.on(';').join(overrides);
+		ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
+		LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
+		Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);
+		ProcessUtil.assertExitValue(regAddProcess, 0);
 	}
 
 	private static class MountImpl extends AbstractMount {
@@ -168,7 +165,7 @@ public class WindowsMounter implements MountProvider {
 		private void run(ProcessBuilder command) throws UnmountFailedException {
 			try {
 				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 5, TimeUnit.SECONDS), 0);
-			} catch (LegacyMounter.CommandFailedException e) {
+			} catch (IOException | TimeoutException e) {
 				throw new UnmountFailedException(e);
 			}
 		}

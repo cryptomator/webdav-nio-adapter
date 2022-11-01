@@ -1,7 +1,6 @@
 package org.cryptomator.frontend.webdav.servlet;
 
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
-import org.cryptomator.frontend.webdav.mount.LegacyMounter;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;

@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Priority(50)
 @OperatingSystem(OperatingSystem.Value.LINUX)
@@ -58,7 +59,7 @@ public class LinuxGioMounter implements MountProvider {
 			ProcessBuilder checkDependenciesCmd = new ProcessBuilder("test", " `command -v gio`");
 			ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(checkDependenciesCmd, 500, TimeUnit.MILLISECONDS), 0);
 			return true;
-		} catch (LegacyMounter.CommandFailedException e) {
+		} catch (IOException | TimeoutException e) {
 			return false;
 		}
 	}
@@ -105,7 +106,7 @@ public class LinuxGioMounter implements MountProvider {
 				}
 			} catch (URISyntaxException e) {
 				throw new IllegalStateException("URI constructed from elements known to be valid.", e);
-			} catch (IOException | LegacyMounter.CommandFailedException e) {
+			} catch (IOException | TimeoutException e) {
 				throw new MountFailedException("Mounting failed", e);
 			}
 		}
@@ -137,7 +138,7 @@ public class LinuxGioMounter implements MountProvider {
 			try {
 				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
 				super.unmount();
-			} catch (LegacyMounter.CommandFailedException e) {
+			} catch (IOException | TimeoutException e) {
 				throw new UnmountFailedException(e);
 			}
 		}

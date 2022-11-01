@@ -24,6 +24,13 @@ import java.util.Scanner;
 
 public class MirroringTest {
 
+	static {
+		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
+		System.setProperty("org.slf4j.simpleLogger.log.org.cryptomator.frontend.webdav", "debug");
+		System.setProperty("org.slf4j.simpleLogger.showDateTime", "true");
+		System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "HH:mm:ss.SSS");
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(MirroringTest.class);
 
 	public static void main(String[] args) throws MountFailedException, IOException {

@@ -88,7 +88,7 @@ public class LinuxGioMounter implements MountProvider {
 				// mount:
 				ProcessBuilder mountCmd = new ProcessBuilder("sh", "-c", "gio mount \"" + schemeCorrectedUri.toASCIIString() + "\"");
 				Process mountProcess = mountCmd.start();
-				ProcessUtil.waitFor(mountProcess, 5, TimeUnit.SECONDS);
+				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(mountProcess, 0);
 
 				// find mount point within gvfsMountDir:

@@ -1,4 +1,5 @@
 import org.cryptomator.frontend.webdav.mount.FallbackMounter;
+import org.cryptomator.frontend.webdav.mount.LinuxGioMounter;
 import org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter;
 import org.cryptomator.frontend.webdav.mount.WindowsMounter;
 import org.cryptomator.integrations.mount.MountProvider;
@@ -12,5 +13,5 @@ module org.cryptomator.frontend.webdav {
 	requires org.slf4j;
 	requires static org.jetbrains.annotations;
 
-	provides MountProvider with MacAppleScriptMounter, FallbackMounter, WindowsMounter;
+	provides MountProvider with MacAppleScriptMounter, FallbackMounter, WindowsMounter, LinuxGioMounter;
 }

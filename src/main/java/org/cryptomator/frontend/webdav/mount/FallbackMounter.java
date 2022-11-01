@@ -43,12 +43,6 @@ public class FallbackMounter implements MountProvider {
 		}
 
 		@Override
-		public MountBuilder setMountpoint(Path path) {
-			// FIXME in API
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
 			LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
 			return new MountImpl(serverHandle, servlet, uri);

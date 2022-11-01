@@ -48,7 +48,7 @@ public class MirroringTest {
 				System.in.read();
 
 				try {
-					mount.unmout();
+					mount.unmount();
 					LOG.info("Gracefully unmounted.");
 				} catch (UnmountFailedException e) {
 					if (mountProvider.supportedFeatures().contains(MountFeature.UNMOUNT_FORCED)) {

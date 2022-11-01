@@ -67,12 +67,6 @@ public class MacAppleScriptMounter implements MountProvider {
 		}
 
 		@Override
-		public MountBuilder setMountpoint(Path path) {
-			// FIXME in API
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
 			try {
 				// mount:
@@ -123,7 +117,7 @@ public class MacAppleScriptMounter implements MountProvider {
 		}
 
 		@Override
-		public void unmout() throws UnmountFailedException {
+		public void unmount() throws UnmountFailedException {
 			unmount(unmountCommand);
 		}
 

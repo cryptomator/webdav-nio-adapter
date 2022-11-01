@@ -40,7 +40,7 @@ public class WindowsMounter implements MountProvider {
 
 	@Override
 	public Set<MountFeature> supportedFeatures() {
-		return Set.of(MountFeature.PORT, MountFeature.MOUNT_AS_DRIVE_LETTER, MountFeature.UNMOUNT_FORCED);
+		return Set.of(MountFeature.PORT, MountFeature.MOUNT_AS_DRIVE_LETTER, MountFeature.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountFeature.UNMOUNT_FORCED);
 	}
 
 	@Override
@@ -71,15 +71,17 @@ public class WindowsMounter implements MountProvider {
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
 			try {
 				tuneProxyConfigSilently(uri);
-				String driveLetterStr = driveLetter.toString();
+				String mountPoint = driveLetter == null //
+						? "*" // MOUNT_TO_SYSTEM_CHOSEN_PATH
+						: driveLetter.toString(); // MOUNT_AS_DRIVE_LETTER
 				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
-				ProcessBuilder mount = new ProcessBuilder("net", "use", driveLetterStr, uncPath, "/persistent:no");
+				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
 				String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(mountProcess, 0);
-				LOG.debug("Mounted {} on drive {}", uncPath, driveLetterStr);
-				return new MountImpl(serverHandle, servlet, driveLetterStr);
+				LOG.debug("Mounted {} on drive {}", uncPath, mountPoint);
+				return new MountImpl(serverHandle, servlet, mountPoint);
 			} catch (IOException | LegacyMounter.CommandFailedException e) {
 				throw new MountFailedException(e);
 			}
@@ -92,7 +94,7 @@ public class WindowsMounter implements MountProvider {
 		try {
 			tuneProxyConfig(uri);
 		} catch (LegacyMounter.CommandFailedException e) {
-			LOG.warn("Tuning proxy config failed.", e.getMessage());
+			LOG.warn("Tuning proxy config failed.", e);
 		}
 	}
 
@@ -154,7 +156,7 @@ public class WindowsMounter implements MountProvider {
 		}
 
 		@Override
-		public void unmout() throws UnmountFailedException {
+		public void unmount() throws UnmountFailedException {
 			run(unmountCommand);
 		}
 

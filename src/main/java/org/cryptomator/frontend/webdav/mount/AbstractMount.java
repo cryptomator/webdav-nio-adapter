@@ -16,7 +16,7 @@ public abstract class AbstractMount implements Mount {
 	}
 
 	@Override
-	public void unmout() throws UnmountFailedException {
+	public void unmount() throws UnmountFailedException {
 		servlet.stop();
 	}
 

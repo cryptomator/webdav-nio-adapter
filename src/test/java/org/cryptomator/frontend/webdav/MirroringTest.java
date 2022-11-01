@@ -46,7 +46,7 @@ public class MirroringTest {
 			}
 
 			var mountBuilder = mountProvider.forFileSystem(pathToMirror);
-			if (mountProvider.supportedFeatures().contains(MountFeature.PORT)) {
+			if (mountProvider.supportsFeature(MountFeature.PORT)) {
 				mountBuilder.setPort(8080);
 			}
 
@@ -58,7 +58,7 @@ public class MirroringTest {
 					mount.unmount();
 					LOG.info("Gracefully unmounted.");
 				} catch (UnmountFailedException e) {
-					if (mountProvider.supportedFeatures().contains(MountFeature.UNMOUNT_FORCED)) {
+					if (mountProvider.supportsFeature(MountFeature.UNMOUNT_FORCED)) {
 						LOG.warn("Graceful unmount failed. Attempting force-unmount...");
 						mount.unmountForced();
 						LOG.info("Forcefully unmounted.");

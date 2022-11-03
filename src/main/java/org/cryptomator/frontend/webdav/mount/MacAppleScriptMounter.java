@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.cryptomator.integrations.mount.MountFeature.*;
 
@@ -80,7 +81,7 @@ public class MacAppleScriptMounter implements MountProvider {
 				// verify mounted:
 				ProcessBuilder verifyMount = new ProcessBuilder("/bin/sh", "-c", "mount | grep \"" + uri.toASCIIString() + "\"");
 				Process verifyProcess = verifyMount.start();
-				String stdout = ProcessUtil.toString(verifyProcess.getInputStream(), StandardCharsets.UTF_8);
+				@SuppressWarnings("resource") String stdout = verifyProcess.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
 				ProcessUtil.waitFor(verifyProcess, 10, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(mountProcess, 0);
 

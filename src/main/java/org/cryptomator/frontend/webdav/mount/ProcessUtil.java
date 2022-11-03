@@ -1,14 +1,10 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import com.google.common.io.CharStreams;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 class ProcessUtil {
 
@@ -23,7 +19,7 @@ class ProcessUtil {
 		int actualExitValue = proc.exitValue();
 		if (actualExitValue != expectedExitValue) {
 			try {
-				String error = toString(proc.getErrorStream(), StandardCharsets.UTF_8);
+				@SuppressWarnings("resource") String error = proc.errorReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
 				throw new IOException("Stderr output: " + error);
 			} catch (IOException e) {
 				throw new IOException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ".", e);
@@ -64,20 +60,6 @@ class ProcessUtil {
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-		}
-	}
-
-	/**
-	 * Reads all bytes from the input stream with the given charset. Closes the inputstream when finished.
-	 *
-	 * @param in
-	 * @param charset
-	 * @return
-	 * @throws IOException
-	 */
-	public static String toString(InputStream in, Charset charset) throws IOException {
-		try (var reader = new InputStreamReader(in, charset)) {
-			return CharStreams.toString(new InputStreamReader(in, charset));
 		}
 	}
 

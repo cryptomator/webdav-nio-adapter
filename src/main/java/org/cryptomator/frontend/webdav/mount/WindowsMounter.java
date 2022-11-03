@@ -21,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Priority(50)
 @OperatingSystem(OperatingSystem.Value.WINDOWS)
@@ -84,7 +85,7 @@ public class WindowsMounter implements MountProvider {
 
 				String actualMountpoint;
 				if (SYSTEM_CHOSEN_MOUNTPOINT.equals(mountPoint)) {
-					String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
+					@SuppressWarnings("resource") String stdout = mountProcess.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
 					actualMountpoint = parseSystemChosenMountpoin(stdout);
 				} else {
 					actualMountpoint = mountPoint;
@@ -142,7 +143,7 @@ public class WindowsMounter implements MountProvider {
 		// get existing value for ProxyOverride key from reqistry:
 		ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
 		Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
-		String regQueryResult = ProcessUtil.toString(regQueryProcess.getInputStream(), StandardCharsets.UTF_8);
+		@SuppressWarnings("resource") String regQueryResult = regQueryProcess.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
 
 		// determine new value for ProxyOverride key:
 		Set<String> overrides = new HashSet<>();

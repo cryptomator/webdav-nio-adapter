@@ -197,6 +197,9 @@ public class WindowsMounter implements MountProvider {
 		}
 
 		private synchronized void unmount(ProcessBuilder command) throws UnmountFailedException {
+			 //TODO: this ensures only that from our side unmount is not called twice.
+			// 	If a user disconnects the drive, unmount will fail
+			//	 One solution would be to parse net use output for an entry of our network drive
 			if (isUnmounted.get()) {
 				return;
 			}

@@ -198,15 +198,14 @@ public class WindowsMounter implements MountProvider {
 		}
 
 		private synchronized void unmount(ProcessBuilder command) throws UnmountFailedException {
-			 //TODO: this ensures only that from our side unmount is not called twice.
-			// 	If a user disconnects the drive, unmount will fail
-			//	 One solution would be to parse net use output for an entry of our network drive
 			if (isUnmounted.get()) {
 				return;
 			}
 
 			try {
-				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 5, TimeUnit.SECONDS), 0);
+				if (!isUnmounted()) {
+					ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 5, TimeUnit.SECONDS), 0);
+				}
 				super.unmount();
 				isUnmounted.set(true);
 			} catch (IOException | TimeoutException e) {
@@ -214,6 +213,38 @@ public class WindowsMounter implements MountProvider {
 			}
 		}
 
-	}
+		/**
+		 * Checks, if the webdav servlet is <em>unmounted</em> by parsing output of `net use`.
+		 * <p>
+		 * As an example, if a network drive with uncPath {@code \\localhost@8080\DavWWWRoot\example} is mounted to Z:, the output of `net use`:
+		 * <pre>
+		 *  New connections will not be remembered.
+		 *
+		 *
+		 *  Status       Local     Remote                    Network
+		 *
+		 *  -------------------------------------------------------------------------------
+		 *               Z:        \\localhost@8080\example     Web Client Network
+		 *  The command completed successfully.
+		 * </pre>
+		 * Therefore, this method will return {@code false}.
+		 *
+		 * @return true, if the path of the webdav servlet is not found in the output of `net use`. false if either the path was found or the process exited abnormally
+		 */
+		@SuppressWarnings("resource")
+		private boolean isUnmounted() {
+			try {
+				var uri = servlet.getServletRootUri();
+				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 
+				ProcessBuilder determineMP = new ProcessBuilder("net", "use");
+				Process determineMPProcess = ProcessUtil.startAndWaitFor(determineMP, 5, TimeUnit.SECONDS);
+				ProcessUtil.assertExitValue(determineMPProcess, 0);
+
+				return determineMPProcess.inputReader(StandardCharsets.UTF_8).lines().noneMatch(l -> l.contains(uncPath));
+			} catch (IOException | TimeoutException e) {
+				return false;
+			}
+		}
+	}
 }

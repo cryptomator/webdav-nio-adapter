@@ -24,9 +24,9 @@ class ProcessUtil {
 		if (actualExitValue != expectedExitValue) {
 			try {
 				String error = toString(proc.getErrorStream(), StandardCharsets.UTF_8);
-				throw new IOException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ". Stderr: " + error);
+				throw new IOException("Stderr output: " + error);
 			} catch (IOException e) {
-				throw new IOException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ".");
+				throw new IOException("Command failed with exit code " + actualExitValue + ". Expected " + expectedExitValue + ".", e);
 			}
 		}
 	}

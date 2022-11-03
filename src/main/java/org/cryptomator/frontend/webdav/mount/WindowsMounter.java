@@ -46,7 +46,7 @@ public class WindowsMounter implements MountProvider {
 
 	@Override
 	public MountBuilder forFileSystem(Path path) {
-		return null;
+		return new MountBuilderImpl(path);
 	}
 
 	private static class MountBuilderImpl extends AbstractMountBuilder {

@@ -99,6 +99,20 @@ public class WindowsMounter implements MountProvider {
 
 	}
 
+	/**
+	 * Extracts the drive letter used as the mountpoint from the output of `net use` process.
+	 * <p>
+	 * Example output of {@code net use * \\localhost\DavWWWRoot\example} is:
+	 * <pre>
+	 * Drive Z: is now connected to \\localhost\example.
+	 *
+	 * The command completed successfully.
+	 *
+	 * </pre>
+	 *
+	 * @param processOutput The complete output of the mounting command `net use`
+	 * @return The drive letter the filesystem is mounted to.
+	 */
 	private static String parseSystemChosenMountpoin(String processOutput) {
 		Pattern driveLetterPattern = Pattern.compile("\s[A-Z]:\s");
 		Matcher m = driveLetterPattern.matcher(processOutput.trim());

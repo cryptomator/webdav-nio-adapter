@@ -40,6 +40,7 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 			throw new MountFailedException("Failed to start server", e);
 		}
 
+		boolean success = false;
 		try {
 			WebDavServletController servlet;
 			try {
@@ -52,10 +53,13 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 			var uri = servlet.getServletRootUri();
 			LOG.info("Mounting {}...", uri);
 
-			return this.mount(serverHandle, servlet, uri);
-		} catch (MountFailedException e) {
-			serverHandle.close();
-			throw e;
+			var mount = this.mount(serverHandle, servlet, uri);
+			success = true;
+			return mount;
+		} finally {
+			if (!success) {
+				serverHandle.close();
+			}
 		}
 	}
 

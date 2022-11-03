@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -170,12 +171,14 @@ public class WindowsMounter implements MountProvider {
 		private final ProcessBuilder forcedUnmountCommand;
 
 		private final Path mountpoint;
+		private final AtomicBoolean isUnmounted;
 
 		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, String driveLetter) {
 			super(serverHandle, servlet);
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
 			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
 			this.mountpoint = Path.of(driveLetter + "\\");
+			this.isUnmounted = new AtomicBoolean(false);
 		}
 
 		@Override
@@ -185,17 +188,23 @@ public class WindowsMounter implements MountProvider {
 
 		@Override
 		public void unmount() throws UnmountFailedException {
-			run(unmountCommand);
+			unmount(unmountCommand);
 		}
 
 		@Override
 		public void unmountForced() throws UnmountFailedException {
-			run(forcedUnmountCommand);
+			unmount(forcedUnmountCommand);
 		}
 
-		private void run(ProcessBuilder command) throws UnmountFailedException {
+		private synchronized void unmount(ProcessBuilder command) throws UnmountFailedException {
+			if (isUnmounted.get()) {
+				return;
+			}
+
 			try {
 				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 5, TimeUnit.SECONDS), 0);
+				super.unmount();
+				isUnmounted.set(true);
 			} catch (IOException | TimeoutException e) {
 				throw new UnmountFailedException(e);
 			}

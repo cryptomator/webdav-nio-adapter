@@ -135,7 +135,7 @@ public class MacAppleScriptMounter implements MountProvider {
 			}
 			try {
 				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(command, 10, TimeUnit.SECONDS), 0);
-				servlet.stop();
+				super.unmount();
 			} catch (IOException | TimeoutException e) {
 				throw new UnmountFailedException(e);
 			}

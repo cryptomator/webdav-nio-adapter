@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +27,7 @@ public class WindowsMounter implements MountProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
+	private static final String SYSTEM_CHOSEN_MOUNTPOINT = "*";
 
 	@Override
 	public String displayName() {
@@ -73,22 +73,39 @@ public class WindowsMounter implements MountProvider {
 			try {
 				tuneProxyConfigSilently(uri);
 				String mountPoint = driveLetter == null //
-						? "*" // MOUNT_TO_SYSTEM_CHOSEN_PATH
+						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
 						: driveLetter.toString(); // MOUNT_AS_DRIVE_LETTER
 				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
-				String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(mountProcess, 0);
-				LOG.debug("Mounted {} on drive {}", uncPath, mountPoint);
-				return new MountImpl(serverHandle, servlet, mountPoint);
+
+				String actualMountpoint;
+				if (SYSTEM_CHOSEN_MOUNTPOINT.equals(mountPoint)) {
+					String stdout = ProcessUtil.toString(mountProcess.getInputStream(), StandardCharsets.UTF_8);
+					actualMountpoint = parseSystemChosenMountpoin(stdout);
+				} else {
+					actualMountpoint = mountPoint;
+				}
+
+				LOG.debug("Mounted {} on drive {}", uncPath, actualMountpoint);
+				return new MountImpl(serverHandle, servlet, actualMountpoint);
 			} catch (IOException | TimeoutException e) {
 				throw new MountFailedException(e);
 			}
 
 		}
 
+	}
+
+	private static String parseSystemChosenMountpoin(String processOutput) {
+		Pattern driveLetterPattern = Pattern.compile("\s[A-Z]:\s");
+		Matcher m = driveLetterPattern.matcher(processOutput.trim());
+		if (!m.find()) {
+			throw new IllegalStateException("Output of `net use` must contain the drive letter");
+		}
+		return m.group().trim();
 	}
 
 	private static void tuneProxyConfigSilently(URI uri) {
@@ -144,7 +161,7 @@ public class WindowsMounter implements MountProvider {
 			super(serverHandle, servlet);
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
 			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
-			this.mountpoint = Paths.get(driveLetter);
+			this.mountpoint = Path.of(driveLetter + "\\");
 		}
 
 		@Override

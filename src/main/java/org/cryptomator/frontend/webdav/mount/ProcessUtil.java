@@ -67,8 +67,18 @@ class ProcessUtil {
 		}
 	}
 
+	/**
+	 * Reads all bytes from the input stream with the given charset. Closes the inputstream when finished.
+	 *
+	 * @param in
+	 * @param charset
+	 * @return
+	 * @throws IOException
+	 */
 	public static String toString(InputStream in, Charset charset) throws IOException {
-		return CharStreams.toString(new InputStreamReader(in, charset));
+		try (var reader = new InputStreamReader(in, charset)) {
+			return CharStreams.toString(new InputStreamReader(in, charset));
+		}
 	}
 
 }

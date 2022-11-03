@@ -116,12 +116,12 @@ public class WindowsMounter implements MountProvider {
 	 * @return The drive letter the filesystem is mounted to.
 	 */
 	private static String parseSystemChosenMountpoin(String processOutput) {
-		Pattern driveLetterPattern = Pattern.compile("\s[A-Z]:\s");
+		Pattern driveLetterPattern = Pattern.compile("\s([A-Z]:)\s");
 		Matcher m = driveLetterPattern.matcher(processOutput.trim());
 		if (!m.find()) {
 			throw new IllegalStateException("Output of `net use` must contain the drive letter");
 		}
-		return m.group().trim();
+		return m.group(1);
 	}
 
 	private static void tuneProxyConfigSilently(URI uri) {

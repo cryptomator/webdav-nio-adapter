@@ -40,18 +40,23 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 			throw new MountFailedException("Failed to start server", e);
 		}
 
-		WebDavServletController servlet;
 		try {
-			servlet = serverHandle.server().createWebDavServlet(vfsRoot, "TODO"); // TODO api needs a volume name
-			servlet.start();
-		} catch (ServerLifecycleException e) {
-			throw new MountFailedException("Failed to create WebDAV servlet", e);
+			WebDavServletController servlet;
+			try {
+				servlet = serverHandle.server().createWebDavServlet(vfsRoot, "TODO"); // TODO api needs a volume name
+				servlet.start();
+			} catch (ServerLifecycleException e) {
+				throw new MountFailedException("Failed to create WebDAV servlet", e);
+			}
+
+			var uri = servlet.getServletRootUri();
+			LOG.info("Mounting {}...", uri);
+
+			return this.mount(serverHandle, servlet, uri);
+		} catch (MountFailedException e) {
+			serverHandle.close();
+			throw e;
 		}
-
-		var uri = servlet.getServletRootUri();
-		LOG.info("Mounting {}...", uri);
-
-		return this.mount(serverHandle, servlet, uri);
 	}
 
 	protected abstract Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException;

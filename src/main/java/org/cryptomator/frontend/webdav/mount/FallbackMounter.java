@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 @Priority(Priority.FALLBACK)
-public class FallbackMounter implements MountProvider {
+public class FallbackMounter implements MountService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FallbackMounter.class);
 
@@ -27,8 +27,8 @@ public class FallbackMounter implements MountProvider {
 	}
 
 	@Override
-	public Set<MountFeature> supportedFeatures() {
-		return Set.of(MountFeature.PORT);
+	public Set<MountCapability> capabilities() {
+		return Set.of(MountCapability.LOOPBACK_PORT);
 	}
 
 	@Override

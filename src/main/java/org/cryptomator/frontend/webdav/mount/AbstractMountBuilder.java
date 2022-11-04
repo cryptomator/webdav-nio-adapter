@@ -26,7 +26,7 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 	}
 
 	@Override
-	public MountBuilder setPort(@Range(from = 0L, to = 32767L) int port) {
+	public MountBuilder setLoopbackPort(@Range(from = 0L, to = 32767L) int port) {
 		this.port = port;
 		return this;
 	}

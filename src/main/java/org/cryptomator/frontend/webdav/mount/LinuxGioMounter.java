@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 
 @Priority(50)
 @OperatingSystem(OperatingSystem.Value.LINUX)
-public class LinuxGioMounter implements MountProvider {
+public class LinuxGioMounter implements MountService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LinuxGioMounter.class);
 	private static final String WEBDAV_URI_SCHEME = "dav";
@@ -65,8 +65,8 @@ public class LinuxGioMounter implements MountProvider {
 	}
 
 	@Override
-	public Set<MountFeature> supportedFeatures() {
-		return Set.of(MountFeature.PORT, MountFeature.MOUNT_TO_SYSTEM_CHOSEN_PATH);
+	public Set<MountCapability> capabilities() {
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH);
 	}
 
 	@Override

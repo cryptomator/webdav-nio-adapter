@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Priority(50)
 @OperatingSystem(OperatingSystem.Value.WINDOWS)
-public class WindowsMounter implements MountProvider {
+public class WindowsMounter implements MountService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
@@ -42,8 +42,8 @@ public class WindowsMounter implements MountProvider {
 	}
 
 	@Override
-	public Set<MountFeature> supportedFeatures() {
-		return Set.of(MountFeature.PORT, MountFeature.MOUNT_AS_DRIVE_LETTER, MountFeature.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountFeature.UNMOUNT_FORCED);
+	public Set<MountCapability> capabilities() {
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED);
 	}
 
 	@Override

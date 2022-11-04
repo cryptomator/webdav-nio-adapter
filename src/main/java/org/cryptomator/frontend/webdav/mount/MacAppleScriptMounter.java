@@ -1,6 +1,7 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import org.cryptomator.frontend.webdav.*;
+import org.cryptomator.frontend.webdav.VersionCompare;
+import org.cryptomator.frontend.webdav.WebDavServerHandle;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.integrations.common.OperatingSystem;
 import org.cryptomator.integrations.common.Priority;
@@ -22,11 +23,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.cryptomator.integrations.mount.MountFeature.*;
 
 @Priority(50)
 @OperatingSystem(OperatingSystem.Value.MAC)
-public class MacAppleScriptMounter implements MountProvider {
+public class MacAppleScriptMounter implements MountService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacAppleScriptMounter.class);
 	private static final String OS_VERSION = System.getProperty("os.version");
@@ -48,12 +48,12 @@ public class MacAppleScriptMounter implements MountProvider {
 	}
 
 	@Override
-	public Set<MountFeature> supportedFeatures() {
-		return Set.of(PORT, UNMOUNT_FORCED);
+	public Set<MountCapability> capabilities() {
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.UNMOUNT_FORCED);
 	}
 
 	@Override
-	public @Range(from = 0L, to = 32767L) int getDefaultPort() {
+	public @Range(from = 0L, to = 32767L) int getDefaultLoopbackPort() {
 		return 42427;
 	}
 

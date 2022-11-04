@@ -77,7 +77,7 @@ public class WindowsMounter implements MountProvider {
 				String mountPoint = driveLetter == null //
 						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
 						: driveLetter.toString(); // MOUNT_AS_DRIVE_LETTER
-				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + "\\DavWWWRoot" + uri.getRawPath().replace('/', '\\');
+				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);

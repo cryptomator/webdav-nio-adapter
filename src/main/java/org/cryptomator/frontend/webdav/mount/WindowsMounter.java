@@ -11,8 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +46,7 @@ public class WindowsMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.LOOPBACK_HOST_NAME, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED);
 	}
 
 	@Override
@@ -54,6 +57,7 @@ public class WindowsMounter implements MountService {
 	private static class MountBuilderImpl extends AbstractMountBuilder {
 
 		private Path driveLetter;
+		private String hostName;
 
 		public MountBuilderImpl(Path vfsRoot) {
 			super(vfsRoot);
@@ -69,6 +73,19 @@ public class WindowsMounter implements MountService {
 			}
 		}
 
+		@SuppressWarnings("ResultOfMethodCallIgnored")
+		@Override
+		public MountBuilder setLoopbackHostName(String hostName) {
+			this.hostName = hostName;
+			try {
+				Path.of("\\\\"+hostName+"\\share");
+				new URL("http",hostName,80,"/");
+			} catch (MalformedURLException | InvalidPathException e) {
+				throw new IllegalArgumentException("hostName \""+hostName+"\" does not satifsfy OS restrictions.",e);
+			}
+			return this;
+		}
+
 
 		@Override
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
@@ -77,7 +94,7 @@ public class WindowsMounter implements MountService {
 				String mountPoint = driveLetter == null //
 						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
 						: driveLetter.toString(); // MOUNT_AS_DRIVE_LETTER
-				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
+				String uncPath = "\\\\" + (hostName == null? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);

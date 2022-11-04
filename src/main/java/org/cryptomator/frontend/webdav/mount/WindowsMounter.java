@@ -46,7 +46,7 @@ public class WindowsMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.LOOPBACK_HOST_NAME, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.LOOPBACK_HOST_NAME, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED, MountCapability.VOLUME_ID);
 	}
 
 	@Override

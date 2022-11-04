@@ -66,7 +66,7 @@ public class LinuxGioMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.VOLUME_ID);
 	}
 
 	@Override

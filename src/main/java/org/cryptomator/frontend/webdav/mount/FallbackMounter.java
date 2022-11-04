@@ -28,7 +28,7 @@ public class FallbackMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.VOLUME_ID);
 	}
 
 	@Override

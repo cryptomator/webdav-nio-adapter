@@ -49,7 +49,7 @@ public class MacAppleScriptMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.UNMOUNT_FORCED);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.UNMOUNT_FORCED, MountCapability.VOLUME_ID);
 	}
 
 	@Override

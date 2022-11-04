@@ -11,7 +11,9 @@ import org.jetbrains.annotations.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 
 public abstract class AbstractMountBuilder implements MountBuilder {
@@ -19,6 +21,7 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractMountBuilder.class);
 
 	protected final Path vfsRoot;
+	protected String contextPath;
 	protected int port;
 
 	public AbstractMountBuilder(Path vfsRoot) {
@@ -30,6 +33,18 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 		this.port = port;
 		return this;
 	}
+
+	@Override
+	public MountBuilder setVolumeId(String volumeId) {
+		try {
+			new URL("http", "localhost", 80, volumeId);
+		} catch (MalformedURLException e) {
+			throw new IllegalArgumentException("Volume id needs to satisfy url path component restrictions", e);
+		}
+		this.contextPath = volumeId;
+		return this;
+	}
+
 
 	@Override
 	public final Mount mount() throws MountFailedException {
@@ -44,7 +59,7 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 		try {
 			WebDavServletController servlet;
 			try {
-				servlet = serverHandle.server().createWebDavServlet(vfsRoot, "TODO"); // TODO api needs a volume name
+				servlet = serverHandle.server().createWebDavServlet(vfsRoot, contextPath);
 				servlet.start();
 			} catch (ServerLifecycleException e) {
 				throw new MountFailedException("Failed to create WebDAV servlet", e);

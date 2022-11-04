@@ -48,6 +48,9 @@ public class MirroringTest {
 			if (mountProvider.supportsCapability(MountCapability.LOOPBACK_PORT)) {
 				mountBuilder.setLoopbackPort(8080);
 			}
+			if (mountProvider.supportsCapability(MountCapability.VOLUME_ID)) {
+				mountBuilder.setVolumeId("testMount");
+			}
 
 			try (var mount = mountBuilder.mount()) {
 				LOG.info("Enter anything to unmount...");

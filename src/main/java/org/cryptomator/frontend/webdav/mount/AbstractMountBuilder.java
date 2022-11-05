@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -73,7 +74,11 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 			return mount;
 		} finally {
 			if (!success) {
-				serverHandle.close();
+				try {
+					serverHandle.close();
+				} catch (IOException e) {
+					LOG.warn("Terminating server caused I/O error", e);
+				}
 			}
 		}
 	}

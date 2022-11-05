@@ -200,8 +200,8 @@ public class WindowsMounter implements MountService {
 		}
 
 		@Override
-		public Path getMountpoint() {
-			return mountpoint;
+		public Mountpoint getMountpoint() {
+			return Mountpoint.forPath(mountpoint);
 		}
 
 		@Override

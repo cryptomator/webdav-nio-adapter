@@ -114,8 +114,8 @@ public class MacAppleScriptMounter implements MountService {
 		}
 
 		@Override
-		public Path getMountpoint() {
-			return mountPath;
+		public Mountpoint getMountpoint() {
+			return Mountpoint.forPath(mountPath);
 		}
 
 		@Override

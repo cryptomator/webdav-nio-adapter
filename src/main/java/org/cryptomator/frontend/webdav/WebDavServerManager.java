@@ -1,5 +1,6 @@
 package org.cryptomator.frontend.webdav;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,10 +36,14 @@ public class WebDavServerManager {
 	private record ReferenceCountingHandle(int port, WebDavServer server, AtomicInteger counter) implements WebDavServerHandle {
 
 		@Override
-		public void close() {
+		public void close() throws IOException {
 			if (counter.decrementAndGet() == 0) {
 				RUNNING_SERVERS.remove(port, server);
-				server.terminate();
+				try {
+					server.terminate();
+				} catch (ServerLifecycleException e) {
+					throw new IOException(e);
+				}
 			}
 		}
 

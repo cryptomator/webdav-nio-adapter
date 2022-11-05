@@ -45,14 +45,15 @@ public class MirroringTest {
 			}
 
 			var mountBuilder = mountProvider.forFileSystem(pathToMirror);
-			if (mountProvider.supportsCapability(MountCapability.LOOPBACK_PORT)) {
+			if (mountProvider.hasCapability(MountCapability.LOOPBACK_PORT)) {
 				mountBuilder.setLoopbackPort(8080);
 			}
-			if (mountProvider.supportsCapability(MountCapability.VOLUME_ID)) {
+			if (mountProvider.hasCapability(MountCapability.VOLUME_ID)) {
 				mountBuilder.setVolumeId("testMount");
 			}
 
 			try (var mount = mountBuilder.mount()) {
+				LOG.info("Mounted successfully to: {}", mount.getMountpoint().uri());
 				LOG.info("Enter anything to unmount...");
 				System.in.read();
 
@@ -60,7 +61,7 @@ public class MirroringTest {
 					mount.unmount();
 					LOG.info("Gracefully unmounted.");
 				} catch (UnmountFailedException e) {
-					if (mountProvider.supportsCapability(MountCapability.UNMOUNT_FORCED)) {
+					if (mountProvider.hasCapability(MountCapability.UNMOUNT_FORCED)) {
 						LOG.warn("Graceful unmount failed. Attempting force-unmount...");
 						mount.unmountForced();
 						LOG.info("Forcefully unmounted.");

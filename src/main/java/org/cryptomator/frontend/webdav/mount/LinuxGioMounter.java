@@ -125,8 +125,8 @@ public class LinuxGioMounter implements MountService {
 		}
 
 		@Override
-		public Path getMountpoint() {
-			return mountPoint;
+		public Mountpoint getMountpoint() {
+			return Mountpoint.forPath(mountPoint);
 		}
 
 		@Override

@@ -4,8 +4,6 @@ import org.cryptomator.frontend.webdav.WebDavServerHandle;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.mount.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -13,8 +11,6 @@ import java.util.Set;
 
 @Priority(Priority.FALLBACK)
 public class FallbackMounter implements MountService {
-
-	private static final Logger LOG = LoggerFactory.getLogger(FallbackMounter.class);
 
 	@Override
 	public String displayName() {
@@ -44,21 +40,22 @@ public class FallbackMounter implements MountService {
 
 		@Override
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
-			LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
 			return new MountImpl(serverHandle, servlet, uri);
 		}
 
 	}
 
 	private static class MountImpl extends AbstractMount {
+		private final URI uri;
+
 		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
 			super(serverHandle, servlet);
+			this.uri = uri;
 		}
 
 		@Override
-		public Path getMountpoint() {
-			// FIXME in API
-			throw new UnsupportedOperationException();
+		public Mountpoint getMountpoint() {
+			return Mountpoint.forUri(uri);
 		}
 
 	}

@@ -5,6 +5,8 @@ import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.integrations.mount.Mount;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 
+import java.io.IOException;
+
 public abstract class AbstractMount implements Mount {
 
 	protected final WebDavServerHandle serverHandle;
@@ -21,7 +23,7 @@ public abstract class AbstractMount implements Mount {
 	}
 
 	@Override
-	public void close() throws UnmountFailedException {
+	public void close() throws UnmountFailedException, IOException {
 		Mount.super.close();
 		serverHandle.close();
 	}

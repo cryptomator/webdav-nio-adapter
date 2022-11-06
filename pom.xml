@@ -18,6 +18,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
+		<integrations-api.version>1.2.0-beta1</integrations-api.version>
 		<webdavservlet.version>1.2.2</webdavservlet.version>
 		<dagger.version>2.41</dagger.version>
 		<jetty.version>10.0.12</jetty.version>
@@ -58,6 +59,13 @@
 			<version>${webdavservlet.version}</version>
 		</dependency>
 
+		<!-- Mount API -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>integrations-api</artifactId>
+			<version>${integrations-api.version}</version>
+		</dependency>
+
 		<!-- Jetty -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -75,6 +83,14 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
+		</dependency>
+
+		<!-- Correctness -->
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>23.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Logging -->

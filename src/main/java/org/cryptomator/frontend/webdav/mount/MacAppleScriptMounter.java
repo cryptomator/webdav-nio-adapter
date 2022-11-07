@@ -95,7 +95,7 @@ public class MacAppleScriptMounter implements MountService {
 					throw new MountFailedException("Mount succeeded, but failed to determine mount point in string: " + stdout);
 				}
 			} catch (IOException | TimeoutException e) {
-				throw new MountFailedException("Mounting failed");
+				throw new MountFailedException("Mounting failed", e);
 			}
 		}
 	}

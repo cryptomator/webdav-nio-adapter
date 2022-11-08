@@ -16,11 +16,12 @@ public class WebDavServerManager {
 
 	public static WebDavServerHandle getOrCreateServer(int port) throws ServerLifecycleException {
 		return RUNNING_SERVERS.compute(port, (p, handle) -> {
-			if (handle == null) {
+			if (handle == null || handle.counter.getAndIncrement() == 0) {
+				// if counter was 0 -> a concurrent thread is about to terminate it.
 				var server = tryCreate(p);
 				return new ReferenceCountingHandle(port, server, new AtomicInteger(1));
 			} else {
-				handle.counter.incrementAndGet();
+				// handle exists. we increased the counter already.
 				return handle;
 			}
 		});

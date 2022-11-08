@@ -38,7 +38,7 @@ public class WebDavServerManager {
 		@Override
 		public void close() throws IOException {
 			if (counter.decrementAndGet() == 0) {
-				RUNNING_SERVERS.remove(port, server);
+				RUNNING_SERVERS.remove(port, this);
 				try {
 					server.terminate();
 				} catch (ServerLifecycleException e) {

@@ -49,7 +49,7 @@ public class MacAppleScriptMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.UNMOUNT_FORCED, MountCapability.VOLUME_ID);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.UNMOUNT_FORCED, MountCapability.VOLUME_ID, MountCapability.VOLUME_NAME);
 	}
 
 	@Override
@@ -64,8 +64,21 @@ public class MacAppleScriptMounter implements MountService {
 
 	private static class MountBuilderImpl extends AbstractMountBuilder {
 
+		private String volumeName;
+
 		public MountBuilderImpl(Path vfsRoot) {
 			super(vfsRoot);
+		}
+
+		@Override
+		public MountBuilder setVolumeName(String volumeName) {
+			this.volumeName = volumeName;
+			return this;
+		}
+
+		@Override
+		protected String getContextPath() {
+			return super.getContextPath() + "/" + volumeName;
 		}
 
 		@Override

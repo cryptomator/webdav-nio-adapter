@@ -16,13 +16,18 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class AbstractMountBuilder implements MountBuilder {
 
+	private static final Pattern PATH_SEP_PATTERN = Pattern.compile("/");
+	private static final Pattern RESERVED_CHARS = Pattern.compile("[^a-zA-Z0-9-._~]+"); // all but unreserved chars according to https://www.rfc-editor.org/rfc/rfc3986#section-2.3
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractMountBuilder.class);
 
 	protected final Path vfsRoot;
-	protected String contextPath;
+	protected String volumeId;
 	protected int port;
 
 	public AbstractMountBuilder(Path vfsRoot) {
@@ -42,10 +47,21 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException("Volume id needs to satisfy url path component restrictions", e);
 		}
-		this.contextPath = volumeId;
+		this.volumeId = volumeId;
 		return this;
 	}
 
+	protected String getContextPath() {
+		return volumeId;
+	}
+
+	private String normalizedContextPath() {
+		return "/" + PATH_SEP_PATTERN.splitAsStream(getContextPath()).filter(Predicate.not(String::isBlank)).map(this::normalizedContextPathSegment).collect(Collectors.joining("/"));
+	}
+
+	private String normalizedContextPathSegment(String segment) {
+		return RESERVED_CHARS.matcher(segment).replaceAll("_");
+	}
 
 	@Override
 	public final Mount mount() throws MountFailedException {
@@ -60,7 +76,7 @@ public abstract class AbstractMountBuilder implements MountBuilder {
 		try {
 			WebDavServletController servlet;
 			try {
-				servlet = serverHandle.server().createWebDavServlet(vfsRoot, contextPath);
+				servlet = serverHandle.server().createWebDavServlet(vfsRoot, normalizedContextPath());
 				servlet.start();
 			} catch (ServerLifecycleException e) {
 				throw new MountFailedException("Failed to create WebDAV servlet", e);

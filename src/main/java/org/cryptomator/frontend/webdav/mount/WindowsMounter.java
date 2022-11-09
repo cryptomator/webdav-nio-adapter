@@ -1,7 +1,5 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import org.cryptomator.frontend.webdav.WebDavServerHandle;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.integrations.common.OperatingSystem;
@@ -17,6 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -168,7 +167,7 @@ public class WindowsMounter implements MountService {
 		if (regQueryProcess.exitValue() == 0 && matcher.find()) {
 			String originalOverrides = matcher.group(1);
 			LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
-			Splitter.on(';').split(originalOverrides).forEach(overrides::add);
+			overrides.addAll(Arrays.asList(originalOverrides.split(";")));
 		}
 		overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
 		overrides.add("<local>");
@@ -176,7 +175,7 @@ public class WindowsMounter implements MountService {
 		overrides.add(uri.getHost() + ":" + uri.getPort());
 
 		// set new value:
-		String adjustedOverrides = Joiner.on(';').join(overrides);
+		String adjustedOverrides = String.join(";", overrides);
 		ProcessBuilder regAdd = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + adjustedOverrides + "\"", "/f");
 		LOG.debug("Setting Registry value for ProxyOverride to: {}", adjustedOverrides);
 		Process regAddProcess = ProcessUtil.startAndWaitFor(regAdd, 5, TimeUnit.SECONDS);

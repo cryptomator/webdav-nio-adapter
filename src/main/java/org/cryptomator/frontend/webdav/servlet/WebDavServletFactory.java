@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav.servlet;
 
-import com.google.common.base.CharMatcher;
 import org.cryptomator.webdav.core.filters.*;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -41,7 +40,10 @@ public class WebDavServletFactory {
 	}
 
 	public static WebDavServletController createServletController(Path rootPath, String untrimmedContextPath, ServerConnector serverConnector, ContextHandlerCollection contextHandlerCollection) {
-		String trimmedCtxPath = CharMatcher.is('/').trimTrailingFrom(untrimmedContextPath);
+		var trimmedCtxPath = untrimmedContextPath;
+		while (trimmedCtxPath.endsWith("/")) {
+			trimmedCtxPath = trimmedCtxPath.substring(0, trimmedCtxPath.length() - 1);
+		}
 		String contextPath = trimmedCtxPath.startsWith("/") ? trimmedCtxPath : "/" + trimmedCtxPath;
 		ServletContextHandler contextHandler = createServletContext(rootPath, contextPath);
 		return new WebDavServletController(contextHandler, contextHandlerCollection, serverConnector, contextPath);

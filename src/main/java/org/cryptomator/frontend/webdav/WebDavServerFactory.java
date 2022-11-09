@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import com.google.common.base.Preconditions;
 import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -61,7 +60,10 @@ class WebDavServerFactory {
 
 
 	private static Server createServer(ExecutorThreadPool threadPool, ContextHandlerCollection servletCollection) {
-		Preconditions.checkState(threadPool.isStarted()); // otherwise addBean() will make the threadpool managed, i.e. it will be shut down when the server is stopped
+		if (!threadPool.isStarted()) {
+			// otherwise addBean() will make the threadpool managed, i.e. it will be shut down when the server is stopped
+			throw new IllegalStateException();
+		}
 		Server server = new Server(threadPool);
 		server.setHandler(servletCollection);
 		return server;

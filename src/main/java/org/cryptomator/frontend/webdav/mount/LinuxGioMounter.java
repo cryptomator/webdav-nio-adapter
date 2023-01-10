@@ -70,6 +70,11 @@ public class LinuxGioMounter implements MountService {
 	}
 
 	@Override
+	public int getDefaultLoopbackPort() {
+		return 42427;
+	}
+
+	@Override
 	public MountBuilder forFileSystem(Path fileSystemRoot) {
 		return new MountBuilderImpl(fileSystemRoot);
 	}

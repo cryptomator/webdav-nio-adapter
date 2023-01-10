@@ -49,6 +49,11 @@ public class WindowsMounter implements MountService {
 	}
 
 	@Override
+	public int getDefaultLoopbackPort() {
+		return 0; //mounts to a drive letter, hence fixed port is not necessary
+	}
+
+	@Override
 	public MountBuilder forFileSystem(Path path) {
 		return new MountBuilderImpl(path);
 	}

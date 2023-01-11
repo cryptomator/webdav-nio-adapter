@@ -35,7 +35,7 @@ public class MacAppleScriptMounter implements MountService {
 
 	@Override
 	public String displayName() {
-		return "WebDAV (Apple Script)";
+		return "WebDAV (AppleScript)";
 	}
 
 	@Override

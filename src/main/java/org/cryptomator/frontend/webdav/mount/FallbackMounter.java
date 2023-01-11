@@ -28,6 +28,11 @@ public class FallbackMounter implements MountService {
 	}
 
 	@Override
+	public int getDefaultLoopbackPort(){
+		return 0;
+	}
+
+	@Override
 	public MountBuilder forFileSystem(Path path) {
 		return new MountBuilderImpl(path);
 	}

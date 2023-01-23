@@ -45,7 +45,7 @@ public class WindowsMounter implements MountService {
 
 	@Override
 	public Set<MountCapability> capabilities() {
-		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.LOOPBACK_HOST_NAME, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED, MountCapability.VOLUME_ID);
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.LOOPBACK_HOST_NAME, MountCapability.MOUNT_AS_DRIVE_LETTER, MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH, MountCapability.UNMOUNT_FORCED, MountCapability.VOLUME_ID, MountCapability.VOLUME_NAME);
 	}
 
 	@Override
@@ -62,6 +62,7 @@ public class WindowsMounter implements MountService {
 
 		private Path driveLetter;
 		private String hostName;
+		private String volumeName;
 
 		public MountBuilderImpl(Path vfsRoot) {
 			super(vfsRoot);
@@ -88,6 +89,17 @@ public class WindowsMounter implements MountService {
 				throw new IllegalArgumentException("hostName \""+hostName+"\" does not satifsfy OS restrictions.",e);
 			}
 			return this;
+		}
+
+		@Override
+		public MountBuilder setVolumeName(String volumeName) {
+			this.volumeName = volumeName;
+			return this;
+		}
+
+		@Override
+		protected String getContextPath() {
+			return super.getContextPath() + "/" + volumeName;
 		}
 
 

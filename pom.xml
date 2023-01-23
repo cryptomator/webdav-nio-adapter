@@ -18,16 +18,16 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
-		<integrations-api.version>1.2.0-beta2</integrations-api.version>
+		<integrations-api.version>1.2.0-beta4</integrations-api.version>
 		<webdavservlet.version>1.2.2</webdavservlet.version>
-		<jetty.version>10.0.12</jetty.version>
-		<slf4j.version>2.0.3</slf4j.version>
+		<jetty.version>10.0.13</jetty.version>
+		<slf4j.version>2.0.6</slf4j.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.9.0</junit.jupiter.version>
+		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
-		<dependency-check.version>7.2.1</dependency-check.version>
+		<dependency-check.version>8.0.1</dependency-check.version>
 		<jacoco.version>0.8.8</jacoco.version>
 		<nexus-staging.version>1.6.8</nexus-staging.version>
 	</properties>

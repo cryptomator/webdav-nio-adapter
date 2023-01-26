@@ -123,6 +123,8 @@ public class LinuxGioMounter implements MountService {
 		private final Path mountPoint;
 		private final ProcessBuilder unmountCommand;
 
+		private volatile boolean isMounted = true;
+
 		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, Path mountPoint, URI uri) {
 			super(serverHandle, servlet);
 			this.mountPoint = mountPoint;
@@ -136,16 +138,20 @@ public class LinuxGioMounter implements MountService {
 
 		@Override
 		public void unmount() throws UnmountFailedException {
-			if (!Files.isDirectory(mountPoint)) {
-				LOG.debug("Volume already unmounted.");
+			if(!isMounted) {
 				return;
 			}
-			try {
-				ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
-				super.unmount();
-			} catch (IOException | TimeoutException e) {
-				throw new UnmountFailedException(e);
+			if (!Files.isDirectory(mountPoint)) {
+				LOG.debug("Volume already unmounted.");
+			} else {
+				try {
+					ProcessUtil.assertExitValue(ProcessUtil.startAndWaitFor(unmountCommand, 10, TimeUnit.SECONDS), 0);
+				} catch (IOException | TimeoutException e) {
+					throw new UnmountFailedException(e);
+				}
 			}
+			super.unmount();
+			isMounted = false;
 		}
 	}
 

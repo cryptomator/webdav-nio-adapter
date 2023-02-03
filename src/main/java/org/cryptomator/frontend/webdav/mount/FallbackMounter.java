@@ -14,7 +14,7 @@ public class FallbackMounter implements MountService {
 
 	@Override
 	public String displayName() {
-		return "WebDAV (Fallback)";
+		return "WebDAV (HTTP Address)";
 	}
 
 	@Override

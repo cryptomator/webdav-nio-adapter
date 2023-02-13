@@ -18,7 +18,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
-		<webdavservlet.version>1.2.2</webdavservlet.version>
+		<webdavservlet.version>1.2.3</webdavservlet.version>
 		<dagger.version>2.41</dagger.version>
 		<jetty.version>10.0.12</jetty.version>
 		<guava.version>31.1-jre</guava.version>

@@ -30,6 +30,7 @@
 		<dependency-check.version>8.0.1</dependency-check.version>
 		<jacoco.version>0.8.8</jacoco.version>
 		<nexus-staging.version>1.6.8</nexus-staging.version>
+		<maven.deploy.version>3.1.0</maven.deploy.version>
 	</properties>
 
 	<licenses>
@@ -273,6 +274,15 @@
 					<url>https://maven.pkg.github.com/cryptomator/webdav-nio-adapter</url>
 				</repository>
 			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<version>${maven.deploy.version}</version>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

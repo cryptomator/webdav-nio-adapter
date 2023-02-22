@@ -1,23 +1,67 @@
 package org.cryptomator.frontend.webdav.mount;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.cryptomator.frontend.webdav.WebDavServerHandle;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.cryptomator.integrations.common.Priority;
+import org.cryptomator.integrations.mount.*;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.util.Set;
 
-class FallbackMounter implements MounterStrategy {
-
-	private static final Logger LOG = LoggerFactory.getLogger(FallbackMounter.class);
+@Priority(Priority.FALLBACK)
+public class FallbackMounter implements MountService {
 
 	@Override
-	public Mount mount(URI uri, MountParams mountParams) throws CommandFailedException {
-		LOG.warn("No applicable strategy has been found for your system. Please use a WebDAV client of your choice to access: {}", uri);
-		throw new UnsupportedSystemException(uri);
+	public String displayName() {
+		return "WebDAV (HTTP Address)";
 	}
 
 	@Override
-	public boolean isApplicable() {
+	public boolean isSupported() {
 		return true;
 	}
 
+	@Override
+	public Set<MountCapability> capabilities() {
+		return Set.of(MountCapability.LOOPBACK_PORT, MountCapability.VOLUME_ID);
+	}
+
+	@Override
+	public int getDefaultLoopbackPort(){
+		return 0;
+	}
+
+	@Override
+	public MountBuilder forFileSystem(Path path) {
+		return new MountBuilderImpl(path);
+	}
+
+	private static class MountBuilderImpl extends AbstractMountBuilder {
+
+		public MountBuilderImpl(Path vfsRoot) {
+			super(vfsRoot);
+		}
+
+		@Override
+		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
+			return new MountImpl(serverHandle, servlet, uri);
+		}
+
+	}
+
+	private static class MountImpl extends AbstractMount {
+		private final URI uri;
+
+		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) {
+			super(serverHandle, servlet);
+			this.uri = uri;
+		}
+
+		@Override
+		public Mountpoint getMountpoint() {
+			return Mountpoint.forUri(uri);
+		}
+
+	}
 }

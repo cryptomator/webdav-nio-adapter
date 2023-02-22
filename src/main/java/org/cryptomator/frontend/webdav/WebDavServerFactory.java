@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import com.google.common.base.Preconditions;
 import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -16,6 +15,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 
+import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -60,16 +60,21 @@ class WebDavServerFactory {
 
 
 	private static Server createServer(ExecutorThreadPool threadPool, ContextHandlerCollection servletCollection) {
-		Preconditions.checkState(threadPool.isStarted()); // otherwise addBean() will make the threadpool managed, i.e. it will be shut down when the server is stopped
+		if (!threadPool.isStarted()) {
+			// otherwise addBean() will make the threadpool managed, i.e. it will be shut down when the server is stopped
+			throw new IllegalStateException();
+		}
 		Server server = new Server(threadPool);
 		server.setHandler(servletCollection);
 		return server;
 	}
 
-	private static ServerConnector createServerConnector(Server server) {
+	private static ServerConnector createServerConnector(Server server, InetSocketAddress bindAddr) {
 		HttpConfiguration config = new HttpConfiguration();
 		config.setUriCompliance(UriCompliance.from("0,AMBIGUOUS_PATH_SEPARATOR,AMBIGUOUS_PATH_ENCODING"));
 		ServerConnector connector = new ServerConnector(server, new HttpConnectionFactory(config));
+		connector.setHost(bindAddr.getHostString());
+		connector.setPort(bindAddr.getPort());
 		server.setConnectors(new Connector[]{connector});
 		return connector;
 	}
@@ -87,7 +92,7 @@ class WebDavServerFactory {
 		return servletContext;
 	}
 
-	public static WebDavServer createWebDavServer() {
+	public static WebDavServer createWebDavServer(InetSocketAddress bindAddr) {
 		var contextPaths = new HashSet<String>();
 		var executorService = createThreadPoolExecutor();
 		var threadPool = createThreadPool(executorService);
@@ -95,7 +100,7 @@ class WebDavServerFactory {
 		var defaultServletCtx = createDefaultServletContext(defaultServlet);
 		var servletCollectionCtx = createContextHandlerCollection(defaultServletCtx);
 		var server = createServer(threadPool, servletCollectionCtx);
-		var serverConnector = createServerConnector(server);
+		var serverConnector = createServerConnector(server, bindAddr);
 		return new WebDavServer(server, executorService, serverConnector, servletCollectionCtx);
 	}
 

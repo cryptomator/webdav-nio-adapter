@@ -8,20 +8,20 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 class DefaultServlet extends HttpServlet {
 
 	private static final String METHOD_PROPFIND = "PROPFIND";
 	private static final int TARPIT_DELAY_MS = 5000;
+	private static final Pattern PATH_SEP_PATTERN = Pattern.compile("/");
 	private final Collection<String> contextPaths;
 
 	public DefaultServlet(Collection<String> contextPaths) {
@@ -82,8 +82,8 @@ class DefaultServlet extends HttpServlet {
 	}
 
 	private boolean isParentOrSamePath(String path, String potentialParent) {
-		String[] pathComponents = Iterables.toArray(Splitter.on('/').omitEmptyStrings().split(path), String.class);
-		String[] parentPathComponents = Iterables.toArray(Splitter.on('/').omitEmptyStrings().split(potentialParent), String.class);
+		String[] pathComponents = PATH_SEP_PATTERN.splitAsStream(path).filter(Predicate.not(String::isBlank)).toArray(String[]::new);
+		String[] parentPathComponents = PATH_SEP_PATTERN.splitAsStream(potentialParent).filter(Predicate.not(String::isBlank)).toArray(String[]::new);
 		if (pathComponents.length < parentPathComponents.length) {
 			return false; // parent can not be parent of path, if it is longer than path.
 		}

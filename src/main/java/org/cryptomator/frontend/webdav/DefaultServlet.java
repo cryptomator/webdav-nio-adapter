@@ -8,30 +8,23 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import java.io.IOException;
-import java.util.Collection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
-import org.cryptomator.frontend.webdav.WebDavServerModule.ContextPaths;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-
-@Singleton
 class DefaultServlet extends HttpServlet {
 
 	private static final String METHOD_PROPFIND = "PROPFIND";
 	private static final int TARPIT_DELAY_MS = 5000;
+	private static final Pattern PATH_SEP_PATTERN = Pattern.compile("/");
 	private final Collection<String> contextPaths;
 
-	@Inject
-	public DefaultServlet(@ContextPaths Collection<String> contextPaths) {
+	public DefaultServlet(Collection<String> contextPaths) {
 		this.contextPaths = contextPaths;
 	}
 
@@ -60,7 +53,7 @@ class DefaultServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
 		resp.addHeader("DAV", "1, 2");
 		resp.addHeader("MS-Author-Via", "DAV");
 		resp.addHeader("Allow", "OPTIONS, PROPFIND, GET, HEAD");
@@ -85,12 +78,12 @@ class DefaultServlet extends HttpServlet {
 	}
 
 	private boolean isRequestedResourcePathPartOfValidContextPath(String requestedResourcePath) {
-		return contextPaths.stream().filter(cp -> isParentOrSamePath(cp, requestedResourcePath)).findAny().isPresent();
+		return contextPaths.stream().anyMatch(cp -> isParentOrSamePath(cp, requestedResourcePath));
 	}
 
 	private boolean isParentOrSamePath(String path, String potentialParent) {
-		String[] pathComponents = Iterables.toArray(Splitter.on('/').omitEmptyStrings().split(path), String.class);
-		String[] parentPathComponents = Iterables.toArray(Splitter.on('/').omitEmptyStrings().split(potentialParent), String.class);
+		String[] pathComponents = PATH_SEP_PATTERN.splitAsStream(path).filter(Predicate.not(String::isBlank)).toArray(String[]::new);
+		String[] parentPathComponents = PATH_SEP_PATTERN.splitAsStream(potentialParent).filter(Predicate.not(String::isBlank)).toArray(String[]::new);
 		if (pathComponents.length < parentPathComponents.length) {
 			return false; // parent can not be parent of path, if it is longer than path.
 		}

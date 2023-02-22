@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>1.2.8</version>
+	<version>2.0.0</version>
 	<name>WebDAV-NIO Adapter</name>
 	<description>Embedded Jetty serving a WebDAV servlet to access resources at a given NIO path.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -15,22 +15,23 @@
 	</scm>
 
 	<properties>
+		<project.build.jdk>17</project.build.jdk>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependencies -->
-		<webdavservlet.version>1.2.1</webdavservlet.version>
-		<dagger.version>2.41</dagger.version>
-		<jetty.version>10.0.10</jetty.version>
-		<guava.version>31.1-jre</guava.version>
-		<slf4j.version>1.7.36</slf4j.version>
+		<integrations-api.version>1.2.0</integrations-api.version>
+		<webdavservlet.version>1.2.3</webdavservlet.version>
+		<jetty.version>10.0.13</jetty.version>
+		<slf4j.version>2.0.6</slf4j.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.8.2</junit.jupiter.version>
+		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
-		<dependency-check.version>7.0.0</dependency-check.version>
-		<jacoco.version>0.8.7</jacoco.version>
+		<dependency-check.version>8.1.0</dependency-check.version>
+		<jacoco.version>0.8.8</jacoco.version>
 		<nexus-staging.version>1.6.8</nexus-staging.version>
+		<maven.deploy.version>3.1.0</maven.deploy.version>
 	</properties>
 
 	<licenses>
@@ -58,6 +59,13 @@
 			<version>${webdavservlet.version}</version>
 		</dependency>
 
+		<!-- Mount API -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>integrations-api</artifactId>
+			<version>${integrations-api.version}</version>
+		</dependency>
+
 		<!-- Jetty -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -70,11 +78,12 @@
 			<version>${jetty.version}</version>
 		</dependency>
 
-		<!-- Guava -->
+		<!-- Correctness -->
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>23.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Logging -->
@@ -82,13 +91,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
-		</dependency>
-
-		<!-- DI -->
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger</artifactId>
-			<version>${dagger.version}</version>
 		</dependency>
 
 		<!-- Test -->
@@ -113,26 +115,19 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.10.1</version>
 				<configuration>
-					<release>11</release>
+					<release>${project.build.jdk}</release>
 					<showWarnings>true</showWarnings>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>com.google.dagger</groupId>
-							<artifactId>dagger-compiler</artifactId>
-							<version>${dagger.version}</version>
-						</path>
-					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0-M7</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>3.3.0</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -148,7 +143,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.2</version>
+				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -280,6 +275,15 @@
 					<url>https://maven.pkg.github.com/cryptomator/webdav-nio-adapter</url>
 				</repository>
 			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<version>${maven.deploy.version}</version>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

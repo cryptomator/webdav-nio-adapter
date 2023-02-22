@@ -8,26 +8,23 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.cryptomator.frontend.webdav.servlet.WebDavServletComponent;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * The WebDAV server, that WebDAV servlets can be added to using {@link #createWebDavServlet(Path, String)}.
  *
- * An instance of this class can be obtained via {@link #create()}.
+ * An instance of this class can be obtained via {@link #create(InetSocketAddress)}.
  */
-@Singleton
 public class WebDavServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
@@ -35,55 +32,17 @@ public class WebDavServer {
 	private final Server server;
 	private final ExecutorService executorService;
 	private final ServerConnector localConnector;
-	private final WebDavServletFactory servletFactory;
+	private final ContextHandlerCollection servletCollectionCtx;
 
-	@Inject
-	WebDavServer(Server server, ExecutorService executorService, ServerConnector connector, WebDavServletFactory servletContextFactory) {
+	WebDavServer(Server server, ExecutorService executorService, ServerConnector connector, ContextHandlerCollection servletCollectionCtx) {
 		this.server = server;
 		this.executorService = executorService;
 		this.localConnector = connector;
-		this.servletFactory = servletContextFactory;
+		this.servletCollectionCtx = servletCollectionCtx;
 	}
 
-	public static WebDavServer create() {
-		WebDavServerComponent comp = DaggerWebDavServerComponent.create();
-		return comp.server();
-	}
-
-	/**
-	 * Reconfigures the server socket to listen on the specified bindAddr and port.
-	 *
-	 * @param bindAddr Hostname or IP address, the WebDAV server's network interface should bind to. Use <code>0.0.0.0</code> to listen to all interfaces.
-	 * @param port TCP port or <code>0</code> to use an auto-assigned port.
-	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
-	 */
-	public void bind(String bindAddr, int port) {
-		this.bind(InetSocketAddress.createUnresolved(bindAddr, port));
-	}
-
-	/**
-	 * Reconfigures the server socket to listen on the specified bindAddr and port.
-	 *
-	 * @param socketBindAddress Socket address and port of the server. Use <code>0.0.0.0:0</code> to listen on all interfaces and auto-assign a port.
-	 * @throws ServerLifecycleException If any exception occurs during socket reconfiguration (e.g. port not available).
-	 */
-	public void bind(InetSocketAddress socketBindAddress) {
-		try {
-			localConnector.stop();
-			LOG.info("Binding server socket to {}:{}", socketBindAddress.getHostString(), socketBindAddress.getPort());
-			localConnector.setHost(socketBindAddress.getHostString());
-			localConnector.setPort(socketBindAddress.getPort());
-			localConnector.start();
-		} catch (Exception e) {
-			throw new ServerLifecycleException("Failed to restart socket.", e);
-		}
-	}
-
-	/**
-	 * @return <code>true</code> if the server is currently running.
-	 */
-	public boolean isRunning() {
-		return server.isRunning();
+	public static WebDavServer create(InetSocketAddress bindAddr) {
+		return WebDavServerFactory.createWebDavServer(bindAddr);
 	}
 
 	/**
@@ -135,8 +94,7 @@ public class WebDavServer {
 	 * @return The controller object for this new servlet
 	 */
 	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) {
-		WebDavServletComponent servletComp = servletFactory.create(rootPath, contextPath);
-		return servletComp.servlet();
+		return WebDavServletFactory.createServletController(rootPath, contextPath, localConnector, servletCollectionCtx);
 	}
 
 }

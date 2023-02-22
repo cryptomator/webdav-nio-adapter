@@ -1,25 +1,15 @@
 package org.cryptomator.frontend.webdav.servlet;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.inject.Inject;
-
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
-import org.cryptomator.frontend.webdav.mount.MountParam;
-import org.cryptomator.frontend.webdav.mount.MountParams;
-import org.cryptomator.frontend.webdav.mount.Mounter;
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
-import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.ContextPath;
-import org.cryptomator.frontend.webdav.servlet.WebDavServletModule.PerServlet;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PerServlet
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class WebDavServletController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServletController.class);
@@ -28,15 +18,12 @@ public class WebDavServletController {
 	private final ContextHandlerCollection contextHandlerCollection;
 	private final ServerConnector connector;
 	private final String contextPath;
-	private final Mounter mounter;
 
-	@Inject
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, @ContextPath String contextPath, Mounter mounter) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
 		this.connector = connector;
 		this.contextPath = contextPath;
-		this.mounter = mounter;
 	}
 
 	/**
@@ -84,22 +71,6 @@ public class WebDavServletController {
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Unable to construct valid URI for given contextPath.", e);
 		}
-	}
-
-	/**
-	 * Tries to mount the resource served by this servlet as a WebDAV drive on the local machine.
-	 * 
-	 * @param mountParams Optional mount parameters, that may be required for certain operating systems.
-	 * @return A {@link Mount} instance allowing unmounting and revealing the drive.
-	 * @throws CommandFailedException If mounting failed.
-	 */
-	public Mount mount(MountParams mountParams) throws CommandFailedException {
-		if (!contextHandler.isStarted()) {
-			throw new IllegalStateException("Mounting only possible for running servlets.");
-		}
-		URI uri = getServletRootUri(mountParams.getOrDefault(MountParam.WEBDAV_HOSTNAME, connector.getHost()));
-		LOG.info("Mounting {} using {}", uri, mounter.getClass().getName());
-		return mounter.mount(uri, mountParams);
 	}
 
 }

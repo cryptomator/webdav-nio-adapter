@@ -33,12 +33,14 @@ public class WebDavServer {
 	private final ExecutorService executorService;
 	private final ServerConnector localConnector;
 	private final ContextHandlerCollection servletCollectionCtx;
+	private final DefaultServlet defaultServlet;
 
-	WebDavServer(Server server, ExecutorService executorService, ServerConnector connector, ContextHandlerCollection servletCollectionCtx) {
+	WebDavServer(Server server, ExecutorService executorService, ServerConnector connector, ContextHandlerCollection servletCollectionCtx, DefaultServlet defaultServlet) {
 		this.server = server;
 		this.executorService = executorService;
 		this.localConnector = connector;
 		this.servletCollectionCtx = servletCollectionCtx;
+		this.defaultServlet = defaultServlet;
 	}
 
 	public static WebDavServer create(InetSocketAddress bindAddr) {
@@ -94,7 +96,7 @@ public class WebDavServer {
 	 * @return The controller object for this new servlet
 	 */
 	public WebDavServletController createWebDavServlet(Path rootPath, String contextPath) {
-		return WebDavServletFactory.createServletController(rootPath, contextPath, localConnector, servletCollectionCtx);
+		return WebDavServletFactory.createServletController(rootPath, contextPath, localConnector, servletCollectionCtx, defaultServlet);
 	}
 
 }

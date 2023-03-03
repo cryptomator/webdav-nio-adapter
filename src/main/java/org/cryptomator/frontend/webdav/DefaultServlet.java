@@ -13,19 +13,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-class DefaultServlet extends HttpServlet {
+class DefaultServlet extends HttpServlet implements ContextPathRegistry {
 
 	private static final String METHOD_PROPFIND = "PROPFIND";
 	private static final int TARPIT_DELAY_MS = 5000;
 	private static final Pattern PATH_SEP_PATTERN = Pattern.compile("/");
-	private final Collection<String> contextPaths;
+	private final Set<String> synchronizedContextPaths;
 
-	public DefaultServlet(Collection<String> contextPaths) {
-		this.contextPaths = contextPaths;
+	public DefaultServlet(Set<String> contextPaths) {
+		this.synchronizedContextPaths = Collections.synchronizedSet(contextPaths);
 	}
 
 	@Override
@@ -78,7 +79,24 @@ class DefaultServlet extends HttpServlet {
 	}
 
 	private boolean isRequestedResourcePathPartOfValidContextPath(String requestedResourcePath) {
-		return contextPaths.stream().anyMatch(cp -> isParentOrSamePath(cp, requestedResourcePath));
+		//required for synchronized collections, see https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collections.html#synchronizedSet(java.util.Set)
+		synchronized (synchronizedContextPaths) {
+			return synchronizedContextPaths.stream().anyMatch(cp -> isParentOrSamePath(cp, requestedResourcePath));
+		}
+	}
+
+	@Override
+	public boolean add(String contextPath) {
+		synchronized (synchronizedContextPaths) {
+			return synchronizedContextPaths.add(contextPath);
+		}
+	}
+
+	@Override
+	public boolean remove(String contextPath) {
+		synchronized (synchronizedContextPaths) {
+			return synchronizedContextPaths.remove(contextPath);
+		}
 	}
 
 	private boolean isParentOrSamePath(String path, String potentialParent) {

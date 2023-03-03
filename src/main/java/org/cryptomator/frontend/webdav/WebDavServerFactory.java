@@ -101,7 +101,7 @@ class WebDavServerFactory {
 		var servletCollectionCtx = createContextHandlerCollection(defaultServletCtx);
 		var server = createServer(threadPool, servletCollectionCtx);
 		var serverConnector = createServerConnector(server, bindAddr);
-		return new WebDavServer(server, executorService, serverConnector, servletCollectionCtx);
+		return new WebDavServer(server, executorService, serverConnector, servletCollectionCtx, defaultServlet);
 	}
 
 }

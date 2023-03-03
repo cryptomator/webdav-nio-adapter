@@ -1,5 +1,6 @@
 package org.cryptomator.frontend.webdav.servlet;
 
+import org.cryptomator.frontend.webdav.ContextPathRegistry;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -17,12 +18,14 @@ public class WebDavServletController {
 	private final ServletContextHandler contextHandler;
 	private final ContextHandlerCollection contextHandlerCollection;
 	private final ServerConnector connector;
+	private final ContextPathRegistry contextPathRegistry;
 	private final String contextPath;
 
-	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, String contextPath) {
+	WebDavServletController(ServletContextHandler contextHandler, ContextHandlerCollection contextHandlerCollection, ServerConnector connector, ContextPathRegistry contextPathRegistry, String contextPath) {
 		this.contextHandler = contextHandler;
 		this.contextHandlerCollection = contextHandlerCollection;
 		this.connector = connector;
+		this.contextPathRegistry = contextPathRegistry;
 		this.contextPath = contextPath;
 	}
 
@@ -33,6 +36,7 @@ public class WebDavServletController {
 	 */
 	public void start() throws ServerLifecycleException {
 		try {
+			contextPathRegistry.add(contextPath);
 			contextHandlerCollection.addHandler(contextHandler);
 			contextHandlerCollection.mapContexts();
 			contextHandler.start();
@@ -52,6 +56,7 @@ public class WebDavServletController {
 			contextHandler.stop();
 			contextHandlerCollection.removeHandler(contextHandler);
 			contextHandlerCollection.mapContexts();
+			contextPathRegistry.remove(contextPath);
 			LOG.info("WebDavServlet stopped: " + contextPath);
 		} catch (Exception e) {
 			throw new ServerLifecycleException("Servlet couldn't be stopped", e);

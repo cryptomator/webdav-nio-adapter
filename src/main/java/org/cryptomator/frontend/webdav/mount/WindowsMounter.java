@@ -83,10 +83,10 @@ public class WindowsMounter implements MountService {
 		public MountBuilder setLoopbackHostName(String hostName) {
 			this.hostName = hostName;
 			try {
-				Path.of("\\\\"+hostName+"\\share");
-				new URL("http",hostName,80,"/");
+				Path.of("\\\\" + hostName + "\\share");
+				new URL("http", hostName, 80, "/");
 			} catch (MalformedURLException | InvalidPathException e) {
-				throw new IllegalArgumentException("hostName \""+hostName+"\" does not satifsfy OS restrictions.",e);
+				throw new IllegalArgumentException("hostName \"" + hostName + "\" does not satifsfy OS restrictions.", e);
 			}
 			return this;
 		}
@@ -109,8 +109,8 @@ public class WindowsMounter implements MountService {
 				tuneProxyConfigSilently(uri);
 				String mountPoint = driveLetter == null //
 						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
-						: driveLetter.toString().substring(0,2); // MOUNT_AS_DRIVE_LETTER
-				String uncPath = "\\\\" + (hostName == null? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
+						: driveLetter.toString().substring(0, 2); // MOUNT_AS_DRIVE_LETTER
+				String uncPath = "\\\\" + (hostName == null ? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
@@ -167,7 +167,7 @@ public class WindowsMounter implements MountService {
 
 	/**
 	 * @param uri The URI for which to tune the registry settings
-	 * @throws IOException If registry access fails
+	 * @throws IOException      If registry access fails
 	 * @throws TimeoutException If registry access does not finish in time
 	 * @deprecated TODO overheadhunter: check if this is really necessary.
 	 */

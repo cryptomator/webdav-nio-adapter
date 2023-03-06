@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Predicate;
@@ -45,12 +44,12 @@ class DefaultServlet extends HttpServlet implements ContextPathRegistry {
 		}
 
 		switch (req.getMethod()) {
-		case METHOD_PROPFIND:
-			doPropfind(req, resp);
-			break;
-		default:
-			super.service(req, resp);
-			break;
+			case METHOD_PROPFIND:
+				doPropfind(req, resp);
+				break;
+			default:
+				super.service(req, resp);
+				break;
 		}
 	}
 

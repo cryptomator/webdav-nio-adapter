@@ -109,7 +109,7 @@ public class WindowsMounter implements MountService {
 				tuneProxyConfigSilently(uri);
 				String mountPoint = driveLetter == null //
 						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
-						: driveLetter.toString(); // MOUNT_AS_DRIVE_LETTER
+						: driveLetter.toString().substring(0,2); // MOUNT_AS_DRIVE_LETTER
 				String uncPath = "\\\\" + (hostName == null? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();

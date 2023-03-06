@@ -125,7 +125,7 @@ public class WindowsMounter implements MountService {
 				}
 
 				LOG.debug("Mounted {} on drive {}", uncPath, actualMountpoint);
-				return new MountImpl(serverHandle, servlet, actualMountpoint);
+				return new MountImpl(serverHandle, servlet, actualMountpoint, uncPath);
 			} catch (IOException | TimeoutException e) {
 				throw new MountFailedException(e);
 			}
@@ -205,13 +205,15 @@ public class WindowsMounter implements MountService {
 		private final ProcessBuilder forcedUnmountCommand;
 
 		private final Path mountpoint;
+		private final String uncPath;
 		private final AtomicBoolean isUnmounted;
 
-		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, String driveLetter) {
+		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, String driveLetter, String uncPath) {
 			super(serverHandle, servlet);
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
 			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
 			this.mountpoint = Path.of(driveLetter + "\\");
+			this.uncPath = uncPath;
 			this.isUnmounted = new AtomicBoolean(false);
 		}
 
@@ -267,9 +269,6 @@ public class WindowsMounter implements MountService {
 		@SuppressWarnings("resource")
 		private boolean isUnmounted() {
 			try {
-				var uri = servlet.getServletRootUri();
-				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
-
 				ProcessBuilder determineMP = new ProcessBuilder("net", "use");
 				Process determineMPProcess = ProcessUtil.startAndWaitFor(determineMP, 5, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(determineMPProcess, 0);

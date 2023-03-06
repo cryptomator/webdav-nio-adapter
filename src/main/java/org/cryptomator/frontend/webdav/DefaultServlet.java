@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -23,10 +23,10 @@ class DefaultServlet extends HttpServlet implements ContextPathRegistry {
 	private static final String METHOD_PROPFIND = "PROPFIND";
 	private static final int TARPIT_DELAY_MS = 5000;
 	private static final Pattern PATH_SEP_PATTERN = Pattern.compile("/");
-	private final Set<String> synchronizedContextPaths;
+	private final Set<String> contextPaths;
 
 	public DefaultServlet(Set<String> contextPaths) {
-		this.synchronizedContextPaths = Collections.synchronizedSet(contextPaths);
+		this.contextPaths = new CopyOnWriteArraySet<>(contextPaths);
 	}
 
 	@Override
@@ -44,12 +44,12 @@ class DefaultServlet extends HttpServlet implements ContextPathRegistry {
 		}
 
 		switch (req.getMethod()) {
-		case METHOD_PROPFIND:
-			doPropfind(req, resp);
-			break;
-		default:
-			super.service(req, resp);
-			break;
+			case METHOD_PROPFIND:
+				doPropfind(req, resp);
+				break;
+			default:
+				super.service(req, resp);
+				break;
 		}
 	}
 
@@ -79,24 +79,17 @@ class DefaultServlet extends HttpServlet implements ContextPathRegistry {
 	}
 
 	private boolean isRequestedResourcePathPartOfValidContextPath(String requestedResourcePath) {
-		//required for synchronized collections, see https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collections.html#synchronizedSet(java.util.Set)
-		synchronized (synchronizedContextPaths) {
-			return synchronizedContextPaths.stream().anyMatch(cp -> isParentOrSamePath(cp, requestedResourcePath));
-		}
+		return contextPaths.stream().anyMatch(cp -> isParentOrSamePath(cp, requestedResourcePath));
 	}
 
 	@Override
 	public boolean add(String contextPath) {
-		synchronized (synchronizedContextPaths) {
-			return synchronizedContextPaths.add(contextPath);
-		}
+		return contextPaths.add(contextPath);
 	}
 
 	@Override
 	public boolean remove(String contextPath) {
-		synchronized (synchronizedContextPaths) {
-			return synchronizedContextPaths.remove(contextPath);
-		}
+		return contextPaths.remove(contextPath);
 	}
 
 	private boolean isParentOrSamePath(String path, String potentialParent) {

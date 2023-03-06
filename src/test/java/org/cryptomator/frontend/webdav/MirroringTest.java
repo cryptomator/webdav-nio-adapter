@@ -51,7 +51,15 @@ public class MirroringTest {
 			if (mountProvider.hasCapability(MountCapability.VOLUME_ID)) {
 				mountBuilder.setVolumeId("testMount");
 			}
-
+			if (mountProvider.hasCapability(MountCapability.VOLUME_NAME)) {
+				mountBuilder.setVolumeName("testName");
+			}
+			if (mountProvider.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER)) {
+				mountBuilder.setMountpoint(Path.of("X://"));
+			}
+			//if (mountProvider.hasCapability(MountCapability.LOOPBACK_HOST_NAME)) {
+			//	mountBuilder.setLoopbackHostName("cryptomator-vault");
+			//}
 			try (var mount = mountBuilder.mount()) {
 				LOG.info("Mounted successfully to: {}", mount.getMountpoint().uri());
 				LOG.info("Enter anything to unmount...");

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>webdav-nio-adapter</artifactId>
-	<version>2.0.1</version>
+	<version>2.0.2</version>
 	<name>WebDAV-NIO Adapter</name>
 	<description>Embedded Jetty serving a WebDAV servlet to access resources at a given NIO path.</description>
 	<url>https://github.com/cryptomator/webdav-nio-adapter</url>
@@ -28,7 +28,7 @@
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
-		<dependency-check.version>8.1.0</dependency-check.version>
+		<dependency-check.version>8.1.2</dependency-check.version>
 		<jacoco.version>0.8.8</jacoco.version>
 		<nexus-staging.version>1.6.8</nexus-staging.version>
 		<maven.deploy.version>3.1.0</maven.deploy.version>

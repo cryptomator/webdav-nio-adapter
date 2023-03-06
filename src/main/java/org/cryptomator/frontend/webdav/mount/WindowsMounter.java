@@ -83,10 +83,10 @@ public class WindowsMounter implements MountService {
 		public MountBuilder setLoopbackHostName(String hostName) {
 			this.hostName = hostName;
 			try {
-				Path.of("\\\\"+hostName+"\\share");
-				new URL("http",hostName,80,"/");
+				Path.of("\\\\" + hostName + "\\share");
+				new URL("http", hostName, 80, "/");
 			} catch (MalformedURLException | InvalidPathException e) {
-				throw new IllegalArgumentException("hostName \""+hostName+"\" does not satifsfy OS restrictions.",e);
+				throw new IllegalArgumentException("hostName \"" + hostName + "\" does not satifsfy OS restrictions.", e);
 			}
 			return this;
 		}
@@ -109,8 +109,8 @@ public class WindowsMounter implements MountService {
 				tuneProxyConfigSilently(uri);
 				String mountPoint = driveLetter == null //
 						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
-						: driveLetter.toString(); // MOUNT_AS_DRIVE_LETTER
-				String uncPath = "\\\\" + (hostName == null? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
+						: driveLetter.toString().substring(0, 2); // MOUNT_AS_DRIVE_LETTER
+				String uncPath = "\\\\" + (hostName == null ? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
@@ -125,7 +125,7 @@ public class WindowsMounter implements MountService {
 				}
 
 				LOG.debug("Mounted {} on drive {}", uncPath, actualMountpoint);
-				return new MountImpl(serverHandle, servlet, actualMountpoint);
+				return new MountImpl(serverHandle, servlet, actualMountpoint, uncPath);
 			} catch (IOException | TimeoutException e) {
 				throw new MountFailedException(e);
 			}
@@ -167,7 +167,7 @@ public class WindowsMounter implements MountService {
 
 	/**
 	 * @param uri The URI for which to tune the registry settings
-	 * @throws IOException If registry access fails
+	 * @throws IOException      If registry access fails
 	 * @throws TimeoutException If registry access does not finish in time
 	 * @deprecated TODO overheadhunter: check if this is really necessary.
 	 */
@@ -205,13 +205,15 @@ public class WindowsMounter implements MountService {
 		private final ProcessBuilder forcedUnmountCommand;
 
 		private final Path mountpoint;
+		private final String uncPath;
 		private final AtomicBoolean isUnmounted;
 
-		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, String driveLetter) {
+		public MountImpl(WebDavServerHandle serverHandle, WebDavServletController servlet, String driveLetter, String uncPath) {
 			super(serverHandle, servlet);
 			this.unmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/no");
 			this.forcedUnmountCommand = new ProcessBuilder("net", "use", driveLetter, "/delete", "/yes");
 			this.mountpoint = Path.of(driveLetter + "\\");
+			this.uncPath = uncPath;
 			this.isUnmounted = new AtomicBoolean(false);
 		}
 
@@ -267,9 +269,6 @@ public class WindowsMounter implements MountService {
 		@SuppressWarnings("resource")
 		private boolean isUnmounted() {
 			try {
-				var uri = servlet.getServletRootUri();
-				String uncPath = "\\\\" + uri.getHost() + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
-
 				ProcessBuilder determineMP = new ProcessBuilder("net", "use");
 				Process determineMPProcess = ProcessUtil.startAndWaitFor(determineMP, 5, TimeUnit.SECONDS);
 				ProcessUtil.assertExitValue(determineMPProcess, 0);

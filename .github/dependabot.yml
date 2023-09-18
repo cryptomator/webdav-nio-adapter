@@ -11,6 +11,12 @@ updates:
       maven-dependencies:
         patterns:
           - "*"
+    ignore:
+      # keep using Jetty 10.x (javax.*) instead of Jetty 11 (jakarta.*)
+      - dependency-name: "org.eclipse.jetty:jetty-server"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.eclipse.jetty:jetty-servlet"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/" # even for `.github/workflows`

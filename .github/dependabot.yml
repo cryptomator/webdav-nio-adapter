@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+    ignore:
+      # keep using Jetty 10.x (javax.*) instead of Jetty 11 (jakarta.*)
+      - dependency-name: "org.eclipse.jetty:jetty-server"
+        versions: ["11.x"]
+      - dependency-name: "org.eclipse.jetty:jetty-servlet"
+        versions: ["11.x"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/" # even for `.github/workflows`
+    schedule:
+      interval: "monthly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

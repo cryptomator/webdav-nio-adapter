@@ -28,8 +28,8 @@
 		<junit.jupiter.version>5.10.0</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
-		<dependency-check.version>8.4.0</dependency-check.version>
-		<jacoco.version>0.8.10</jacoco.version>
+		<dependency-check.version>8.4.2</dependency-check.version>
+		<jacoco.version>0.8.11</jacoco.version>
 		<nexus-staging.version>1.6.13</nexus-staging.version>
 		<maven.deploy.version>3.1.1</maven.deploy.version>
 	</properties>

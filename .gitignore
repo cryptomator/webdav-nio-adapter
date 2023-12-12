@@ -22,3 +22,6 @@ test-output/
 .idea/compiler.xml
 .idea/jarRepositories.xml
 *.iml
+
+# Maven
+pom.xml.versionsBackup

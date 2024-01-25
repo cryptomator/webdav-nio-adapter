@@ -28,7 +28,7 @@
 		<junit.jupiter.version>5.10.1</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
-		<dependency-check.version>9.0.6</dependency-check.version>
+		<dependency-check.version>9.0.9</dependency-check.version>
 		<jacoco.version>0.8.11</jacoco.version>
 		<nexus-staging.version>1.6.13</nexus-staging.version>
 		<maven.deploy.version>3.1.1</maven.deploy.version>
@@ -113,7 +113,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
+				<version>3.12.1</version>
 				<configuration>
 					<release>${project.build.jdk}</release>
 					<showWarnings>true</showWarnings>
@@ -122,7 +122,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>3.2.5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

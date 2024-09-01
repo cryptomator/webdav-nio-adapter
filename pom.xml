@@ -25,7 +25,7 @@
 		<slf4j.version>2.0.13</slf4j.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.10.2</junit.jupiter.version>
+		<junit.jupiter.version>5.11.0</junit.jupiter.version>
 
 		<!-- mvn plugin dependencies -->
 		<dependency-check.version>10.0.2</dependency-check.version>

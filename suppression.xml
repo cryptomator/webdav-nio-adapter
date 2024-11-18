@@ -36,6 +36,7 @@
 		]]></notes>
    		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-http@.*$</packageUrl>
    		<vulnerabilityName>CVE-2024-6763</vulnerabilityName>
+		<cve>CVE-2024-6763</cve>
 </suppress>
 
 </suppressions>

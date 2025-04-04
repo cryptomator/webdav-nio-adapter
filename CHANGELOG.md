@@ -9,6 +9,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## [Unreleased]
 
+## [2.0.9] - 2025-04-04
+
 ### Added
 * File /CHANGELOG.md to keep track of changes
 

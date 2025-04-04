@@ -84,6 +84,19 @@ public class MacAppleScriptMounter implements MountService {
 		@Override
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
 			try {
+				// store credentials:
+				ProcessBuilder storeCredentials = new ProcessBuilder("security", "add-internet-password", //
+						"-a", "anonymous", //
+						"-s", "localhost", //
+						"-P", String.valueOf(uri.getPort()), //
+						"-r", "http", //
+						"-D", "Cryptomator WebDAV Access", //
+						"-T", "/System/Library/CoreServices/NetAuthAgent.app/Contents/MacOS/NetAuthSysAgent");
+				ProcessUtil.startAndWaitFor(storeCredentials, 10, TimeUnit.SECONDS);
+			} catch (IOException | TimeoutException e) {
+				LOG.warn("Unable to store credentials for WebDAV access: {}", e.getMessage());
+			}
+			try {
 				// mount:
 				String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 				ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);

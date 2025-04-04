@@ -88,7 +88,7 @@ public class MacAppleScriptMounter implements MountService {
 				String mountAppleScript = String.format("mount volume \"%s\"", uri.toASCIIString());
 				ProcessBuilder mount = new ProcessBuilder("/usr/bin/osascript", "-e", mountAppleScript);
 				Process mountProcess = mount.start();
-				ProcessUtil.waitFor(mountProcess, 60, TimeUnit.SECONDS); // huge timeout since the user might need to confirm connecting via http
+				ProcessUtil.waitFor(mountProcess, 120, TimeUnit.SECONDS); // huge timeout since issue #107 + the user might need to confirm connecting via http
 				ProcessUtil.assertExitValue(mountProcess, 0);
 
 				// verify mounted:

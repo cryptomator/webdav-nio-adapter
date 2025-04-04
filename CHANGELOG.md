@@ -11,4 +11,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ### Added
 * File /CHANGELOG.md to keep track of changes
-* increase timeout for MacAppleScript mounter to 120s (see #107)
+
+## Changed
+* Increase timeout for MacAppleScript mounter to 120s (see #107)
+* Updates org.eclipse.jetty:jetty-server from 10.0.24 to 10.0.25
+* Updates org.eclipse.jetty:jetty-servlet from 10.0.24 to 10.0.25

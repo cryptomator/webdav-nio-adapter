@@ -10,7 +10,7 @@ updates:
           - "org.apache.maven.plugins:*"
           - "org.jacoco:jacoco-maven-plugin"
           - "org.owasp:dependency-check-maven"
-          - "org.sonatype.plugins:nexus-staging-maven-plugin"
+          - "org.sonatype.central:central-publishing-maven-plugin"
       java-production-dependencies:
         patterns:
           - "*"
@@ -18,7 +18,7 @@ updates:
           - "org.apache.maven.plugins:*"
           - "org.jacoco:jacoco-maven-plugin"
           - "org.owasp:dependency-check-maven"
-          - "org.sonatype.plugins:nexus-staging-maven-plugin"
+          - "org.sonatype.central:central-publishing-maven-plugin"
           - "org.junit.jupiter:*"
     ignore:
       # keep using Jetty 10.x (javax.*) instead of Jetty 11 (jakarta.*)

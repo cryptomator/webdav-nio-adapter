@@ -7,11 +7,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The changelog starts with version 2.0.9.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/webdav-nio-adapter/releases).
 
+## [Unreleased]
+
+### Changed
+* **[BREAKING]** Update build target to JDK 21
+
+
 ## [2.0.10] - 2025-04-04
 
 ### Changed
 * Updated org.cryptomator:webdav-nio-adapter-servlet from 1.2.7 to 1.2.8
 * Mounting with MacAppleScriptMounter adds credential entry to keychain (again) ([75ef214cd44a3eb84cd4ecc6242456cfa42b35a7](https://github.com/cryptomator/webdav-nio-adapter/commit/75ef214cd44a3eb84cd4ecc6242456cfa42b35a7))
+
 
 ## [2.0.9] - 2025-04-04
 

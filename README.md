@@ -16,7 +16,7 @@ Uses Jackrabbit and an embedded Jetty to server the servlet.
   <dependency>
     <groupId>org.cryptomator</groupId>
     <artifactId>webdav-nio-adapter</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.10</version>
   </dependency>
 </dependencies>
 ```

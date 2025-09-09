@@ -10,7 +10,11 @@ updates:
           - "org.apache.maven.plugins:*"
           - "org.jacoco:jacoco-maven-plugin"
           - "org.owasp:dependency-check-maven"
-          - "org.sonatype.plugins:nexus-staging-maven-plugin"
+          - "org.sonatype.central:central-publishing-maven-plugin"
+      java-test-dependencies:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.cryptomator:cryptofs"
       java-production-dependencies:
         patterns:
           - "*"
@@ -18,8 +22,9 @@ updates:
           - "org.apache.maven.plugins:*"
           - "org.jacoco:jacoco-maven-plugin"
           - "org.owasp:dependency-check-maven"
-          - "org.sonatype.plugins:nexus-staging-maven-plugin"
+          - "org.sonatype.central:central-publishing-maven-plugin"
           - "org.junit.jupiter:*"
+          - "org.cryptomator:cryptofs"
     ignore:
       # keep using Jetty 10.x (javax.*) instead of Jetty 11 (jakarta.*)
       - dependency-name: "org.eclipse.jetty:jetty-server"

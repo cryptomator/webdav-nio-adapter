@@ -11,6 +11,10 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ### Changed
 * **[BREAKING]** Update build target to JDK 21
+* Updated `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.8 to 1.2.10
+* Updated `org.cryptomator:integrations-api` from 1.5.1 to 1.6.0
+* Updated `org.eclipse.jetty:jetty-server` from 10.0.25 to 10.0.26
+* Updated `org.eclipse.jetty:jetty-servlet` from 10.0.25 to 10.0.26
 
 
 ## [2.0.10] - 2025-04-04

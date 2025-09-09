@@ -9,6 +9,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## [Unreleased]
 
+No changes.
+
+
+## [3.0.0] - 2025-09-09
+
 ### Changed
 * **[BREAKING]** Update build target to JDK 21
 * Updated `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.8 to 1.2.10

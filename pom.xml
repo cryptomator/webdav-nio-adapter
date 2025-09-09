@@ -26,6 +26,7 @@
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.13.4</junit.jupiter.version>
+		<cryptofs.version>2.9.0</cryptofs.version>
 
 		<!-- mvn plugin dependencies -->
 		<mvn-compiler.version>3.14.0</mvn-compiler.version>
@@ -110,6 +111,12 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>cryptofs</artifactId>
+			<version>${cryptofs.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

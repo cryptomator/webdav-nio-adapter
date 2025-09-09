@@ -11,6 +11,10 @@ updates:
           - "org.jacoco:jacoco-maven-plugin"
           - "org.owasp:dependency-check-maven"
           - "org.sonatype.central:central-publishing-maven-plugin"
+      java-test-dependencies:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.cryptomator:cryptofs"
       java-production-dependencies:
         patterns:
           - "*"

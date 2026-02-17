@@ -9,7 +9,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## [Unreleased]
 
-No changes.
+### Changed
+* Pin Ci actions ([#129](https://github.com/cryptomator/webdav-nio-adapter/pull/129))
+* Updated dependencies
+    * `org.cryptomator:integrations-api` from version 1.6.0 to 1.7.0
+    * `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.10 to 1.2.11
 
 
 ## [3.0.0] - 2025-09-09

@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The changelog starts with version 2.0.9.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/webdav-nio-adapter/releases).
 
+## [3.0.1] - 2026-02-17
+
+### Changed
+* Pin Ci actions ([#129](https://github.com/cryptomator/webdav-nio-adapter/pull/129))
+* Updated dependencies
+    * `org.cryptomator:integrations-api` from version 1.6.0 to 1.7.0
+    * `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.10 to 1.2.11
+
+
 ## [3.0.0] - 2025-09-09
 
 ### Changed

@@ -42,7 +42,8 @@
 		<notes><![CDATA[
 			Jetty 10 is EOL, therefore no updates.
    		]]></notes>
-		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-server@.*$</packageUrl>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2025-11143</vulnerabilityName>
 		<cve>CVE-2025-11143</cve>
 	</suppress>
 	

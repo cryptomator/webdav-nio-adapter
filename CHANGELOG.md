@@ -9,7 +9,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## Unreleased
 
-No changes yet.
+### Changed
+* **[BREAKING]** Update build target to JDK 26
 
 
 ## [3.0.1] - 2026-02-17

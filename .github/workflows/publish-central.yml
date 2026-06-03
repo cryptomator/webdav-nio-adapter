@@ -18,10 +18,10 @@ jobs:
           server-password: MAVEN_CENTRAL_PASSWORD
       - name: Verify project version = ${{ github.event.release.tag_name }}
         run: |
-            PROJECT_VERSION=$(mvn help:evaluate "-Dexpression=project.version" -q -DforceStdout)
+            PROJECT_VERSION=$(./mvnw help:evaluate "-Dexpression=project.version" -q -DforceStdout)
             test "$PROJECT_VERSION" = "${{ github.event.release.tag_name }}"
       - name: Deploy
-        run: mvn deploy -B -DskipTests -Psign,deploy-central --no-transfer-progress
+        run: ./mvnw deploy -B -DskipTests -Psign,deploy-central --no-transfer-progress
         env:
           MAVEN_OPTS: >
             --add-opens=java.base/java.util=ALL-UNNAMED

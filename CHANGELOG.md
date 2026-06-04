@@ -9,6 +9,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## Unreleased
 
+No changes yet.
+
+
+## [3.0.2] - 2026-06-04
+
 ### Added
 * Maven Wrapper ([#147](https://github.com/cryptomator/webdav-nio-adapter/pull/147))
 

@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The changelog starts with version 2.0.9.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/webdav-nio-adapter/releases).
 
-## Unreleased
+## [3.0.2] - 2026-06-04
 
 ### Added
 * Maven Wrapper ([#147](https://github.com/cryptomator/webdav-nio-adapter/pull/147))

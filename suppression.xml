@@ -24,7 +24,7 @@
 	<suppress>
 		<notes><![CDATA[
   		Suppress false positive, because com.google.common.io.Files.getTempDir() is not used
-   ]]></notes>
+		]]></notes>
 		<packageUrl regex="true">^pkg:maven/com\.google\.guava/guava@.*$</packageUrl>
 		<vulnerabilityName>CVE-2020-8908</vulnerabilityName>
 		<cve>CVE-2020-8908</cve>
@@ -37,6 +37,30 @@
 		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>   	
    		<vulnerabilityName>CVE-2024-6763</vulnerabilityName>
 		<cve>CVE-2024-6763</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[
+			Jetty 10 is EOL, therefore no updates.
+    		]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2025-11143</vulnerabilityName>
+		<cve>CVE-2025-11143</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[
+			Jetty 10 is EOL, therefore no updates.
+    		]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2026-2332</vulnerabilityName>
+		<cve>CVE-2026-2332</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[
+			Jetty 10 is EOL, therefore no updates.
+    		]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2026-5795</vulnerabilityName>
+		<cve>CVE-2026-5795</cve>
 	</suppress>
 	
 

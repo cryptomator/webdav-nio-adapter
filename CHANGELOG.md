@@ -9,8 +9,16 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## Unreleased
 
+### Added
+* Maven Wrapper ([#147](https://github.com/cryptomator/webdav-nio-adapter/pull/147))
+
 ### Changed
-* **[BREAKING]** Update build target to JDK 26
+* **[BREAKING]** Update build target to JDK 26 ([#146](https://github.com/cryptomator/webdav-nio-adapter/pull/146))
+* Updated dependencies ([#144](https://github.com/cryptomator/webdav-nio-adapter/pull/144))
+    * `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.11 to 1.2.12
+    * `org.cryptomator:integrations-api` from 1.7.0 to 1.8.0
+    * `org.slf4j:slf4j-api` from 2.0.17 to 2.0.18
+    * `org.slf4j:slf4j-simple` from 2.0.17 to 2.0.18
 
 
 ## [3.0.1] - 2026-02-17

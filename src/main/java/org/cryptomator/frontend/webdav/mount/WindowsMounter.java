@@ -9,7 +9,9 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -107,6 +109,7 @@ public class WindowsMounter implements MountService {
 
 		@Override
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
+			BufferedReader processOutputReader = null;
 			try {
 				tuneProxyConfigSilently(uri);
 				String mountPoint = driveLetter == null //
@@ -120,7 +123,8 @@ public class WindowsMounter implements MountService {
 
 				String actualMountpoint;
 				if (SYSTEM_CHOSEN_MOUNTPOINT.equals(mountPoint)) {
-					@SuppressWarnings("resource") String stdout = mountProcess.inputReader().lines().collect(Collectors.joining("\n"));
+					processOutputReader = mountProcess.inputReader();
+					String stdout = mountProcess.inputReader().lines().collect(Collectors.joining("\n"));
 					actualMountpoint = parseDriveLetter(stdout);
 				} else {
 					actualMountpoint = mountPoint;
@@ -128,14 +132,26 @@ public class WindowsMounter implements MountService {
 
 				LOG.debug("Mounted {} on drive {}", uncPath, actualMountpoint);
 				return new MountImpl(serverHandle, servlet, actualMountpoint, uncPath);
-			} catch (IOException | TimeoutException e) {
+			} catch (UncheckedIOException | IOException | TimeoutException e) {
 				throw new MountFailedException(e);
+			} finally {
+				tryCloseReader(processOutputReader);
 			}
 
 		}
 
 	}
 
+	private static void tryCloseReader(BufferedReader reader) {
+		if (reader != null) {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				LOG.warn("Failed to close output stream of net use command", e);
+			}
+		}
+
+	}
 	/**
 	 * Extracts the drive letter used as the mountpoint from the output of `net use` process.
 	 * <p>

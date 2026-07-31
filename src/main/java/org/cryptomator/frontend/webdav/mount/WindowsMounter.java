@@ -120,7 +120,7 @@ public class WindowsMounter implements MountService {
 
 				String actualMountpoint;
 				if (SYSTEM_CHOSEN_MOUNTPOINT.equals(mountPoint)) {
-					@SuppressWarnings("resource") String stdout = mountProcess.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
+					@SuppressWarnings("resource") String stdout = mountProcess.inputReader().lines().collect(Collectors.joining("\n"));
 					actualMountpoint = parseSystemChosenMountpoin(stdout);
 				} else {
 					actualMountpoint = mountPoint;

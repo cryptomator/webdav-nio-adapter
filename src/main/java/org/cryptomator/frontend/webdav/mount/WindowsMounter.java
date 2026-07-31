@@ -5,6 +5,7 @@ import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.integrations.common.OperatingSystem;
 import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.mount.*;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ public class WindowsMounter implements MountService {
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsMounter.class);
 	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String SYSTEM_CHOSEN_MOUNTPOINT = "*";
+	private static final Pattern NET_USE_DRIVE_LETTER_PATTERN = Pattern.compile("\\b([A-Z]:)\\s*");
 
 	@Override
 	public String displayName() {
@@ -137,7 +139,7 @@ public class WindowsMounter implements MountService {
 	/**
 	 * Extracts the drive letter used as the mountpoint from the output of `net use` process.
 	 * <p>
-	 * Example output of {@code net use * \\localhost\DavWWWRoot\example} is:
+	 * Example (english) output of {@code net use * \\localhost\DavWWWRoot\example} is:
 	 * <pre>
 	 * Drive Z: is now connected to \\localhost\example.
 	 *
@@ -148,11 +150,11 @@ public class WindowsMounter implements MountService {
 	 * @param processOutput The complete output of the mounting command `net use`
 	 * @return The drive letter the filesystem is mounted to.
 	 */
-	private static String parseSystemChosenMountpoin(String processOutput) {
-		Pattern driveLetterPattern = Pattern.compile("\s([A-Z]:)\s");
-		Matcher m = driveLetterPattern.matcher(processOutput.trim());
+	@VisibleForTesting
+	static String parseSystemChosenMountpoin(String processOutput) {
+		Matcher m = NET_USE_DRIVE_LETTER_PATTERN.matcher(processOutput.trim());
 		if (!m.find()) {
-			throw new IllegalStateException("Output of `net use` must contain the drive letter");
+			throw new IllegalStateException(" must contain the drive letter");
 		}
 		return m.group(1);
 	}

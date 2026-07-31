@@ -152,10 +152,11 @@ public class WindowsMounter implements MountService {
 		}
 
 	}
+
 	/**
 	 * Extracts the drive letter used as the mountpoint from the output of `net use` process.
 	 * <p>
-	 * Example (english) output of {@code net use * \\localhost\DavWWWRoot\example} is:
+	 * Example output of {@code net use * \\localhost\DavWWWRoot\example} wiht an english locale is:
 	 * <pre>
 	 * Drive Z: is now connected to \\localhost\example.
 	 *

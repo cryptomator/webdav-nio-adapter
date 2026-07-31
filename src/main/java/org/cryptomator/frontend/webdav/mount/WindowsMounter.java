@@ -121,7 +121,7 @@ public class WindowsMounter implements MountService {
 				String actualMountpoint;
 				if (SYSTEM_CHOSEN_MOUNTPOINT.equals(mountPoint)) {
 					@SuppressWarnings("resource") String stdout = mountProcess.inputReader().lines().collect(Collectors.joining("\n"));
-					actualMountpoint = parseSystemChosenMountpoin(stdout);
+					actualMountpoint = parseDriveLetter(stdout);
 				} else {
 					actualMountpoint = mountPoint;
 				}
@@ -151,7 +151,7 @@ public class WindowsMounter implements MountService {
 	 * @return The drive letter the filesystem is mounted to.
 	 */
 	@VisibleForTesting
-	static String parseSystemChosenMountpoin(String processOutput) {
+	static String parseDriveLetter(String processOutput) {
 		Matcher m = NET_USE_DRIVE_LETTER_PATTERN.matcher(processOutput.trim());
 		if (!m.find()) {
 			throw new IllegalStateException(" must contain the drive letter");

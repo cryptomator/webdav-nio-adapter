@@ -154,7 +154,7 @@ public class WindowsMounter implements MountService {
 	static String parseDriveLetter(String processOutput) {
 		Matcher m = NET_USE_DRIVE_LETTER_PATTERN.matcher(processOutput.trim());
 		if (!m.find()) {
-			throw new IllegalStateException(" must contain the drive letter");
+			throw new IllegalStateException("Output of 'net use' must contain the drive letter on zero-exit value.");
 		}
 		return m.group(1);
 	}

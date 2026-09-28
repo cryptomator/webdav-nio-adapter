@@ -9,7 +9,14 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## Unreleased
 
-No changes yet.
+### Fixed
+* Drive letter detection in Windows mounter failed on non-English systems ([#150](https://github.com/cryptomator/webdav-nio-adapter/issues/150))
+
+### Changed
+* Updated dependencies ([#154](https://github.com/cryptomator/webdav-nio-adapter/pull/154))
+    * `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.12 to 1.2.13
+    * `org.cryptomator:integrations-api` from 1.8.0 to 1.9.0
+    * `org.slf4j:slf4j-api` from 2.0.18 to 2.0.20
 
 
 ## [3.0.2] - 2026-06-04

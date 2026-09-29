@@ -10,7 +10,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ## [3.0.3] - 2026-09-28
 
 ### Fixed
-* Drive letter detection in Windows mounter failed on non-English systems ([#150](https://github.com/cryptomator/webdav-nio-adapter/issues/150))
+* Fixed drive letter detection in Windows mounter on non-English systems ([#150](https://github.com/cryptomator/webdav-nio-adapter/issues/150))
+* Fixed tuning Windows proxy settings uses wrong hostname and port ([#155](https://github.com/cryptomator/wevdav-nio-adapter/pull/155))
 
 ### Changed
 * Updated dependencies ([#154](https://github.com/cryptomator/webdav-nio-adapter/pull/154))

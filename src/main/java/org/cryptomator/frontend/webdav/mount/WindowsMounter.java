@@ -111,11 +111,12 @@ public class WindowsMounter implements MountService {
 		protected Mount mount(WebDavServerHandle serverHandle, WebDavServletController servlet, URI uri) throws MountFailedException {
 			BufferedReader processOutputReader = null;
 			try {
-				tuneProxyConfigSilently(uri);
+				String uncHostName = hostName == null ? uri.getHost() : hostName;
+				tuneProxyConfigSilently(uncHostName, uri.getPort());
 				String mountPoint = driveLetter == null //
 						? SYSTEM_CHOSEN_MOUNTPOINT // MOUNT_TO_SYSTEM_CHOSEN_PATH
 						: driveLetter.toString().substring(0, 2); // MOUNT_AS_DRIVE_LETTER
-				String uncPath = "\\\\" + (hostName == null ? uri.getHost() : hostName) + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
+				String uncPath = "\\\\" + uncHostName + "@" + uri.getPort() + uri.getRawPath().replace('/', '\\');
 				ProcessBuilder mount = new ProcessBuilder("net", "use", mountPoint, uncPath, "/persistent:no");
 				Process mountProcess = mount.start();
 				ProcessUtil.waitFor(mountProcess, 30, TimeUnit.SECONDS);
@@ -176,23 +177,24 @@ public class WindowsMounter implements MountService {
 		return m.group(1);
 	}
 
-	private static void tuneProxyConfigSilently(URI uri) {
+	private static void tuneProxyConfigSilently(String host, int port) {
 		try {
-			tuneProxyConfig(uri);
+			tuneProxyConfig(host, port);
 		} catch (IOException | TimeoutException e) {
 			LOG.warn("Tuning proxy config failed.", e);
 		}
 	}
 
 	/**
-	 * @param uri The URI for which to tune the registry settings
+	 * @param host The host name used in the UNC path, i.e. the one the WebClient service will connect to
+	 * @param port The port the WebDAV server listens on
 	 * @throws IOException      If registry access fails
 	 * @throws TimeoutException If registry access does not finish in time
-	 * @deprecated TODO overheadhunter: check if this is really necessary.
+	 * @deprecated Only has an effect for manually configured proxies; ignored when a PAC script is in use.
 	 */
 	@Deprecated
-	private static void tuneProxyConfig(URI uri) throws IOException, TimeoutException {
-		// get existing value for ProxyOverride key from reqistry:
+	private static void tuneProxyConfig(String host, int port) throws IOException, TimeoutException {
+		// get existing value for ProxyOverride key from registry:
 		ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
 		Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
 		@SuppressWarnings("resource") String regQueryResult = regQueryProcess.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
@@ -205,10 +207,10 @@ public class WindowsMounter implements MountService {
 			LOG.debug("Original Registry value for ProxyOverride is: {}", originalOverrides);
 			overrides.addAll(Arrays.asList(originalOverrides.split(";")));
 		}
-		overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
+		overrides.removeIf(s -> s.startsWith(host + ":"));
 		overrides.add("<local>");
-		overrides.add(uri.getHost());
-		overrides.add(uri.getHost() + ":" + uri.getPort());
+		overrides.add(host);
+		overrides.add(host + ":" + port);
 
 		// set new value:
 		String adjustedOverrides = String.join(";", overrides);

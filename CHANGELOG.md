@@ -15,7 +15,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Changed
 * Updated dependencies ([#154](https://github.com/cryptomator/webdav-nio-adapter/pull/154))
     * `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.12 to 1.2.13
-    * `org.cryptomator:integrations-api` from 1.8.0 to 1.9.0
+    * `org.cryptomator:integrations-api` from 1.8.0 to 1.9.1
     * `org.slf4j:slf4j-api` from 2.0.18 to 2.0.20
 
 

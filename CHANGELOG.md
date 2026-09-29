@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The changelog starts with version 2.0.9.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/webdav-nio-adapter/releases).
 
-## [3.0.3] - 2026-09-28
+## [3.0.3] - 2026-09-29
 
 ### Fixed
 * Fixed drive letter detection in Windows mounter on non-English systems ([#150](https://github.com/cryptomator/webdav-nio-adapter/issues/150))

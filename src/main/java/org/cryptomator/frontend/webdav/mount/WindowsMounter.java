@@ -194,7 +194,7 @@ public class WindowsMounter implements MountService {
 	 */
 	@Deprecated
 	private static void tuneProxyConfig(String host, int port) throws IOException, TimeoutException {
-		// get existing value for ProxyOverride key from reqistry:
+		// get existing value for ProxyOverride key from registry:
 		ProcessBuilder regQuery = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
 		Process regQueryProcess = ProcessUtil.startAndWaitFor(regQuery, 5, TimeUnit.SECONDS);
 		@SuppressWarnings("resource") String regQueryResult = regQueryProcess.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));

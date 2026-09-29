@@ -31,9 +31,22 @@
 	</suppress>
 	<suppress>
    		<notes><![CDATA[
-		Jetty 10 is EOL
+		Jetty 10 is EOL, so its vulnerabilities will never be fixed upstream. Suppress the NVD findings, which are
+		matched via the CPE identifiers of the jars (vendor is reported as eclipse, jetty and mortbay_jetty alike).
+
+		Scoped to the 10.x line on purpose: as soon as we move to Jetty 11/12, this rule stops applying and
+		vulnerabilities are reported again.
 		]]></notes>
-		<cpe>cpe:2.3:a:eclipse:jetty:10.0.26:*:*:*:*:*:*:*</cpe>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty(\.[^/]+)?/[^@]+@10\..*$</packageUrl>
+		<cpe regex="true">.*</cpe>
+	</suppress>
+	<suppress>
+   		<notes><![CDATA[
+		Same as above, but for findings that are not matched via a CPE: OSS Index reports vulnerabilities against
+		the package URL directly, so they survive any <cpe> suppression and have to be matched by name.
+		]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty(\.[^/]+)?/[^@]+@10\..*$</packageUrl>
+		<vulnerabilityName regex="true">.*</vulnerabilityName>
 	</suppress>
 
 </suppressions>
